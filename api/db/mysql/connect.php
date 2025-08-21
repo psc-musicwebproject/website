@@ -1,7 +1,7 @@
 <?php 
 
     // Database configuration
-    $servername = "172.16.0.20";
+    $servername = "localhost";
     $username = "staging_sql_psc_musicweb";
     $password = "63SdEIi72i9jbB";
     $dbname = "psc-musicweb";

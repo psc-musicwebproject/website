@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,12 +13,12 @@
     <div class="flex flex-col w-full min-h-screen">
         <!-- Hero section - responsive height -->
         <div class="flex flex-col h-64 md:h-80 lg:h-96">
-            <div class="hero h-full" style="background-image: url(/assets/image/wallpaper/music-banner.jpg);">
+            <div class="hero h-full" style="background-image: url(/assets/image/wallpaper/images.jpg);">
                 <div class="hero-overlay bg-opacity-60"></div>
                 <div class="hero-content text-center items-center p-4">
                     <div class="flex flex-col items-center space-y-2">
-                        <img src="/assets/image/logo/psc/psc.png" class="max-h-16 md:max-h-20 lg:max-h-24 w-auto object-contain">
-                        <p class="text-white text-sm md:text-base lg:text-lg font-medium">ห้อง PSC Music วิทยาลัยเทคโนโลยีพงษ์สวัสดิ์</p>
+                        <img src="/assets/image/logo/Blue_Archive_EN_logo.svg" class="max-h-16 md:max-h-20 lg:max-h-24 w-auto object-contain">
+                        <p class="text-white text-sm md:text-base lg:text-lg font-medium">โรงเรียนเกลือบริโภคเสริมไอโอดีน วิทยาลัยเขตบูลอาไคด์</p>
                     </div>
                 </div>
             </div>
@@ -25,7 +27,7 @@
         <!-- Login form section - flexible height -->
         <div class="flex flex-col items-center justify-center px-4 py-8">
             <div class="w-full max-w-md">
-                <form action="/api/login/login_db.php" method="post" class="space-y-4">
+                <form action="/api/auth/login/index.php" method="post" class="space-y-4">
                     <?php      
                     if (isset($_SESSION['error'])) {
                         echo '<div role="alert" class="alert alert-error mb-4">
@@ -47,13 +49,13 @@
                     ?>
                     
                     <div>
-                        <label class="block text-sm font-medium mb-1">Username:</label>
-                        <input type="text" name="username" placeholder="Username" 
-                               class="input input-bordered w-full" required>
+                        <label class="block text-sm font-medium mb-1">เลขประจำตัว:</label>
+                        <input type="number" name="stu_id" placeholder="03xxxx, 02xxxx, 99xxxx" class="input validator input-bordered w-full" required title="กรุณากรอกรหัสนักศึกษาเป็นตัวเลขเท่านั้น" maxlength="6" minlength="6">
+                        <p class="validator-hint">กรุณากรอกรหัสนักศึกษาเป็นตัวเลขเท่านั้น</p>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium mb-1">Password:</label>
+                        <label class="block text-sm font-medium mb-1">รหัสผ่าน:</label>
                         <input type="password" name="password" placeholder="Password" 
                                class="input input-bordered w-full" required>
                     </div>
