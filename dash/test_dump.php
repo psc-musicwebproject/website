@@ -7,15 +7,17 @@ $id_q = '';
 
 $user_name = '';
 $user_surname = '';
+$user_status = '';
 
 if (isset($_SESSION['stu_id'])) {
     $id_q = mysqli_real_escape_string($conn, $_SESSION['stu_id']);
-    $query = "SELECT name, surname FROM users WHERE student_id = '$id_q'";
+    $query = "SELECT name, surname, type FROM users WHERE student_id = '$id_q'";
     $result = mysqli_query($conn, $query);
     if (mysqli_num_rows($result) == 1) {
         $row = mysqli_fetch_assoc($result);
         $user_name = $row['name'];
         $user_surname = $row['surname'];
+        $user_status = $row['type'];
     } else {
         header('location: ../auth/login.php');
     }
@@ -36,7 +38,7 @@ if (isset($_SESSION['stu_id'])) {
     <h1>Test Dashboard</h1>
     <p>Current ID: <?php echo(htmlspecialchars($id_q)) ?></p>
     <p>Name: <?php echo(htmlspecialchars($user_name).' '.htmlspecialchars($user_surname)) ?></p>
-    <p>Status</p>
+    <p>Status: <?php echo(htmlspecialchars($user_status)) ?></p>
     <button type="button" class="btn btn-primary"><a href="/api/auth/logout">Logout</a></button>
 </body>
 </html>
