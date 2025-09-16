@@ -12,9 +12,8 @@
     <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
     <!--end::Accessibility Meta Tags-->
     <!--begin::Primary Meta Tags-->
-    <meta name="title" content="AdminLTE 4 | Login Page v2" />
-    <meta name="author" content="ColorlibHQ" />
-    <meta name="description" content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS. Fully accessible with WCAG 2.1 AA compliance."/>
+    <meta name="title" content="ระบบจองห้อง PSC Music | เข้าสู่ระบบ" />
+    <meta name="author" content="Pongsawadi Technological College" />
     <!--end::Primary Meta Tags-->
     <!--begin::Accessibility Features-->
     <!-- Skip links will be dynamically added by accessibility.js -->
@@ -67,7 +66,7 @@
               unset($_SESSION['error']);
           }
           ?>
-          <form id="loginForm" action="/api/auth/login/index.php" method="post">
+          <form action="/api/auth/login/index.php" method="post">
             <div class="input-group mb-1">
               <div class="form-floating">
                 <input id="stu_id" name="stu_id" type="text" class="form-control" value="" placeholder=""
@@ -82,7 +81,7 @@
               <div class="form-floating">
                 <input id="password" name="password" type="password" class="form-control" placeholder=""
                   data-bs-toggle="tooltip" data-bs-placement="right" title="กรุณากรอกรหัสผ่าน"/>
-                <label for="password">รหัสผ่าน</label>
+                <label for="password  ">รหัสผ่าน</label>
               </div>
               <div class="invalid-tooltip">
                 กรุณากรอกรหัสผ่าน
@@ -93,7 +92,7 @@
               <!-- /.col -->
               <div class="col-4">
                 <div class="d-grid gap-2">
-                  <button type="submit" class="btn btn-primary">Sign In</button>
+                  <button type="submit" name="login_user" class="btn btn-primary">Sign In</button>
                 </div>
               </div>
               <!-- /.col -->
@@ -125,7 +124,7 @@
       crossorigin="anonymous"
     ></script>
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-    <script src="../js/adminlte.js"></script>
+    <script src="/lib/adminlte/js/adminlte.js"></script>
     <!--end::Required Plugin(AdminLTE)-->
     <!--begin: Form Validation Script -->
     <script>
