@@ -1,0 +1,8 @@
+services:
+  musicweb:
+    image: fbraz3/lnmp:8.4-dev  # or fbraz3/lnmp:8.4-phalcon-dev
+    volumes:
+      - ./:/app/public/
+    ports:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:3306:3306"
