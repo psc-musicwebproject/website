@@ -55,4 +55,36 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the club membership for this user.
+     */
+    public function clubMembership()
+    {
+        return $this->hasOne(ClubMember::class, 'user_id');
+    }
+
+    /**
+     * Get the approved club memberships for this user.
+     */
+    public function approvedClubMemberships()
+    {
+        return $this->hasMany(ClubMember::class, 'approval_person_id');
+    }
+
+    /**
+     * Check if user is a club member.
+     */
+    public function isClubMember(): bool
+    {
+        return $this->clubMembership()->where('status', 'approved')->exists();
+    }
+
+    /**
+     * Check if user has pending club application.
+     */
+    public function hasPendingClubApplication(): bool
+    {
+        return $this->clubMembership()->where('status', 'waiting')->exists();
+    }
 }

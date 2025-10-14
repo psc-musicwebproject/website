@@ -1,5 +1,5 @@
 <x-auth.layout>
-    <form id="" method="POST" action=" {{ route('auth.web.login') }}">
+    <form id="" method="POST" action="{{ route('auth.web.login') }}">
         @csrf
         @if ($errors->any())
             <div class="alert alert-danger" role="alert">

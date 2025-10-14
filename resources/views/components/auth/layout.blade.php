@@ -11,7 +11,8 @@
     <div class="login-box">
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <p class="mb-0 text-center fs-6">{{ config('app.name', "PSC-MusicWeb Project") }}</p>
+                <img src="{{ asset("/assets/image/logo.png") }}" alt="Logo" class="mx-auto mb-1 d-block" style="max-height: 3.5rem">
+                <p class="mb-0 text-center fs-6 fw-bold">{{ config('app.name', "PSC-MusicWeb Project") }}</p>
             </div>
             <div class="card-body login-card-body">
                 {{ $slot }}
