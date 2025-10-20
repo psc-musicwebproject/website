@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\BookingController;
 
 Route::get('/', function () {
     return redirect('/dash');
@@ -23,9 +24,7 @@ Route::get('/dash', function (){
     return view('dash.main', ['title' => 'Dashboard']);
 })->middleware('auth')->name('dashboard');
 
-Route::get('/dash/booking', function (){
-    return view('dash.booking', ['title' => 'จองห้อง']);
-})->middleware('auth')->name('dash.booking');
+Route::get('/dash/booking', [BookingController::class, 'index'])->middleware('auth')->name('dash.booking');
 
 Route::get('/dash/booking/history', function (){
     return view('dash.bookhistory');
