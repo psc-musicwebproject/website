@@ -43,11 +43,32 @@
                                     <input type="text" class="form-control" id="name" placeholder="หัวข้อการจอง / ใช้ห้อง">
                                 </div>
                         </div>
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="attendee" class="form-label">ผู้ร่วมใช้ห้อง</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="attendee" rows="8" placeholder="รหัสประจำตัว/อีเมล"></input>
+                                    <button class="btn btn-outline-secondary" type="button" id="button-add-attendee"><i class="bi bi-plus-square-fill"></i></button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">ชื่อ</th>
+                                            <th scope="col">นามสกุล</th>
+                                            <th scope="col">รหัส/อีเมล</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="card-footer text-end">
-                <button type="submit" class="btn btn-primary">ส่งแบบฟอร์ม</button>
+                <button type="submit" class="btn btn-primary">บันทึก</button>
             </div>
         </form>
     </div>
