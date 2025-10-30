@@ -29,7 +29,7 @@
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
                 aria-label="Main Navigation" data-accordian="false" id="navigation">
                 <li class="nav-item">
-                    <a href="/dash" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <a href=" {{ route('dash') }} " class="nav-link {{ request()->routeIs('dash') ? 'active' : '' }}">
                         <i class="bi bi-house-door"></i>
                         <p>Dashboard</p>
                     </a>
