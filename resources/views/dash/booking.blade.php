@@ -10,7 +10,6 @@
             </div>
             <form>
                 @csrf
-                <div class="container">
                     <div class="row">
                         <div class="col">
                                 <div class="mb-3">
@@ -65,7 +64,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+
             </div>
             <div class="card-footer text-end">
                 <button type="submit" class="btn btn-primary">บันทึก</button>
