@@ -14,8 +14,10 @@ Route::get('/', function () {
     return redirect('/dash');
 });
 
-// Auth
-Route::view('/auth/login', 'auth.login')->name('login');
+// Auth - with optional guard parameter
+Route::get('/auth/login', function () {
+    return view('auth.login');
+})->name('login');
 
 // Login is an invokable controller (LoginController::__invoke)
 Route::post('/auth/web/login', LoginController::class)
@@ -55,6 +57,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin-only routes
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:admin')->group(function () {
     Route::view('/admin', 'admin.main', ['title' => 'Admin Dashboard'])->name('admin.dash');
 });

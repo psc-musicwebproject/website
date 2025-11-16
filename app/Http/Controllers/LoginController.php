@@ -18,14 +18,35 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // Check which guard is being requested
+        $guard = $request->query('guard', 'web');
+        
+        // Attempt login with the appropriate guard
+        if (Auth::guard($guard)->attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('dash');
+            // Redirect based on which guard was used
+            if ($guard === 'admin') {
+                return redirect()->intended('/admin');
+            }
+            
+            return redirect()->intended('/dash');
+        }
+
+        // Provide specific error messages based on the guard
+        if ($guard === 'admin') {
+            // Check if user exists but is not an admin
+            if (Auth::guard('web')->attempt($credentials)) {
+                Auth::guard('web')->logout(); // Logout from web guard
+                
+                return back()->withErrors([
+                    'access' => 'Unauthorized access. Admin privileges required.',
+                ])->onlyInput('student_id');
+            }
         }
 
         return back()->withErrors([
-            'stu_id' => 'The provided credentials do not match our records.',
+            'credentials' => 'The provided credentials do not match our records.',
         ])->onlyInput('student_id');
     }
 }

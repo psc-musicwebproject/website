@@ -46,12 +46,22 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
+            'name' => 'Tazuna',
+            'student_id' => '992789',
+            'surname' => 'Hayakawa',
+            'username' => '992789',
+            'class' => null,
+            'type' => 'teacher',
+            'password' => '6789',
+        ]);
+
+        User::factory()->create([
             'name' => 'Yayoi',
             'student_id' => '992999',
             'surname' => 'Akikawa',
             'username' => '992999',
             'class' => null,
-            'type' => 'teacher',
+            'type' => 'admin',
             'password' => '7777',
         ]);
     }
