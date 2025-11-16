@@ -25,3 +25,6 @@ Thumbs.db
 bun.lock
 composer.lock
 package-lock.json
+
+# Build command on staging server
+build.sh
