@@ -1,6 +1,13 @@
 <x-auth.layout>
-    <form id="" method="POST" action="{{ route('auth.web.login') }}">
+    <form id="" method="POST" action="{{ route('auth.web.login', ['guard' => request()->query('guard')]) }}">
         @csrf
+        
+        @if (request()->query('error') === 'access_denied')
+            <div class="alert alert-danger" role="alert">
+                <strong>Access Denied.</strong> Admin credentials required.
+            </div>
+        @endif
+        
         @if ($errors->any())
             <div class="alert alert-danger" role="alert">
                 <ul class="mb-0">
@@ -10,9 +17,10 @@
                 </ul>
             </div>
         @endif
+        
         <div class="input-group mb-2">
             <div class="form-floating">
-                <input name="student_id" type="numeric" class="form-control" value="" placeholder="" data-bs-toggle="tooltip" data-bs-placement="right" title="กรุณากรอกรหัสประจำตัวเป็นตัวเลขเท่านั้น"/>
+                <input name="student_id" type="numeric" class="form-control" value="{{ old('student_id') }}" placeholder="" data-bs-toggle="tooltip" data-bs-placement="right" title="กรุณากรอกรหัสประจำตัวเป็นตัวเลขเท่านั้น"/>
                 <label for="student_id">รหัสประจำตัว</label>
             </div>
         </div>

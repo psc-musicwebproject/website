@@ -13,6 +13,12 @@
             <div class="card-header text-center">
                 <img src="{{ asset("/assets/image/logo.png") }}" alt="Logo" class="mx-auto mb-1 d-block" style="max-height: 3.5rem">
                 <p class="mb-0 text-center fs-6 fw-bold">{{ config('app.name', "PSC-MusicWeb Project") }}</p>
+                
+                @if (request()->query('guard') === 'admin')
+                    <div class="alert alert-warning mt-2 mb-0" role="alert">
+                        <strong>🔐 (สำหรับผู้ดูแลระบบ)</strong>
+                    </div>
+                @endif
             </div>
             <div class="card-body login-card-body">
                 {{ $slot }}
