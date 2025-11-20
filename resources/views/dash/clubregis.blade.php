@@ -50,19 +50,19 @@
                 <div class="row">
                     <div class="mb-3 col-12 col-lg-3">
                         <label for="name" class="form-label">ชื่อ</label>
-                        <input type="text" class="form-control" id="name" disabled value="{{ Auth::user()->name }}">
+                        <input type="text" class="form-control" id="name" readonly value="{{ Auth::user()->name }}">
                     </div>
                     <div class="mb-3 col-12 col-lg-3">
                         <label for="surname" class="form-label">นามสกุล</label>
-                        <input type="text" class="form-control" id="surname" disabled value="{{ Auth::user()->surname }}">
+                        <input type="text" class="form-control" id="surname" readonly value="{{ Auth::user()->surname }}">
                     </div>
                     <div class="mb-3 col-12 col-lg-3">
                         <label for="student_id" class="form-label">รหัสประจำตัว</label>
-                        <input type="text" class="form-control" id="student_id" disabled value="{{ Auth::user()->student_id }}">
+                        <input type="text" class="form-control" id="student_id" readonly value="{{ Auth::user()->student_id }}">
                     </div>
                     <div class="mb-3 col-12 col-lg-3">
                         <label for="class" class="form-label">ระดับชั้น</label>
-                        <input type="text" class="form-control" id="class" disabled value="{{ Auth::user()->class }}">
+                        <input type="text" class="form-control" id="class" readonly value="{{ Auth::user()->class }}">
                     </div>
                 </div>
 
