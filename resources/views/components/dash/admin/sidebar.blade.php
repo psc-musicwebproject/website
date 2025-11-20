@@ -35,8 +35,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/dash" class="nav-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                        <i class="bi bi-house-door"></i>
+                    <a href=" {{ route('admin.appsetting') }}" class="nav-link {{ request()->routeIs('admin.appsetting') ? 'active' : '' }}">
+                        <i class="bi bi bi-gear-fill"></i>
                         <p>ตั้งค่าระบบ</p>
                     </a>
                 </li>

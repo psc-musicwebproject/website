@@ -3,11 +3,11 @@
 // PSC-MusicWeb's Route
 // 2025 - Toonshouin! , ArmGameXD
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use App\Http\BookingController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\BookingController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 // Default Route
 Route::get('/', function () {
@@ -58,5 +58,6 @@ Route::middleware('auth')->group(function () {
 
 // Admin-only routes
 Route::middleware('auth:admin')->group(function () {
-    Route::view('/admin', 'admin.main', ['title' => 'Admin Dashboard'])->name('admin.dash');
+    Route::view('/admin', 'admin.main', ['title' => 'Dashboard'])->name('admin.dash');
+    Route::view('/admin/appsetting', 'admin.appsetting', ['title' => 'ตั้งค่าระบบ'])->name('admin.appsetting');
 });
