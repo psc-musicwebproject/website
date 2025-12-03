@@ -3,7 +3,7 @@
     <div class="sidebar-brand justify-content-start">
         <div class="mx-2 d-flex align-items-center">
             <img src="{{ asset("assets/image/logo.png") }}" alt="Logo" class="brand-image img-fluid shadow" style="max-height: 2.25rem">
-            <span class="brand-text fw-bold">PSC Music</span>
+            <span class="brand-text fw-bold">{{ $AppSetting::getSetting('header') }}</span>
         </div>
     </div>
     <div class="sidebar-wrapper">
