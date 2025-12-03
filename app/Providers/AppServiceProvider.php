@@ -24,5 +24,11 @@ class AppServiceProvider extends ServiceProvider
         Auth::provider('admin', function ($app, array $config) {
             return new AdminProvider($app['hash'], $config['model']);
         });
+
+        /** Announce AppSetting to Global */
+
+        if (class_exists(\App\Models\AppSetting::class)) {
+            view()->share('AppSetting', \App\Models\AppSetting::class);
+        }
     }
 }

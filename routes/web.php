@@ -63,7 +63,6 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/admin/appsetting', function () {
         return view('admin.appsetting', [
             'title' => 'ตั้งค่าระบบ',
-            'AppSetting' => App\Models\AppSetting::first()
         ]);
     })->name('admin.appsetting');
     Route::post('/admin/manage/appsetting/update', AppSettingController::class)->name('admin.appsetting.update');
