@@ -28,3 +28,6 @@ package-lock.json
 
 # Build command on staging server
 build.sh
+
+# Ignore logo since it may be customized.
+public/assets/image/logo.png
