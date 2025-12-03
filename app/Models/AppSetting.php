@@ -33,6 +33,7 @@ class AppSetting extends Model
     protected $fillable = [
         'web_name',
         'web_header',
+        'app_logo_uri',
         'notice',
     ];
 
