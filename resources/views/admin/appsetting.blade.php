@@ -1,5 +1,3 @@
-@use('App\Models\AppSetting')
-
 <x-dash.admin.layout>
     <!-- Get error from  redirect()->back()->with('success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว') to shown-->
     @if (session('success'))
@@ -29,7 +27,7 @@
                                 <div class="mb-3">
                                     <label for="app_name" class="form-label">ชื่อแอปพลิเคชัน</label>
                                     <input type="text" class="form-control" id="app_name" name="app_name" placeholder="ชื่อแอปพลิเคชัน"
-                                        value="{{ config('app.name', 'PSC-MusicWeb') ?? AppSetting::getSetting('name') }}"
+                                        value="{{ config('app.name', 'PSC-MusicWeb') ?? $AppSetting::getSetting('name') }}"
                                         {{ config('app.name') ? 'readonly' : '' }}>
                                 </div>
                                 @if (config('app.name'))
@@ -40,7 +38,7 @@
                                 <div class="mb-3">
                                     <label for="app_header" class="form-label">หัวแอป</label>
                                     <input type="text" class="form-control" id="app_header" name="app_header" placeholder="หัวแอป"
-                                        value="{{ AppSetting::getSetting('header') ?? 'PSC Music'}}">
+                                        value="{{ $AppSetting::getSetting('header') ?? 'PSC Music'}}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="app_logo" class="form-label">โลโก้แอปพลิเคชัน</label>
