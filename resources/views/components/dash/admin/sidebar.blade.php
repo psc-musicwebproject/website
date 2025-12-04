@@ -55,7 +55,7 @@
                 </li>
                 <li class="nav-header">ชมรมดนตรี</li>
                 <li class="nav-item">
-                    <a href="{{ route('dash.club.register') }}" class="nav-link {{ request()->routeIs('dash.club.register') ? 'active' : '' }}">
+                    <a href="{{ route('admin.club.approve') }}" class="nav-link {{ request()->routeIs('dash.club.register') ? 'active' : '' }}">
                         <i class="bi bi-file-ruled"></i>
                         <p>อนุมัติการสมัคร</p>
                     </a>
