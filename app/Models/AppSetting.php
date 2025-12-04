@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use GuzzleHttp\Promise\Create;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -54,6 +55,18 @@ class AppSetting extends Model
         if ($setting) {
             $setting->$query = $value;
             $setting->save();
+
+            return true;
+        } else {
+            // If no setting exists, create a new one
+            $newSetting = new self();
+            $newSetting->$query = $value;
+            if ($key === 'name') {
+                $newSetting->web_header = 'PSC Music';
+            } elseif ($key === 'header') {
+                $newSetting->web_name = 'PSC-MusicWeb';
+            }
+            $newSetting->save();
 
             return true;
         }
