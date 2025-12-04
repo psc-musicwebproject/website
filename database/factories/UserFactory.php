@@ -24,12 +24,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->firstName(),
-            'surname' => fake()->lastName(),
-            'student_id' => fake()->unique(),
-            'username' => fake()->unique(),
-            'type' => fake()->randomElement(['student', 'teacher', 'admin']),
-            'class' => fake()->randomElement(['ปวส.1/5','ปวส.1/6','ปวส.1/7 (ม.)']),
+            'name' => $this->faker->firstName(),
+            'surname' => $this->faker->lastName(),
+            'student_id' => $this->faker->unique(),
+            'username' => $this->faker->unique(),
+            'type' => $this->faker->randomElement(['student', 'teacher', 'admin']),
+            'class' => $this->faker->randomElement(['ปวส.1/5','ปวส.1/6','ปวส.1/7 (ม.)']),
             'password' => static::$password ??= 'password', // Remove Hash::make()
         ];
     }
