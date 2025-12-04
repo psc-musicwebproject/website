@@ -26,9 +26,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            'name' => 'Matikane',
+            'name' => 'Belno',
             'student_id' => '032483',
-            'surname' => 'tannhauser',
+            'surname' => 'Light',
             'username' => 'u6832483',
             'type' => 'student',
             'class' => 'ปวส.1/7 (ม.)',
@@ -36,9 +36,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            'name' => 'Oguri',
+            'name' => 'Agnes',
             'student_id' => '032408',
-            'surname' => 'Cap',
+            'surname' => 'Tachyon',
             'username' => 'u6832408',
             'type' => 'student',
             'class' => 'ปวส.1/6',
