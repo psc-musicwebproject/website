@@ -43,8 +43,7 @@ class ClubRegisterController extends Controller
             ClubMember::create([
                 'user_id' => Auth::id(),
                 'status' => 'waiting',
-                // Note: ability field is not in your schema, you might want to add it
-                // or store it in a separate table or JSON field
+                'ability' => $request->input('ability'),
             ]);
 
             return redirect()->back()->with('success', 'ส่งใบสมัครเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลชมรม');

@@ -66,4 +66,18 @@ Route::middleware('auth:admin')->group(function () {
         ]);
     })->name('admin.appsetting');
     Route::post('/admin/manage/appsetting/update', AppSettingController::class)->name('admin.appsetting.update');
+    Route::get('/admin/club/approve', function() {
+        return view('admin.club.approve.main', [
+            'title' => 'อนุมัติสมาชิกชมรม',
+            'clubApprovals' => App\Models\ClubMember::getPendingApprovals()
+        ]);
+    })->name('admin.club.approve');
+    Route::get('/admin/club/approve/{id}', function($id) {
+        return view('admin.club.approve.detail', [
+            'title' => 'อนุมัติสมาชิกชมรม',
+            'clubMember' => App\Models\ClubMember::getApplicationByID($id)
+        ]);
+    })->name('admin.club.approve.detail');
+
+    Route::post('/admin/club/approve/{id}', [App\Http\Controllers\ClubApprovalController::class, 'update'])->name('admin.club.approve.update');
 });

@@ -27,6 +27,7 @@ class ClubMember extends Model
         'member_id',
         'user_id',
         'status',
+        'ability',
         'approval_person_id',
         'approval_time',
         'approval_comment',
@@ -153,4 +154,21 @@ class ClubMember extends Model
             'approval_comment' => $comment,
         ]);
     }
+
+    /** Get list of user that needed approval */
+    public static function getPendingApprovals()
+    {
+        return self::with('user')
+            ->pending()
+            ->get();
+    }
+
+    public static function getApplicationByID(string $id)
+    {
+        return self::with('user')
+            ->where('member_id', $id)
+            ->first()
+            ->get();
+    }
+
 }
