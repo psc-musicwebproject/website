@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('member_id')->unique();
             $table->string('user_id');
             $table->string('status')->default('waiting');
+            $table->string('ability');
             $table->string('approval_person_id')->nullable();
             $table->dateTime('approval_time')->nullable();
             $table->string('approval_comment')->nullable();
