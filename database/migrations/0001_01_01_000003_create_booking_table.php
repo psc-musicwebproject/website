@@ -15,16 +15,22 @@ return new class extends Migration
             $table->id();
             $table->uuid('booking_id')->unique();
             $table->string('booking_name');
-            $table->uuid(('room_id'));
+            $table->uuid('room_id');
             $table->timestamp('booking_time');
             $table->string('user_id');
             $table->dateTime('booked_from')->nullable();
             $table->dateTime('booked_to')->nullable();
-            $table->json('attendees');
-            $table->string('status')->default('waiting');
+            $table->json('attendees')->nullable();
+            $table->string('approval_status')->default('waiting');
             $table->string('approval_person_id')->nullable();
             $table->dateTime('approval_time')->nullable();
             $table->string('approval_comment')->nullable();
+            $table->string(('checking_status'))->default('not_checked');
+            $table->string('checking_person_id')->nullable();
+            $table->dateTime('checking_time')->nullable();
+            $table->dateTime('checkout_time')->nullable();
+            $table->string('checkout_person_id')->nullable();
+            $table->string('booking_status')->default('waiting_approval');
         });
 
         Schema::create('rooms', function (Blueprint $table) {
