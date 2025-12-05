@@ -42,20 +42,20 @@
                 </li>
                 <li class="nav-header">ห้องดนตรี</li>
                 <li class="nav-item">
-                    <a href="{{ route('dash.booking') }}" class="nav-link {{ request()->routeIs('dash.booking') ? 'active' : '' }}">
+                    <a href="{{ route('admin.roomsetting') }}" class="nav-link {{ request()->routeIs('admin.roomsetting') ? 'active' : '' }}">
                         <i class="bi bi-pencil-square"></i>
                         <p>ตั้งค่าห้อง</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('dash.booking.history')}}" class="nav-link {{ request()->routeIs('dash.booking.history') ? 'active' : '' }}">
+                    <a href="{{ route('admin.booking')}}" class="nav-link {{ request()->routeIs('admin.booking*') ? 'active' : '' }}">
                         <i class="bi bi-journals"></i>
                         <p>อนุมัติการใช้ห้อง</p>
                     </a>
                 </li>
                 <li class="nav-header">ชมรมดนตรี</li>
                 <li class="nav-item">
-                    <a href="{{ route('admin.club.approve') }}" class="nav-link {{ request()->routeIs('dash.club.register') ? 'active' : '' }}">
+                    <a href="{{ route('admin.club.approve') }}" class="nav-link {{ request()->routeIs('admin.club.approve*') ? 'active' : '' }}">
                         <i class="bi bi-file-ruled"></i>
                         <p>อนุมัติการสมัคร</p>
                     </a>
