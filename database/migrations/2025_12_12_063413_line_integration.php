@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('line_id')->nullable()->after('remember_token')->comment('LINE User ID');
+            $table->string('line_id')->nullable()->comment('LINE User ID');
             $table->boolean('line_bound')->default(false)->after('line_id')->comment('Whether LINE account is bound');
         });
     }
