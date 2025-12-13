@@ -35,6 +35,14 @@ Route::post('/auth/web/logout', function () {
     return redirect('/auth/login');
 })->name('auth.web.logout');
 
+// Line Authentication Routes
+Route::get('/auth/line/bindingPage', function () {
+    return view('auth.bindline', ['title' => 'ผูกบัญชี LINE']);
+})->name('auth.line.bind');
+Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount'])->name('auth.bind.line');
+Route::get('/auth/line/redirect', [App\Http\Controllers\LineIntegrationController::class, 'AuthenticateViaLine'])->name('auth.line.redirect');
+Route::get('/auth/line/callback', [App\Http\Controllers\LineIntegrationController::class, 'GetCallbackFromLine'])->name('auth.line.callback');
+
 // Group: authenticated user dashboard routes
 Route::middleware('auth')->group(function () {
     Route::view('/dash', 'dash.main', ['title' => 'Dashboard'])->name('dash');

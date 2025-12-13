@@ -25,12 +25,21 @@ class LoginController extends Controller
         if (Auth::guard($guard)->attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Redirect based on which guard was used
-            if ($guard === 'admin') {
-                return redirect()->intended('/admin');
+            if (env('LINE_ENABLED') && $guard === 'web' || $_COOKIE['skip_line_check'] !== 'true') {
+                $user = Auth::guard('web')->user();
+                if (is_null($user->line_id)) {
+                    $user->line_bound = false;
+                    $user->save();
+                    return redirect()->route('auth.line.bind');
+                }
+
+                // Redirect based on which guard was used
+                if ($guard === 'admin') {
+                    return redirect()->intended('/admin');
+                }
+                
+                return redirect()->intended('/dash');
             }
-            
-            return redirect()->intended('/dash');
         }
 
         // Provide specific error messages based on the guard

@@ -32,6 +32,8 @@ class User extends Authenticatable
         'type',
         'class',
         'password',
+        'line_id',
+        'line_bound'
     ];
 
     /**
