@@ -26,13 +26,16 @@ class LineIntegrationController extends Controller
             ]);
         }
 
-        if (User::isThisLineIDAlreadyBound($lineUser->id)) {
-            return redirect()->route('auth.line.bind')->withErrors([
-                'line_error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว',
-            ]);
-        }
-        
         // Check if user is authenticated (for binding flow)
+        if ($request->user()) {
+            // Check if this LINE ID is already bound to a different user
+            if (User::isThisLineIDAlreadyBound($lineUser->id, $request->user()->id)) {
+                return redirect()->route('auth.line.bind')->withErrors([
+                    'line_error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว',
+                ]);
+            }
+            
+            // Bind LINE ID to current user
         if ($request->user() && !$request->user()->line_bound) {
             $user = $request->user();
             $user->line_id = $lineUser->id;
@@ -44,6 +47,7 @@ class LineIntegrationController extends Controller
         
         // Otherwise, just return the user info (for other purposes)
         return response()->json($lineUser);
+        }
     }
 
     public function BindLineAccount(Request $request)
