@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Laravel\Socialite\Socialite;
+use App\Models\User;
 
 class LineIntegrationController extends Controller
 {
@@ -18,6 +19,18 @@ class LineIntegrationController extends Controller
     {
         // Logic for handling callback from LINE API
         $lineUser = Socialite::driver('line')->user();
+
+        if (!$lineUser || empty($lineUser->id)) {
+            return redirect()->route('auth.line.bind')->withErrors([
+                'line_error' => 'ไม่สามารถรับข้อมูลจาก LINE ได้ กรุณาลองใหม่อีกครั้ง',
+            ]);
+        }
+
+        if (User::isThisLineIDAlreadyBound($lineUser->id)) {
+            return redirect()->route('auth.line.bind')->withErrors([
+                'line_error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว',
+            ]);
+        }
         
         // Check if user is authenticated (for binding flow)
         if ($request->user() && !$request->user()->line_bound) {
