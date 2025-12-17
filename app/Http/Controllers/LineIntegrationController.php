@@ -28,13 +28,19 @@ class LineIntegrationController extends Controller
             return redirect()->route('auth.line.bind')->withErrors([
                 'line_error' => 'ไม่สามารถรับข้อมูลจาก LINE ได้ กรุณาลองใหม่อีกครั้ง',
             ]);
-        } elseif ($isBindingMode && $request->user() && !$request->user()->line_bound) {
+        } 
+        
+        // Handle binding mode
+        if ($isBindingMode && $request->user()) {
             $user = $request->user();
-            if (User::isThisLineIDAlreadyBound($lineUser->id, $request->user()->id)) {
+            
+            // Check if this LINE ID is already bound to another user
+            if (User::isThisLineIDAlreadyBound($lineUser->id, $user->id)) {
                 return redirect()->route('auth.line.bind')->withErrors([
                     'line_error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว',
                 ]);
             }
+            
             $user->line_id = $lineUser->id;
             $user->line_bound = true;
             $user->save();
@@ -45,6 +51,8 @@ class LineIntegrationController extends Controller
             } else if ($guard === 'admin') {
                 return redirect()->route('admin.dashboard')->with('status', 'การผูกบัญชี LINE สำเร็จแล้ว');
             }
+            
+            return redirect()->route('dash')->with('status', 'การผูกบัญชี LINE สำเร็จแล้ว');
         }
         
         // Otherwise, just return the user info (for other purposes)
