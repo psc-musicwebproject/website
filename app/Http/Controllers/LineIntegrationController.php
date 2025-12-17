@@ -19,12 +19,16 @@ class LineIntegrationController extends Controller
     {
         // Logic for handling callback from LINE API
         $lineUser = Socialite::driver('line')->user();
+        
+        // Check if this is a binding flow
+        $isBindingMode = session('line_binding_mode', false);
+        session()->forget('line_binding_mode'); // Clear the session flag
 
         if (!$lineUser || empty($lineUser->id)) {
             return redirect()->route('auth.line.bind')->withErrors([
                 'line_error' => 'ไม่สามารถรับข้อมูลจาก LINE ได้ กรุณาลองใหม่อีกครั้ง',
             ]);
-        } elseif ($request->user() && !$request->user()->line_bound) {
+        } elseif ($isBindingMode && $request->user() && !$request->user()->line_bound) {
             $user = $request->user();
             if (User::isThisLineIDAlreadyBound($lineUser->id, $request->user()->id)) {
                 return redirect()->route('auth.line.bind')->withErrors([
@@ -49,6 +53,9 @@ class LineIntegrationController extends Controller
 
     public function BindLineAccount(Request $request)
     {
+        // Store binding intent in session
+        session(['line_binding_mode' => true]);
+        
         // Redirect to LINE for OAuth authorization
         return Socialite::driver('line')
             ->redirect();
