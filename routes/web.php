@@ -39,17 +39,15 @@ Route::post('/auth/web/logout', function () {
 Route::get('/auth/line/redirect', [App\Http\Controllers\LineIntegrationController::class, 'AuthenticateViaLine'])->name('auth.line.redirect');
 Route::get('/auth/line/callback', [App\Http\Controllers\LineIntegrationController::class, 'GetCallbackFromLine'])->name('auth.line.callback');
 
-// LINE Binding Routes (require authentication from web or admin guard)
-Route::middleware(['auth:web,admin'])->group(function () {
+// Group: authenticated user dashboard routes
+Route::middleware('auth')->group(function () {
+    Route::view('/dash', 'dash.main', ['title' => 'Dashboard'])->name('dash');
+
+    // LINE Binding Routes (for web users)
     Route::get('/auth/line/bindingPage', function () {
         return view('auth.bindline', ['title' => 'ผูกบัญชี LINE']);
     })->name('auth.line.bind');
     Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount'])->name('auth.bind.line');
-});
-
-// Group: authenticated user dashboard routes
-Route::middleware('auth')->group(function () {
-    Route::view('/dash', 'dash.main', ['title' => 'Dashboard'])->name('dash');
 
     Route::get('/dash/booking', function() {
         $rooms = App\Models\Room::getAvailableRooms();
@@ -92,6 +90,13 @@ Route::middleware('auth')->group(function () {
 // Admin-only routes
 Route::middleware('auth:admin')->group(function () {
     Route::view('/admin', 'admin.main', ['title' => 'Dashboard'])->name('admin.dash');
+    
+    // LINE Binding Routes (for admin users) - override the web routes
+    Route::get('/auth/line/bindingPage', function () {
+        return view('auth.bindline', ['title' => 'ผูกบัญชี LINE']);
+    });
+    Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount']);
+    
     Route::get('/admin/manage/app', function () {
         return view('admin.appsetting', [
             'title' => 'ตั้งค่าระบบ',
