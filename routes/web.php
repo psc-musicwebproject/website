@@ -35,7 +35,7 @@ Route::post('/auth/web/logout', function () {
     return redirect('/auth/login');
 })->name('auth.web.logout');
 
-// Line Authentication Routes
+// Line Authentication Routes (public - for initial login)
 Route::get('/auth/line/redirect', [App\Http\Controllers\LineIntegrationController::class, 'AuthenticateViaLine'])->name('auth.line.redirect');
 Route::get('/auth/line/callback', [App\Http\Controllers\LineIntegrationController::class, 'GetCallbackFromLine'])->name('auth.line.callback');
 
