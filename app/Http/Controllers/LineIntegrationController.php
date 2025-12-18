@@ -13,11 +13,16 @@ use Illuminate\Support\Facades\Auth;
 
 class LineIntegrationController extends Controller
 {
-    public function AuthenticateViaLine()
+    public function AuthenticateViaLine(Request $request)
     {
         // Logic for authenticating with LINE API
+        $guard = $request->query('guard', 'web');
+        
         session()->forget('line_binding_mode');
-        session(['auth_via_line' => true]);
+        session([
+            'auth_via_line' => true,
+            'line_auth_guard' => $guard
+        ]);
         session()->save(); // Force save before redirect
         
         return Socialite::driver('line')
@@ -44,6 +49,7 @@ class LineIntegrationController extends Controller
         Log::info('Received LINE callback', [
             'line_id' => $lineUser->id ?? 'unknown',
             'binding_mode' => $isBindingMode,
+            'isAuth' => session('auth_via_line', false),
             'stored_user_id' => $bindingUserId,
             'current_user_id' => $currentUserId
         ]);
@@ -97,10 +103,9 @@ class LineIntegrationController extends Controller
         
         // Future: Handle authentication flow (login with LINE)
         if (session('auth_via_line', false)) {
-            session()->forget('auth_via_line');
-            
-            $guard = $request->query('guard', 'web');
-            
+            $guard = session('line_auth_guard', 'web');
+            session()->forget(['auth_via_line', 'line_auth_guard']);
+
             // Find user by LINE ID
             $user = User::where('line_id', $lineUser->id)->first();
             

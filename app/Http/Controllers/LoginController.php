@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\LineIntegrationController;
+use Termwind\Components\Li;
 
 class LoginController extends Controller
 {
@@ -13,49 +15,57 @@ class LoginController extends Controller
      */
     public function __invoke(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'student_id' => ['required', 'numeric'],
-            'password' => ['required'],
-        ]);
+        if ($request->input('action') === 'cred_login') {
+            $credentials = $request->validate([
+                'student_id' => ['required', 'numeric'],
+                'password' => ['required'],
+            ]);
 
-        // Check which guard is being requested
-        $guard = $request->query('guard', 'web');
-        
-        // Attempt login with the appropriate guard
-        if (Auth::guard($guard)->attempt($credentials)) {
-            $request->session()->regenerate();
+            // Check which guard is being requested
+            $guard = $request->query('guard', 'web');
+            
+            // Attempt login with the appropriate guard
+            if (Auth::guard($guard)->attempt($credentials)) {
+                $request->session()->regenerate();
 
-            if ((bool) env('LINE_ENABLED', false) && ($guard === 'web' || $guard === 'admin')) {
-                $user = Auth::guard($guard)->user();
-                if (empty($user->line_id)) {
-                    $user->line_bound = false;
-                    $user->save();
-                    return redirect()->route('auth.line.bind');
+                if ((bool) env('LINE_ENABLED', false) && ($guard === 'web' || $guard === 'admin')) {
+                    $user = Auth::guard($guard)->user();
+                    if (empty($user->line_id)) {
+                        $user->line_bound = false;
+                        $user->save();
+                        return redirect()->route('auth.line.bind');
+                    }
+                }
+
+                // Redirect based on which guard was used
+                if ($guard === 'admin') {
+                    return redirect()->intended('/admin');
+                }
+                
+                return redirect()->intended('/dash');
+            }
+
+            // Provide specific error messages based on the guard
+            if ($guard === 'admin') {
+                // Check if user exists but is not an admin
+                if (Auth::guard('web')->attempt($credentials)) {
+                    Auth::guard('web')->logout(); // Logout from web guard
+                    
+                    return back()->withErrors([
+                        'access' => 'Unauthorized access. Admin privileges required.',
+                    ])->onlyInput('student_id');
                 }
             }
 
-            // Redirect based on which guard was used
-            if ($guard === 'admin') {
-                return redirect()->intended('/admin');
-            }
-            
-            return redirect()->intended('/dash');
+            return back()->withErrors([
+                'credentials' => 'The provided credentials do not match our records.',
+            ])->onlyInput('student_id');
+        } elseif ($request->input('action') === 'line_login') {
+            return (new LineIntegrationController())->AuthenticateViaLine($request);
         }
-
-        // Provide specific error messages based on the guard
-        if ($guard === 'admin') {
-            // Check if user exists but is not an admin
-            if (Auth::guard('web')->attempt($credentials)) {
-                Auth::guard('web')->logout(); // Logout from web guard
-                
-                return back()->withErrors([
-                    'access' => 'Unauthorized access. Admin privileges required.',
-                ])->onlyInput('student_id');
-            }
-        }
-
+        
         return back()->withErrors([
-            'credentials' => 'The provided credentials do not match our records.',
-        ])->onlyInput('student_id');
+            'action' => 'Invalid action specified.',
+        ]);
     }
 }

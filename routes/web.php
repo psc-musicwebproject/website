@@ -37,11 +37,10 @@ Route::post('/auth/web/logout', function () {
 })->name('auth.web.logout');
 
 // Line Authentication Routes (public - for initial login)
-Route::get('/auth/line/redirect', [App\Http\Controllers\LineIntegrationController::class, 'AuthenticateViaLine'])->name('auth.line.redirect');
 Route::get('/auth/line/callback', [App\Http\Controllers\LineIntegrationController::class, 'GetCallbackFromLine'])->name('auth.line.callback');
 
 // LINE Binding Routes (for both web and admin users)
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:web,admin'])->group(function () {
     Route::get('/auth/line/bindingPage', function () {
         // Determine default redirect based on user guard
         $defaultRedirect = Auth::guard('admin')->check() ? route('admin.dash') : route('dash');
