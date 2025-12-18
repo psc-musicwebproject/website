@@ -7,12 +7,19 @@ use Laravel\Socialite\Socialite;
 use App\Models\User;
 // Add logging for debugging purposes
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class LineIntegrationController extends Controller
 {
     public function AuthenticateViaLine()
     {
         // Logic for authenticating with LINE API
+        session()->forget('line_binding_mode');
+        session(['auth_via_line' => true]);
+        session()->save(); // Force save before redirect
+        
         return Socialite::driver('line')
             ->redirect();
     }
@@ -26,11 +33,19 @@ class LineIntegrationController extends Controller
         $isBindingMode = session('line_binding_mode', false);
         $bindingUserId = session('line_binding_user_id');
         
+        // Determine current user ID from either guard
+        $currentUserId = 'guest';
+        if (Auth::guard('admin')->check()) {
+            $currentUserId = Auth::guard('admin')->id();
+        } elseif (Auth::guard('web')->check()) {
+            $currentUserId = Auth::guard('web')->id();
+        }
+        
         Log::info('Received LINE callback', [
             'line_id' => $lineUser->id ?? 'unknown',
             'binding_mode' => $isBindingMode,
             'stored_user_id' => $bindingUserId,
-            'current_user_id' => $request->user() ? $request->user()->id : 'guest'
+            'current_user_id' => $currentUserId
         ]);
 
         if (!$lineUser || empty($lineUser->id)) {
@@ -62,18 +77,57 @@ class LineIntegrationController extends Controller
             $user->line_bound = true;
             $user->save();
 
-            session()->forget(['line_binding_mode', 'line_binding_user_id']);
+            // Get guard and redirect URL BEFORE forgetting session
+            $guard = session('line_binding_guard', 'web');
+            $redirectUrl = session('line_bind_redirect');
+            session()->forget(['line_binding_mode', 'line_binding_user_id', 'line_binding_guard', 'line_bind_redirect']);
             Log::info('Successfully bound LINE ID ' . $lineUser->id . ' to user ID: ' . $user->id);
-            
-            $guard = $request->query('guard', 'web');
+
+            // Use stored redirect URL if available
+            if ($redirectUrl) {
+                return redirect($redirectUrl)->with('status', 'การผูกบัญชี LINE สำเร็จแล้ว');
+            }
+
             if ($guard === 'admin') {
-                return redirect()->route('admin.dashboard')->with('status', 'การผูกบัญชี LINE สำเร็จแล้ว');
+                return redirect()->route('admin.dash')->with('status', 'การผูกบัญชี LINE สำเร็จแล้ว');
             }
             
             return redirect()->route('dash')->with('status', 'การผูกบัญชี LINE สำเร็จแล้ว');
         }
         
         // Future: Handle authentication flow (login with LINE)
+        if (session('auth_via_line', false)) {
+            session()->forget('auth_via_line');
+            
+            $guard = $request->query('guard', 'web');
+            
+            // Find user by LINE ID
+            $user = User::where('line_id', $lineUser->id)->first();
+            
+            if ($user) {
+                // For admin guard, verify user is an admin
+                if ($guard === 'admin' && $user->type !== 'admin') {
+                    return back()->withErrors([
+                        'credentials' => 'คุณไม่มีสิทธิ์เข้าถึงส่วนผู้ดูแลระบบ',
+                    ]);
+                }
+                
+                // Login the user directly (LINE authentication is already validated)
+                Auth::guard($guard)->login($user);
+                $request->session()->regenerate();
+
+                if ($guard === 'admin') {
+                    return redirect()->intended('/admin');
+                }
+                
+                return redirect()->intended('/dash');
+            }
+            
+            return back()->withErrors([
+                'credentials' => 'ไม่พบบัญชีที่ผูกกับ LINE นี้ในระบบ',
+            ]);
+        }
+
         // Check if LINE ID exists in database
         $existingUser = User::where('line_id', $lineUser->id)->first();
         if ($existingUser) {
@@ -87,14 +141,33 @@ class LineIntegrationController extends Controller
 
     public function BindLineAccount(Request $request)
     {
+        // Detect which guard the user is authenticated with
+        $guard = 'web';
+        $user = null;
+        
+        if (Auth::guard('admin')->check()) {
+            $guard = 'admin';
+            $user = Auth::guard('admin')->user();
+        } elseif (Auth::guard('web')->check()) {
+            $guard = 'web';
+            $user = Auth::guard('web')->user();
+        }
+        
+        if (!$user) {
+            return redirect()->route('login')->withErrors([
+                'auth_error' => 'กรุณาเข้าสู่ระบบก่อนผูกบัญชี LINE',
+            ]);
+        }
+        
         // Store binding intent and user ID in session
         session([
             'line_binding_mode' => true,
-            'line_binding_user_id' => $request->user()->id
+            'line_binding_user_id' => $user->id,
+            'line_binding_guard' => $guard
         ]);
         session()->save(); // Force save before redirect
 
-        Log::info('Initiating LINE account binding process for user ID: ' . $request->user()->id);
+        Log::info('Initiating LINE account binding process for user ID: ' . $user->id . ' (guard: ' . $guard . ')');
         
         // Redirect to LINE for OAuth authorization
         return Socialite::driver('line')
