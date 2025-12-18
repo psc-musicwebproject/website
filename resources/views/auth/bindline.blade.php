@@ -18,4 +18,12 @@
         <button type="submit" class="btn btn-primary btn-block mt-3">ผูกบัญชีไลน์</button>
         </div>
     </form>
+    <div class="d-flex justify-content-center align-items-center text-center mt-3">
+        <a href="{{ $skipUrl }}" class="btn btn-link p-0 text-secondary" style="text-decoration: none;">ข้ามขั้นตอนนี้</a>
+        <span class="mx-2">|</span>
+        <form method="POST" action="{{ route('auth.web.logout') }}" class="d-inline m-0">
+            @csrf
+            <button type="submit" class="btn btn-link p-0 text-danger" style="text-decoration: none;">ออกจากระบบ</button>
+        </form>
+    </div>
 </x-auth.layout>
