@@ -42,8 +42,16 @@ Route::get('/auth/line/callback', [App\Http\Controllers\LineIntegrationControlle
 // LINE Binding Routes (for both web and admin users)
 Route::middleware(['auth:web,admin'])->group(function () {
     Route::get('/auth/line/bindingPage', function () {
-        // Determine default redirect based on user guard
-        $defaultRedirect = Auth::guard('admin')->check() ? route('admin.dash') : route('dash');
+        // Prefer explicit guard query parameter when provided (preserved during redirects)
+        $requestedGuard = request()->query('guard');
+
+        if ($requestedGuard === 'admin') {
+            $defaultRedirect = route('admin.dash');
+        } else {
+            // Fallback to checking the current authenticated guard
+            $defaultRedirect = Auth::guard('admin')->check() ? route('admin.dash') : route('dash');
+        }
+
         $skipUrl = $defaultRedirect;
         $title = 'ผูกบัญชี LINE';
         return view('auth.bindline', compact('title', 'skipUrl'));
