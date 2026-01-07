@@ -40,6 +40,10 @@ return [
         'client_secret' => env('LINE_CLIENT_SECRET'),
         'redirect' => env('LINE_REDIRECT_URL', '/auth/line/callback'),
         'bot_prompt' => env('LINE_BOT_PROMPT', 'normal'),
+        'messaging_api' => [
+            'channel_secret' => env('LINE_MESSAGING_API_CHANNEL_SECRET'),
+            'access_token' => env('LINE_MESSAGING_API_ACCESS_TOKEN'),
+        ],
     ],
 
 ];

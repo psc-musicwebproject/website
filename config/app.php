@@ -56,6 +56,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | LINE Integration Toggle
+    |--------------------------------------------------------------------------
+    |
+    | Enable or disable LINE integration (binding/login) via the
+    | `LINE_ENABLED` environment variable. Defaults to false.
+    |
+    */
+    'line_enabled' => env('LINE_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

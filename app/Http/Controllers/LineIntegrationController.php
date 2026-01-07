@@ -9,10 +9,45 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
+// Importing LINE SDK v12
+use GuzzleHttp\Client;
+use LINE\Clients\MessagingApi\Configuration;
+use LINE\Clients\MessagingApi\Api\MessagingApiApi;
+use LINE\Clients\MessagingApi\Model\PushMessageRequest;
+use LINE\Clients\MessagingApi\Model\TextMessage;
+use LINE\Clients\MessagingApi\Model\FlexMessage;
+use LINE\Clients\MessagingApi\Model\FlexBubble;
+use LINE\Clients\MessagingApi\ApiException;
 
 
 class LineIntegrationController extends Controller
 {
+    protected $messagingApi;
+
+    public function __construct()
+    {
+        $accessToken = config('services.line.messaging_api.access_token');
+        
+        if (empty($accessToken)) {
+            Log::error('LINE Messaging API access token is not configured');
+            throw new \RuntimeException('LINE Messaging API access token is missing');
+        }
+        
+        $client = new Client();
+        $config = new Configuration();
+        $config->setAccessToken($accessToken);
+        
+        $this->messagingApi = new MessagingApiApi(
+            client: $client,
+            config: $config
+        );
+    }
+
+    public function getLineBot()
+    {
+        return $this->messagingApi;
+    }
+
     public function AuthenticateViaLine(Request $request)
     {
         // Logic for authenticating with LINE API
@@ -121,6 +156,13 @@ class LineIntegrationController extends Controller
                 Auth::guard($guard)->login($user);
                 $request->session()->regenerate();
 
+                // Send messesage to user via LINE Messaging API that login was successful
+                try {
+                    $this->SendNormalTextMessage($lineUser->id, 'คุณ ' . $user->name . ' เข้าสู่ระบบสำเร็จแล้ว, ยินดีต้อนรับเข้าสู่ระบบ!');
+                } catch (ApiException $e) {
+                    Log::error('Failed to send LINE login success message: ' . $e->getMessage());
+                }
+
                 if ($guard === 'admin') {
                     return redirect()->intended('/admin');
                 }
@@ -177,5 +219,69 @@ class LineIntegrationController extends Controller
         // Redirect to LINE for OAuth authorization
         return Socialite::driver('line')
             ->redirect();
+    }
+
+    public function SendNormalTextMessage($to, $msg)
+    {
+        try {
+            $message = new TextMessage(['text' => $msg]);
+            $request = new PushMessageRequest([
+                'to' => $to,
+                'messages' => [$message],
+            ]);
+            
+            $this->messagingApi->pushMessage($request);
+            return true;
+        } catch (ApiException $e) {
+            Log::error('LINE API Error: ' . $e->getCode() . ' ' . $e->getResponseBody());
+            return false;
+        }
+    }
+
+    public function pushFlexMessage($to, $altText = 'Flex Message', $flexContainer = null)
+    {
+        try {
+            // Default flex bubble if none provided
+            if ($flexContainer === null) {
+                $flexContainer = [
+                    'type' => 'bubble',
+                    'hero' => [
+                        'type' => 'image',
+                        'url' => 'https://example.com/image.jpg',
+                        'size' => 'full',
+                        'aspectRatio' => '20:13',
+                    ],
+                    'body' => [
+                        'type' => 'box',
+                        'layout' => 'vertical',
+                        'contents' => [
+                            [
+                                'type' => 'text',
+                                'text' => 'Product Name',
+                                'weight' => 'bold',
+                                'size' => 'xl',
+                            ],
+                        ],
+                    ],
+                ];
+            }
+            
+            $flexMessage = new FlexMessage([
+                'type' => 'flex',
+                'altText' => $altText,
+                'contents' => $flexContainer,
+            ]);
+            
+            $request = new PushMessageRequest([
+                'to' => $to,
+                'messages' => [$flexMessage],
+            ]);
+            
+            $this->messagingApi->pushMessage($request);
+            return true;
+        } catch (ApiException $e) {
+            Log::error('LINE Flex Message Error: ' . $e->getCode() . ' ' . $e->getResponseBody());
+            return false;
+        }
     }
 }
