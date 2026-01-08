@@ -13,7 +13,9 @@
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
         "linecorp/line-bot-sdk": "^12.3",
-        "socialiteproviders/line": "^4.1"
+        "socialiteproviders/line": "^4.1",
+        "symfony/mailer": "^7.4",
+        "symfony/resend-mailer": "^8.0"
     },
     "require-dev": {
         "laravel/pail": "^1.2.2",
