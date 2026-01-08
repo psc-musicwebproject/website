@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
+use App\Notifications\BookingAlert;
+use App\Notifications\Admin\Broadcast\AdminBookingToast;
+use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
 {
@@ -51,12 +54,22 @@ class BookingController extends Controller
             $booking->attendees = empty($attendees) ? null : $attendees;
             $booking->save();
 
+            if ($booking->user) {
+                $booking->user->notify(new BookingAlert($booking));
+            }
+            
+            if ($booking->user && $booking->user->type != "admin") {
+                $admin = \App\Models\User::where('type', 'admin')->get();
+                if ($admin->isNotEmpty()) {
+                    Notification::send($admin, new AdminBookingToast($booking));
+                }
+            }
+            
             return redirect()->route($redirectRoute)->with('success', 'บันทึกการจองเรียบร้อยแล้ว');
         } catch (\Exception $e) {
             return redirect()->route($redirectRoute)->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
         }
     }
-
 
     public function approveBooking(Request $request, $bookingId)
     {
