@@ -25,7 +25,7 @@
             </div>
             <div class="card-footer text-center">
                 <small class="text-muted">{{now()->year}} - Toonshouin! , ArmGameXD</small>
-                <small class="text-muted"> | v{{ config('app.version', '1.0.0') }}</small>
+                <small class="text-muted"> | {{ config('app.version', '1.0.0') }}</small>
             </div>
         </div>
     </div>
