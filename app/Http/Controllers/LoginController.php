@@ -6,66 +6,77 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LineIntegrationController;
-use Termwind\Components\Li;
 
 class LoginController extends Controller
 {
-    /**
-     * Handle an authentication attempt.
-     */
+    // Inject the LineController so Laravel handles dependencies automatically
+    public function __construct(
+        protected LineIntegrationController $lineController
+    ) {}
+
     public function __invoke(Request $request): RedirectResponse
     {
-        if ($request->input('action') === 'cred_login') {
-            $credentials = $request->validate([
-                'student_id' => ['required', 'numeric'],
-                'password' => ['required'],
-            ]);
+        $action = $request->input('action');
 
-            // Check which guard is being requested
-            $guard = $request->query('guard', 'web');
-            
-            // Attempt login with the appropriate guard
-            if (Auth::guard($guard)->attempt($credentials)) {
-                $request->session()->regenerate();
-
-                if ((bool) env('LINE_ENABLED', false) && ($guard === 'web' || $guard === 'admin')) {
-                    $user = Auth::guard($guard)->user();
-                    if (empty($user->line_id)) {
-                        $user->line_bound = false;
-                        $user->save();
-                        return redirect()->route('auth.line.bind');
-                    }
-                }
-
-                // Redirect based on which guard was used
-                if ($guard === 'admin') {
-                    return redirect()->intended('/admin');
-                }
-                
-                return redirect()->intended('/dash');
-            }
-
-            // Provide specific error messages based on the guard
-            if ($guard === 'admin') {
-                // Check if user exists but is not an admin
-                if (Auth::guard('web')->attempt($credentials)) {
-                    Auth::guard('web')->logout(); // Logout from web guard
-                    
-                    return back()->withErrors([
-                        'access' => 'Unauthorized access. Admin privileges required.',
-                    ])->onlyInput('student_id');
-                }
-            }
-
-            return back()->withErrors([
-                'credentials' => 'The provided credentials do not match our records.',
-            ])->onlyInput('student_id');
-        } elseif ($request->input('action') === 'line_login') {
-            return (new LineIntegrationController())->AuthenticateViaLine($request);
+        // 1. Handle LINE Login Delegate
+        if ($action === 'line_login') {
+            return $this->lineController->AuthenticateViaLine($request);
         }
-        
-        return back()->withErrors([
-            'action' => 'Invalid action specified.',
+
+        // 2. Validate Action
+        if ($action !== 'cred_login') {
+            return back()->withErrors(['action' => 'Invalid action specified.']);
+        }
+
+        // 3. Handle Credentials Login
+        $credentials = $request->validate([
+            'student_id' => ['required', 'numeric'],
+            'password'   => ['required'],
         ]);
+
+        $guard = $request->query('guard', 'web');
+
+        // Attempt login
+        if (Auth::guard($guard)->attempt($credentials)) {
+            $request->session()->regenerate();
+
+            /** * BEST PRACTICE: Use config() instead of env() 
+             * Ensure you have 'line_enabled' => env('LINE_ENABLED', false) in a config file.
+             */
+            $lineEnabled = config('app.line_enabled', false); 
+
+            // LINE Binding Check
+            if ($lineEnabled && in_array($guard, ['web', 'admin'])) {
+                $user = Auth::guard($guard)->user();
+                
+                if (empty($user->line_id)) {
+                    // Assuming 'line_bound' is a column you need to toggle
+                    $user->line_bound = false; 
+                    $user->save();
+                    
+                    // Preserve the current guard when redirecting so the
+                    // bind route can operate in the same auth context.
+                    return redirect()->route('auth.line.bind', ['guard' => $guard]);
+                }
+            }
+
+            // Success Redirect
+            return redirect()->intended($guard === 'admin' ? '/admin' : '/dash');
+        }
+
+        // 4. Handle Failures (Admin specifics)
+        if ($guard === 'admin') {
+            // Check if they are a valid user but NOT an admin
+            // We use 'once' to check credentials without actually logging them into the session
+            if (Auth::guard('web')->once($credentials)) {
+                return back()
+                    ->withErrors(['access' => 'Unauthorized access. Admin privileges required.'])
+                    ->onlyInput('student_id');
+            }
+        }
+
+        return back()
+            ->withErrors(['credentials' => 'The provided credentials do not match our records.'])
+            ->onlyInput('student_id');
     }
 }
