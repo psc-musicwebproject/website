@@ -22,6 +22,7 @@
                 <div class="accordion-body">
                     <form action="{{ route('admin.appsetting.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="action" value="general">
                         <div class="card">
                             <div class="card-body">
                                 <div class="mb-3">
@@ -67,10 +68,45 @@
                 </div>
             </div>
         </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    ประกาศหน้า Login
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#appSettingsAccordion">
+                <div class="accordion-body">
+                    <form action="{{ route('admin.appsetting.update') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="action" value="note">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="notice" class="form-label">ข้อความประกาศ</label>
+                                    <textarea id="notice" name="notice">{{ $AppSetting::getNotice() }}</textarea>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">บันทึก</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('notice')) {
+            const easyMDE = new EasyMDE({ 
+                element: document.getElementById('notice'),
+                previewClass: ['editor-preview', 'markdown-content'],
+            });
+        }
+        
         document.getElementById('app_logo').addEventListener('change', function(e) {
             console.log('File selected:', e.target.files[0]);
             const file = e.target.files[0];

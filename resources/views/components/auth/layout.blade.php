@@ -28,7 +28,19 @@
                 <small class="text-muted"> | {{ config('app.version', '1.0.0') }}</small>
             </div>
         </div>
+
+        @if(request()->query('guard') != 'admin' && $notice = $AppSetting::getNotice())
+            <div class="card card-outline card-warning mt-2 mb-0">
+                <div class="card-header">
+                    <strong>ประกาศ</strong>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 markdown-content">
+                        {!! Illuminate\Support\Str::markdown($notice) !!}
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
-    
 </body>
 </html>

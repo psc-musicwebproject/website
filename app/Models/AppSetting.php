@@ -90,6 +90,15 @@ class AppSetting extends Model
             $setting->save();
 
             return true;
+        } else {
+             // If no setting exists, create a new one
+             $newSetting = new self();
+             $newSetting->notice = $value;
+             $newSetting->web_name = 'PSC-MusicWeb';
+             $newSetting->web_header = 'PSC Music';
+             $newSetting->save();
+ 
+             return true;
         }
 
         return false;

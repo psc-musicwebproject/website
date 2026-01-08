@@ -16,6 +16,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "easymde": "^2.20.0",
         "laravel-echo": "^2.2.6",
         "pusher-js": "^8.4.0"
     }

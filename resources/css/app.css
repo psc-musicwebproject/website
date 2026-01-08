@@ -1,13 +1,28 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
-@import 'admin-lte/dist/css/adminlte.min.css';
-@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "admin-lte/dist/css/adminlte.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+@import "easymde/dist/easymde.min.css";
 
 /* Custom styles */
 :root {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 body {
     font-family: var(--font-sans);
 }
+
+/* Markdown Content Styling */
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.25rem;
+}
+
+.markdown-content h1, .CodeMirror .cm-header-1 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
+.markdown-content h2, .CodeMirror .cm-header-2 { font-size: 1.15rem; font-weight: bold; margin-bottom: 0.5rem; }
+.markdown-content h3, .CodeMirror .cm-header-3 { font-size: 1.05rem; font-weight: bold; margin-bottom: 0.5rem; }
+.markdown-content p, .CodeMirror { margin-bottom: 0.5rem; font-size: 0.9rem; }
+.markdown-content ul, .markdown-content ol { padding-left: 1.2rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
