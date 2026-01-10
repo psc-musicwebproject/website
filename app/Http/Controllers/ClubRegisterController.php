@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClubMember;
+use App\Notifications\ClubRegisterSentNoti;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +46,8 @@ class ClubRegisterController extends Controller
                 'status' => 'waiting',
                 'ability' => $request->input('ability'),
             ]);
+
+            Auth::user()->notify(new ClubRegisterSentNoti());
 
             return redirect()->back()->with('success', 'ส่งใบสมัครเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลชมรม');
 
