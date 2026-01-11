@@ -15,12 +15,12 @@ class BookingController extends Controller
     {
         $isAdmin = $request->route('isAdmin', false);
         $redirectRoute = $request->route('redirectRoute', 'dash.booking');
-        
+
         try {
             $request->validate([
-                'room_id' => ['required','string'],
-                'name' => ['required','string','max:255'],
-                'date' => ['required','date'],
+                'room_id' => ['required', 'string'],
+                'name' => ['required', 'string', 'max:255'],
+                'date' => ['required', 'date'],
                 'time_from' => ['required'],
                 'time_to' => ['required'],
             ]);
@@ -51,20 +51,40 @@ class BookingController extends Controller
             $booking->booked_from = date('Y-m-d H:i:s', strtotime("$booked_date $time_from"));
             $booking->booked_to = date('Y-m-d H:i:s', strtotime("$booked_date $time_to"));
             $attendees = $request->input('attendees');
+            if (is_string($attendees)) {
+                $decoded = json_decode($attendees, true);
+                // Check if decode was successful
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $attendees = $decoded;
+                }
+            }
             $booking->attendees = empty($attendees) ? null : $attendees;
+            
+            // Handle "Book on Behalf" for Admins
+            if (Auth::user()->type === 'admin' && $request->has('book_owner_id')) {
+                 $ownerId = $request->input('book_owner_id');
+                 if (\App\Models\User::where('id', $ownerId)->exists()) {
+                     $booking->user_id = $ownerId;
+                 } else {
+                     $booking->user_id = Auth::id(); // Fallback
+                 }
+            } else {
+                $booking->user_id = Auth::id();
+            }
+
             $booking->save();
 
             if ($booking->user) {
-                $booking->user->notify(new BookingAlert($booking));
+                $booking->user->notify(new BookingAlert($booking, Auth::user()));
             }
-            
-            if ($booking->user && $booking->user->type != "admin") {
+
+            if ($booking->user && ($booking->user->type != "admin" || Auth::user()->type != 'admin') ) {
                 $admin = \App\Models\User::where('type', 'admin')->get();
                 if ($admin->isNotEmpty()) {
                     Notification::send($admin, new AdminBookingToast($booking));
                 }
             }
-            
+
             return redirect()->route($redirectRoute)->with('success', 'บันทึกการจองเรียบร้อยแล้ว');
         } catch (\Exception $e) {
             return redirect()->route($redirectRoute)->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
@@ -93,5 +113,35 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('admin.booking')->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
         }
+    }
+
+    public function findUser(Request $request)
+    {
+        $query = $request->input('query');
+
+        if (!$query) {
+            return response()->json(['error' => 'Query is required'], 400);
+        }
+
+        $user = \App\Models\User::where('student_id', $query)
+            ->orWhere('email', $query)
+            ->first();
+
+        if ($user) {
+            return response()->json([
+                'found' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'surname' => $user->surname,
+                    'student_id' => $user->student_id,
+                    'email' => $user->email,
+                    'type' => $user->type,
+                    'role_label' => $user->role_label
+                ]
+            ]);
+        }
+
+        return response()->json(['found' => false], 404);
     }
 }

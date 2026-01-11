@@ -100,4 +100,9 @@ class User extends Authenticatable
         
         return $query->exists();
     }
+
+    public function getRoleLabelAttribute()
+    {
+        return UserTypeMapping::where('db_type', $this->type)->value('named_type') ?? ucfirst($this->type);
+    }
 }

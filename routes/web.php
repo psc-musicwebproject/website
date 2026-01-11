@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('dash.booking');
     Route::post('/dash/booking/submit', [BookingController::class, 'saveBooking'])->defaults('redirectRoute', 'dash.booking')->name('dash.booking.submit');
+    Route::post('/dash/booking/find-user', [BookingController::class, 'findUser'])->name('dash.booking.find_user');
     Route::get('/dash/booking/history', function () {
         // Use auth() helper to get the current guard's user
         $Bookings = App\Models\Booking::getCurrentUserBookings(auth()->id());
@@ -157,4 +158,5 @@ Route::middleware('auth:admin')->group(function () {
     })->name('admin.booking.detail');
     Route::post('/admin/booking/approve/{id}', [App\Http\Controllers\BookingController::class, 'approveBooking'])->name('admin.booking.approve');
     Route::post('/admin/booking/delete/{id}', [App\Http\Controllers\BookingController::class, 'deleteBooking'])->name('admin.booking.delete');
+    Route::post('/admin/booking/find-user', [BookingController::class, 'findUser'])->name('admin.booking.find_user');
 });
