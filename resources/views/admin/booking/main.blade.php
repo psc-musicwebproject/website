@@ -50,7 +50,20 @@
                     @csrf
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col">
+                            <div class="col-12">
+                                <h6>ผู้จอง (Booker)</h6>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="booker_input" placeholder="ค้นหาผู้จอง (รหัสนักศึกษา / อีเมล)" value="{{ Auth::user()->student_id }}">
+                                    <button class="btn btn-outline-secondary" type="button" id="button-search-booker"><i class="bi bi-search"></i></button>
+                                </div>
+                                <div class="invalid-feedback" id="bookerFeedback"></div>
+                                <div class="alert alert-info py-2" id="booker-info">
+                                    <strong>ผู้จองปัจจุบัน:</strong> <span id="booker-name">{{ Auth::user()->name }} {{ Auth::user()->surname }}</span> (<span id="booker-status">{{ Auth::user()->role_label }}</span>)
+                                </div>
+                                <input type="hidden" name="book_owner_id" id="book_owner_id" value="{{ Auth::id() }}">
+                            </div>
+                            <hr>
+                            <div class="col-12">
                                 <div class="mb-3">
                                     <label for="room_id" class="form-label">ห้องที่ต้องการจอง</label>
                                     <select class="form-select" id="room_id" name="room_id" required @if(count($rooms)==0) disabled @endif>
@@ -81,6 +94,30 @@
                                     <input type="text" class="form-control" id="name" name="name" placeholder="หัวข้อการจอง / ใช้ห้อง" required>
                                 </div>
                             </div>
+                            <hr>
+                            <!-- Attendee Section -->
+                            <div class="col-12">
+                                <h6>รายชื่อผู้เข้าร่วม</h6>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="attendee_input" placeholder="รหัสนักศึกษา / อีเมล">
+                                    <button class="btn btn-outline-secondary" type="button" id="button-add-attendee"><i class="bi bi-plus-square-fill"></i></button>
+                                </div>
+                                <div class="invalid-feedback" id="attendee-feedback" style="display: none;"></div>
+                                
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ชื่อ-สกุล</th>
+                                            <th>สถานะ</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendees-table-body">
+                                        <!-- Dynamic Content -->
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="attendees" id="attendees_json">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -92,7 +129,236 @@
         </div>
     </div>
 
-    <!-- For Delete Booking Modal -->
+    <!-- Guest Name Modal for Admin -->
+    <div class="modal fade" id="guestNameModalAdmin" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ระบุชื่อผู้เข้าร่วม (Guest)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="guest_name_input" class="form-label">ชื่อ-นามสกุล</label>
+                        <input type="text" class="form-control" id="guest_name_input" placeholder="กรอกชื่อผู้เข้าร่วม">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="saveGuestNameBtn">ยืนยัน</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Booker Elements
+            const bookerInput = document.getElementById('booker_input');
+            const searchBookerBtn = document.getElementById('button-search-booker');
+            const bookerNameSpan = document.getElementById('booker-name');
+            const bookOwnerIdInput = document.getElementById('book_owner_id');
+
+            // Attendee Elements
+            const attendeeInput = document.getElementById('attendee_input');
+            const addButton = document.getElementById('button-add-attendee');
+            const attendeesTableBody = document.getElementById('attendees-table-body');
+            const attendeesJsonInput = document.getElementById('attendees_json');
+            const feedbackDiv = document.getElementById('attendee-feedback');
+            
+            // Modal elements
+            const guestModalEl = document.getElementById('guestNameModalAdmin');
+            const guestModal = new bootstrap.Modal(guestModalEl);
+            const guestNameInput = document.getElementById('guest_name_input');
+            const saveGuestBtn = document.getElementById('saveGuestNameBtn');
+
+            // Current Booker State (Defaults to Admin)
+            let currentBooker = {
+                id: '{{ Auth::user()->student_id }}', // Assuming admin has student_id or use fallback
+                email: '{{ Auth::user()->email }}',
+                db_id: '{{ Auth::id() }}'
+            };
+
+            let attendees = [];
+            let pendingGuestEmail = '';
+
+            // --- Booker Search Logic ---
+            searchBookerBtn.addEventListener('click', async function() {
+                const query = bookerInput.value.trim();
+                if (!query) return;
+
+                try {
+                    const response = await fetch('{{ route('admin.booking.find_user') }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify({ query: query })
+                    });
+                    const result = await response.json();
+
+                    if (response.ok && result.found) {
+                        const user = result.user;
+                        // Update Booker State
+                        currentBooker = {
+                            id: user.student_id,
+                            email: user.email,
+                            db_id: user.id
+                        };
+                        // Update UI
+                        bookerNameSpan.textContent = `${user.name} ${user.surname}`;
+                        document.getElementById('booker-status').textContent = user.role_label;
+                        bookOwnerIdInput.value = user.id;
+                        bookerInput.classList.remove('is-invalid');
+                    } else {
+                        bookerInput.classList.add('is-invalid');
+                        bookerFeedback.textContent = 'ไม่พบผู้ใช้งาน';
+                        bookerFeedback.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error(error);
+                    bookerFeedback.textContent = 'เกิดข้อผิดพลาด:  ' + error.message;
+                    bookerFeedback.style.display = 'block';
+                }
+            });
+
+            function updateAttendeesJson() {
+                attendeesJsonInput.value = JSON.stringify({ attendee: attendees });
+            }
+
+            function renderTable() {
+                attendeesTableBody.innerHTML = '';
+                attendees.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    
+                    let displayName = item.user_name || `${item.name} ${item.surname}`;
+                    let displayStatus = item.user_status; // Already label from backend
+
+                    tr.innerHTML = `
+                        <td>${displayName} <br><small class="text-muted">${item.user_identify}</small></td>
+                        <td><span class="badge bg-secondary">${displayStatus}</span></td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="btn btn-xs btn-danger" onclick="removeAttendee(${index})"><i class="bi bi-trash"></i> ลบ</button>
+                            </div>
+                        </td>
+                    `;
+                    attendeesTableBody.appendChild(tr);
+                });
+            }
+
+            window.removeAttendee = function(index) {
+                attendees.splice(index, 1);
+                renderTable();
+                updateAttendeesJson();
+            }
+
+            function isValidEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            // --- Attendee Add Logic (Reused Validation) ---
+            addButton.addEventListener('click', async function() {
+                const query = attendeeInput.value.trim();
+                if (!query) return;
+
+                attendeeInput.classList.remove('is-invalid');
+                feedbackDiv.style.display = 'none';
+
+                // Self Check (Reused Logic) checking against currentBooker
+                if (query === currentBooker.id || (currentBooker.email && query === currentBooker.email)) {
+                    attendeeInput.classList.add('is-invalid');
+                    feedbackDiv.textContent = 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
+                    feedbackDiv.style.display = 'block';
+                    return;
+                }
+
+                const hasAtSymbol = query.includes('@');
+                const isEmail = isValidEmail(query);
+
+                if (hasAtSymbol && !isEmail) {
+                    attendeeInput.classList.add('is-invalid');
+                    feedbackDiv.textContent = 'รูปแบบอีเมลไม่ถูกต้อง';
+                    feedbackDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('{{ route('admin.booking.find_user') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ query: query })
+                    });
+                    
+                    const result = await response.json();
+
+                    if (response.ok && result.found) {
+                        const user = result.user;
+                        
+                        // Check match if user entered ID but currentBooker.id was undefined logic? 
+                        // Actually the user.id check in backend is robust, but here we check input string.
+                        // Additional check:
+                        if (user.id == currentBooker.db_id) {
+                             attendeeInput.classList.add('is-invalid');
+                            feedbackDiv.textContent = 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
+                            feedbackDiv.style.display = 'block';
+                            return;
+                        }
+
+                        // User found
+                        attendees.push({
+                            user_from: 'id',
+                            user_status: user.role_label, 
+                            user_identify: user.student_id, 
+                            
+                            // Extra fields for display
+                            name: user.name,
+                            surname: user.surname
+                        });
+
+                        renderTable();
+                        updateAttendeesJson();
+                        attendeeInput.value = ''; 
+                    } else {
+                        // Not found
+                        if (hasAtSymbol) { 
+                             pendingGuestEmail = query;
+                             guestNameInput.value = '';
+                             guestModal.show();
+                        } else {
+                            attendeeInput.classList.add('is-invalid');
+                            feedbackDiv.textContent = 'ไม่พบรหัสนักศึกษา/ผู้ใช้นี้ในระบบ';
+                            feedbackDiv.style.display = 'block';
+                        }
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    alert('เกิดข้อผิดพลาดในการตรวจสอบข้อมูล');
+                }
+            });
+
+            saveGuestBtn.addEventListener('click', function() {
+                const name = guestNameInput.value.trim();
+                if (name) {
+                    attendees.push({
+                        user_from: 'mail',
+                        user_status: 'Guest',
+                        user_identify: pendingGuestEmail,
+                        user_name: name
+                    });
+                    renderTable();
+                    updateAttendeesJson();
+                    attendeeInput.value = '';
+                    guestModal.hide();
+                } else {
+                    alert('กรุณาระบุชื่อ');
+                }
+            });
+        });
+    </script>
+
     @foreach($bookings as $booking)
     <div class="modal fade" id="deleteBooking-{{ $booking->booking_id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">

@@ -96,7 +96,96 @@
                 </div>
             </div>
         </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    ตั้งค่าประเภทผู้ใช้
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#appSettingsAccordion">
+                <div class="accordion-body">
+                    <div class="card mb-3">
+                        <div class="card-header">รายการประเภทผู้ใช้</div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Database Type</th>
+                                        <th>Display Label</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(App\Models\UserTypeMapping::all() as $mapping)
+                                    <tr>
+                                        <td>{{ $mapping->db_type }}</td>
+                                        <td>{{ $mapping->named_type }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-warning edit-type-btn" 
+                                                data-db-type="{{ $mapping->db_type }}" 
+                                                data-named-type="{{ $mapping->named_type }}">
+                                                แก้ไข
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger delete-type-btn" 
+                                                data-bs-toggle="modal" data-bs-target="#deleteMapping-{{ $mapping->db_type }}">
+                                                ลบ
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('admin.appsetting.update') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="action" value="user_type_update">
+                        <div class="card">
+                            <div class="card-header">เพิ่ม/แก้ไข ประเภทผู้ใช้</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="db_type" class="form-label">Database Type (เช่น user, admin)</label>
+                                    <input type="text" class="form-control" id="db_type" name="db_type" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="named_type" class="form-label">Display Label (เช่น Student, Staff)</label>
+                                    <input type="text" class="form-control" id="named_type" name="named_type" required>
+                                </div>
+                            </div>
+                            <div class="card-footer text-end">
+                                <button type="submit" class="btn btn-primary">บันทึก</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @foreach (App\Models\UserTypeMapping::all() as $mapping)
+        <div class="modal fade" id="deleteMapping-{{ $mapping->db_type }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">ลบประเภทผู้ใช้</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        คุณต้องการลบประเภทผู้ใช้ {{ $mapping->named_type }} ใช่หรือไม่?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <form action="{{ route('admin.appsetting.update') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="db_type" value="{{ $mapping->db_type }}">
+                            <button type="submit" name="action" value="user_type_delete" class="btn btn-danger">ลบ</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -120,6 +209,13 @@
                 };
                 reader.readAsDataURL(file);
             }
+        });
+        document.querySelectorAll('.edit-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('db_type').value = this.dataset.dbType;
+                document.getElementById('named_type').value = this.dataset.namedType;
+                document.getElementById('db_type').scrollIntoView({ behavior: 'smooth' });
+            });
         });
     });
     </script>

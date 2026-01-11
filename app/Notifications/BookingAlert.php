@@ -10,19 +10,22 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Booking;
+use App\Models\User;
 
 class BookingAlert extends Notification
 {
     use Queueable;
 
     protected $booking;
+    protected $bookedBy;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Booking $booking)
+    public function __construct(Booking $booking, User $bookedBy)
     {
         $this->booking = $booking;
+        $this->bookedBy = $bookedBy;
     }
 
     /**
@@ -57,7 +60,7 @@ class BookingAlert extends Notification
         if ($this->booking->user->type != 'admin') {
             $jsonString = file_get_contents(app_path('line/flex_messages/booking_alert.json'));
             $flexMessage = json_decode($jsonString, true);
-        } elseif ($this->booking->user->type == 'admin') {
+        } elseif ($this->booking->user->type == 'admin' || $this->bookedBy->type == 'admin') {
             $jsonString = file_get_contents(app_path('line/flex_messages/booking_alert_admin.json'));
             $flexMessage = json_decode($jsonString, true);    
         }

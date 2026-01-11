@@ -52,6 +52,32 @@ class AppSettingController extends Controller
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกการตั้งค่า: ' . $e->getMessage());
             }
+        } elseif ($action === 'user_type_update') {
+            $request->validate([
+                'db_type' => 'required|string|max:255',
+                'named_type' => 'required|string|max:255',
+            ]);
+
+            try {
+                \App\Models\UserTypeMapping::updateOrCreate(
+                    ['db_type' => $request->input('db_type')],
+                    ['named_type' => $request->input('named_type')]
+                );
+                return redirect()->back()->with('success', 'บันทึกประเภทผู้ใช้เรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+            }
+        } elseif ($action === 'user_type_delete') {
+            $request->validate([
+                'db_type' => 'required|string|max:255',
+            ]);
+
+            try {
+                \App\Models\UserTypeMapping::where('db_type', $request->input('db_type'))->delete();
+                return redirect()->back()->with('success', 'ลบประเภทผู้ใช้เรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+            }
         }
         
         return redirect()->back()->with('error', 'Unknown Action');
