@@ -259,10 +259,6 @@
                             user_from: 'id',
                             user_status: user.role_label, 
                             user_identify: user.student_id, 
-                            
-                            // Extra fields for display
-                            name: user.name,
-                            surname: user.surname
                         });
                         
                         attendeeInput.value = '';

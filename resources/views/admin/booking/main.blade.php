@@ -311,10 +311,6 @@
                             user_from: 'id',
                             user_status: user.role_label, 
                             user_identify: user.student_id, 
-                            
-                            // Extra fields for display
-                            name: user.name,
-                            surname: user.surname
                         });
 
                         renderTable();
@@ -344,7 +340,7 @@
                 if (name) {
                     attendees.push({
                         user_from: 'mail',
-                        user_status: 'Guest',
+                        user_status: 'guest',
                         user_identify: pendingGuestEmail,
                         user_name: name
                     });
