@@ -51,7 +51,7 @@ class BookingAlert extends Notification
 
     public function toLineIntegration(object $notifiable): string
     {
-        
+
         // Importing Line Flex Message Template from JSON file
         if ($notifiable->line_id == null) {
             return "No Line User ID";
@@ -62,26 +62,27 @@ class BookingAlert extends Notification
             $flexMessage = json_decode($jsonString, true);
         } elseif ($this->booking->user->type == 'admin' || $this->bookedBy->type == 'admin') {
             $jsonString = file_get_contents(app_path('line/flex_messages/booking_alert_admin.json'));
-            $flexMessage = json_decode($jsonString, true);    
+            $flexMessage = json_decode($jsonString, true);
         }
 
         // Replace placeholders with actual booking data
         // Room name
-        $flexMessage['body']['contents'][2]['contents'][0]['contents'][1]['text'] = 
+        $flexMessage['body']['contents'][2]['contents'][0]['contents'][1]['text'] =
             $this->booking->room->room_name ?? 'ไม่ระบุ';
 
         // Date
-        $flexMessage['body']['contents'][2]['contents'][1]['contents'][1]['text'] = 
+        $flexMessage['body']['contents'][2]['contents'][1]['contents'][1]['text'] =
             \Carbon\Carbon::parse($this->booking->booked_from)->locale('th')->isoFormat('DD MMMM YYYY');
 
         // Time
-        $flexMessage['body']['contents'][2]['contents'][2]['contents'][1]['text'] = 
-            \Carbon\Carbon::parse($this->booking->booked_from)->format('H:i') . ' - ' . 
+        $flexMessage['body']['contents'][2]['contents'][2]['contents'][1]['text'] =
+            \Carbon\Carbon::parse($this->booking->booked_from)->format('H:i') . ' - ' .
             \Carbon\Carbon::parse($this->booking->booked_to)->format('H:i');
 
         // Participants
-        $flexMessage['body']['contents'][2]['contents'][3]['contents'][1]['text'] = 
-            is_array($this->booking->attendees) ? implode(', ', $this->booking->attendees) : ($this->booking->attendees ?? 'ไม่ระบุผู้เข้าร่วม');
+        $attendeeList = Booking::parseAttendeeforDisplay($this->booking->attendees);
+        $flexMessage['body']['contents'][2]['contents'][3]['contents'][1]['text'] =
+            !empty($attendeeList) ? implode(', ', $attendeeList) : 'ไม่ระบุผู้เข้าร่วม';
 
         // Update action URL (optional - link to booking details)
         if ($this->booking->user->type == 'admin') {
@@ -92,7 +93,7 @@ class BookingAlert extends Notification
         $flexMessage['footer']['contents'][0]['action']['uri'] = $bookingUrl;
 
         $lineController = new LineIntegrationController();
-        return $lineController->pushFlexMessage($notifiable->line_id, "แจ้งเตือนการจองห้องเสร็จสิ้น" , $flexMessage);
+        return $lineController->pushFlexMessage($notifiable->line_id, "แจ้งเตือนการจองห้องเสร็จสิ้น", $flexMessage);
     }
 
     /**
