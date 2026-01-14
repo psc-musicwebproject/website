@@ -130,7 +130,7 @@
     </div>
 
     <!-- Guest Name Modal for Admin -->
-    <div class="modal fade" id="guestNameModalAdmin" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal fade" id="guestNameModalAdmin" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -152,6 +152,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Modal instances
+            const addBookingModalEl = document.getElementById('addBooking');
+            const guestModalEl = document.getElementById('guestNameModalAdmin');
+            
+            const addBookingModal = bootstrap.Modal.getOrCreateInstance(addBookingModalEl);
+            const guestModal = new bootstrap.Modal(guestModalEl);
+            
             // Booker Elements
             const bookerInput = document.getElementById('booker_input');
             const searchBookerBtn = document.getElementById('button-search-booker');
@@ -164,12 +171,16 @@
             const attendeesTableBody = document.getElementById('attendees-table-body');
             const attendeesJsonInput = document.getElementById('attendees_json');
             const feedbackDiv = document.getElementById('attendee-feedback');
-            
-            // Modal elements
-            const guestModalEl = document.getElementById('guestNameModalAdmin');
-            const guestModal = new bootstrap.Modal(guestModalEl);
+
             const guestNameInput = document.getElementById('guest_name_input');
             const saveGuestBtn = document.getElementById('saveGuestNameBtn');
+
+            // Handle Guest Modal Close -> Reopen Booking Modal
+            guestModalEl.addEventListener('hidden.bs.modal', function () {
+                // Check if addBooking is already open to avoid flickering or errors (though .show() is usually idempotent)
+                // We always want to return to the main modal after the sub-modal closes
+                addBookingModal.show();
+            });
 
             // Current Booker State (Defaults to Admin)
             let currentBooker = {
@@ -179,9 +190,10 @@
             };
 
             let attendees = [];
+            let cachedUserNames = {};
             let pendingGuestEmail = '';
 
-            // --- Booker Search Logic ---
+            // ... (Booker Search Logic stays same) ...
             searchBookerBtn.addEventListener('click', async function() {
                 const query = bookerInput.value.trim();
                 if (!query) return;
@@ -228,7 +240,7 @@
                 attendees.forEach((item, index) => {
                     const tr = document.createElement('tr');
                     
-                    let displayName = item.user_name || `${item.name} ${item.surname}`;
+                    let displayName = item.user_name || cachedUserNames[item.user_identify] || '-';
                     let displayStatus = item.user_status; // Already label from backend
 
                     tr.innerHTML = `
@@ -255,7 +267,7 @@
                 return re.test(email);
             }
 
-            // --- Attendee Add Logic (Reused Validation) ---
+            // --- Attendee Add Logic ---
             addButton.addEventListener('click', async function() {
                 const query = attendeeInput.value.trim();
                 if (!query) return;
@@ -263,7 +275,7 @@
                 attendeeInput.classList.remove('is-invalid');
                 feedbackDiv.style.display = 'none';
 
-                // Self Check (Reused Logic) checking against currentBooker
+                // Self Check
                 if (query === currentBooker.id || (currentBooker.email && query === currentBooker.email)) {
                     attendeeInput.classList.add('is-invalid');
                     feedbackDiv.textContent = 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
@@ -296,15 +308,15 @@
                     if (response.ok && result.found) {
                         const user = result.user;
                         
-                        // Check match if user entered ID but currentBooker.id was undefined logic? 
-                        // Actually the user.id check in backend is robust, but here we check input string.
-                        // Additional check:
                         if (user.id == currentBooker.db_id) {
                              attendeeInput.classList.add('is-invalid');
                             feedbackDiv.textContent = 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
                             feedbackDiv.style.display = 'block';
                             return;
                         }
+
+                        // Cache user name for display
+                        cachedUserNames[user.student_id] = `${user.name} ${user.surname}`;
 
                         // User found
                         attendees.push({
@@ -321,6 +333,9 @@
                         if (hasAtSymbol) { 
                              pendingGuestEmail = query;
                              guestNameInput.value = '';
+                             
+                             // Swap Modals
+                             addBookingModal.hide();
                              guestModal.show();
                         } else {
                             attendeeInput.classList.add('is-invalid');
@@ -347,7 +362,7 @@
                     renderTable();
                     updateAttendeesJson();
                     attendeeInput.value = '';
-                    guestModal.hide();
+                    guestModal.hide(); // This triggers hidden.bs.modal which reopens addBookingModal
                 } else {
                     alert('กรุณาระบุชื่อ');
                 }

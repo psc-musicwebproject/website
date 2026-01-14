@@ -125,6 +125,7 @@
             const saveGuestBtn = document.getElementById('save-guest-name');
             
             let attendees = [];
+            let cachedUserNames = {}; // Cache for display names to keep JSON clean
             let pendingGuestEmail = '';
             
             // Current User Info
@@ -142,24 +143,22 @@
 
             function renderTable() {
                 attendeesTableBody.innerHTML = '';
-                attendees.forEach((att, index) => {
+                attendees.forEach((attendee, index) => {
                     const tr = document.createElement('tr');
                     
-                    let nameDisplay = '';
-                    if (att.user_name) {
-                        nameDisplay = att.user_name;
-                    } else if (att.name && att.surname) {
-                        nameDisplay = `${att.name} ${att.surname}`;
-                    } else {
-                        nameDisplay = '-';
-                    }
+                    let nameDisplay = attendee.user_name || cachedUserNames[attendee.user_identify] || '-';
+                    let statusBadge = attendee.user_status === 'guest' ? 'bg-secondary' : 'bg-primary';
 
                     tr.innerHTML = `
                         <th scope="row">${index + 1}</th>
                         <td>${nameDisplay}</td>
-                        <td>${att.user_status}</td>
-                        <td>${att.user_identify}</td>
-                        <td><button type="button" class="btn btn-sm btn-danger remove-attendee" data-index="${index}"><i class="bi bi-trash"></i> ลบ</button></td>
+                        <td><span class="badge ${statusBadge}">${attendee.user_status}</span></td>
+                        <td>${attendee.user_identify}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger remove-attendee" data-index="${index}">
+                                <i class="bi bi-trash"></i> ลบ
+                            </button>
+                        </td>
                     `;
                     attendeesTableBody.appendChild(tr);
                 });
@@ -254,6 +253,9 @@
                              attendeeInput.value = '';
                              return;
                         }
+
+                        // Cache the name for display purposes
+                        cachedUserNames[user.student_id] = `${user.name} ${user.surname || ''}`.trim();
 
                         attendees.push({
                             user_from: 'id',
