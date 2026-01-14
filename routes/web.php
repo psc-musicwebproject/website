@@ -56,7 +56,7 @@ Route::middleware(['auth:web,admin'])->group(function () {
         $title = 'ผูกบัญชี LINE';
         return view('auth.bindline', compact('title', 'skipUrl'));
     })->name('auth.line.bind');
-    
+
     Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount'])
         ->name('auth.bind.line');
 });
@@ -104,6 +104,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/dash/club/register', App\Http\Controllers\ClubRegisterController::class)
         ->name('dash.club.register.submit');
+
+    Route::get('/dash/calendar/events', [\App\Http\Controllers\Api\CalendarController::class, 'events'])->name('dash.calendar.events');
 });
 
 // Admin-only routes
@@ -116,6 +118,15 @@ Route::middleware('auth:admin')->group(function () {
         ]);
     })->name('admin.appsetting');
     Route::post('/admin/manage/app/update', AppSettingController::class)->name('admin.appsetting.update');
+
+    Route::get('/admin/manage/user', function () {
+        $users = \app\Models\User::all();
+        return view('admin.usersetting', [
+            'title' => 'ตั้งค่าผู้ใช้',
+            'users' => $users
+        ]);
+    })->name('admin.usersetting');
+
     Route::get('/admin/club/approve', function () {
         return view('admin.club.approve.main', [
             'title' => 'อนุมัติสมาชิกชมรม',
@@ -159,4 +170,6 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/booking/approve/{id}', [App\Http\Controllers\BookingController::class, 'approveBooking'])->name('admin.booking.approve');
     Route::post('/admin/booking/delete/{id}', [App\Http\Controllers\BookingController::class, 'deleteBooking'])->name('admin.booking.delete');
     Route::post('/admin/booking/find-user', [BookingController::class, 'findUser'])->name('admin.booking.find_user');
+
+    Route::get('/admin/calendar/events', [\App\Http\Controllers\Api\CalendarController::class, 'events'])->name('admin.calendar.events');
 });
