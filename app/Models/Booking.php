@@ -188,18 +188,23 @@ class Booking extends Model
         return false;
     }
 
-    public static function parseAttendeeforDisplay($attendee)
+    public function parseAttendeeforDisplay()
     {
-        if (is_string($attendee)) {
-            $attendee = json_decode($attendee, true);
-        }
+        $attendees = $this->attendees;
 
-        if (empty($attendee) || !is_array($attendee) || !isset($attendee['attendee'])) {
+        if (empty($attendees) || !is_array($attendees) || !isset($attendees['attendee'])) {
             return [];
+        }
+        if (is_string($attendees)) {
+            $attendees = json_decode($attendees, true);
         }
 
         $attendeeList = [];
-        foreach ($attendee['attendee'] as $user) {
+        if ($this->user) {
+            $attendeeList[] = $this->user->name . ' ' . $this->user->surname . ' (' . ($this->user->student_id ?? '-') . ')';
+        }
+
+        foreach ($attendees['attendee'] as $user) {
             $name = $user['user_name'] ?? 'Unknown';
             if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
                 $dbUser = User::where('student_id', $user['user_identify'])
@@ -239,5 +244,47 @@ class Booking extends Model
             $attendeeList[] = $name;
         }
         return $attendeeList;
+    }
+    public function isAttendee(User $user): bool
+    {
+        $attendees = $this->attendees;
+        if (is_string($attendees)) {
+            $attendees = json_decode($attendees, true);
+        }
+
+        if (empty($attendees) || !is_array($attendees)) {
+            return false;
+        }
+
+        // Try to handle both structure layouts if needed, but primarily the one in history
+        /*
+         { "attendee": [ ... ] }
+        */
+        $list = $attendees['attendee'] ?? $attendees;
+        if (!is_array($list)) return false;
+
+        foreach ($list as $p) {
+            // Check student_id or id
+            if (isset($p['user_from']) && $p['user_from'] === 'id') {
+                if (isset($p['user_identify'])) {
+                    if ($p['user_identify'] == $user->student_id || $p['user_identify'] == $user->id) {
+                        return true;
+                    }
+                }
+            }
+            // Check email
+            if (isset($p['user_from']) && $p['user_from'] === 'mail') {
+                if (isset($p['user_identify']) && $p['user_identify'] == $user->email) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function isOwnerOrAttendee(User $user): bool
+    {
+        return $this->user_id == $user->id || $this->isAttendee($user);
     }
 }

@@ -80,7 +80,7 @@ class BookingAlert extends Notification
             \Carbon\Carbon::parse($this->booking->booked_to)->format('H:i');
 
         // Participants
-        $attendeeList = Booking::parseAttendeeforDisplay($this->booking->attendees);
+        $attendeeList = $this->booking->parseAttendeeforDisplay();
         $flexMessage['body']['contents'][2]['contents'][3]['contents'][1]['text'] =
             !empty($attendeeList) ? implode(', ', $attendeeList) : 'ไม่ระบุผู้เข้าร่วม';
 
