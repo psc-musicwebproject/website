@@ -58,3 +58,81 @@ window.Echo = new Echo({
         };
     },
 });
+
+import { Calendar } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import bootstrap5Plugin from '@fullcalendar/bootstrap5';
+
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+
+    var calendar = new Calendar(calendarEl, {
+        plugins: [ dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin ],
+        themeSystem: 'bootstrap5',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: calendarEl.dataset.eventRoute || '/dash/calendar/events',
+        eventClick: function(info) {
+            var props = info.event.extendedProps;
+            
+            // Populate Modal
+            document.getElementById('modalRoom').textContent = props.room_name;
+            document.getElementById('modalTitle').textContent = props.booking_name;
+            document.getElementById('modalOwner').textContent = props.owner_name;
+            document.getElementById('modalTime').textContent = props.start_formatted + ' - ' + props.end_formatted;
+
+            // Attendees
+            var attendeeList = document.getElementById('modalAttendeesList');
+            var attendeeSection = document.getElementById('modalAttendeesSection');
+            attendeeList.innerHTML = '';
+            
+            if (props.attendees && props.attendees.length > 0) {
+                 attendeeSection.style.display = 'block';
+                 
+                 var attendeesData = props.attendees;
+                 if (typeof attendeesData === 'string') {
+                     attendeesData = attendeesData.split(', ');
+                 }
+                 
+                 attendeesData.forEach(function(att) {
+                     var li = document.createElement('li');
+                     if (typeof att === 'string') {
+                         li.textContent = att;
+                     } else {
+                         li.textContent = att.user_name || att.user_identify || 'Unknown'; 
+                     }
+                     attendeeList.appendChild(li);
+                 });
+            } else {
+                attendeeSection.style.display = 'none';
+            }
+
+            // Detail Button
+            var detailBtn = document.getElementById('modalDetailBtn');
+            if (props.can_view_detail) {
+                detailBtn.style.display = 'inline-block';
+                detailBtn.href = props.detail_url;
+            } else {
+                detailBtn.style.display = 'none';
+            }
+
+            // Show Modal
+            var myModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+            myModal.show();
+        },
+        eventTimeFormat: { // like '14:30:00'
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false
+        }
+    });
+
+    calendar.render();
+});
