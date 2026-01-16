@@ -21,6 +21,15 @@
                 <th scope="col">ห้องที่จอง</th>
                 <td>{{ App\Models\Room::getRoomNameByID($detail->room_id) }}</td>
             </tr>
+            @php $displayAttendees = $detail->parseAttendeeforDisplay(); @endphp
+            @if (!empty($displayAttendees))
+                <tr>
+                    <th scope="col">ผู้เข้าร่วม</th>
+                    <td>
+                        {{ implode(', ', $displayAttendees) }}
+                    </td>
+                </tr>
+            @endif
             @endforeach
         </tbody>
     </table>

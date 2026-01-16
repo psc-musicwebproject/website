@@ -13,7 +13,7 @@
                 </tr>
                 <tr>
                     <td>ชื่อผู้สมัคร</td>
-                    <td> {{ $approval->user->name }} {{ $approval->user->surname }} </td>
+                    <td> {{ $approval->user->name }} {{ $approval->user->surname }} ({{ $approval->user->student_id }})</td>
                 </tr>
                 <tr>
                     <td>เวลาที่สมัคร</td>
@@ -24,7 +24,7 @@
                     <td> {{ $approval->ability }} </td>
                 </tr>
             @endforeach
-        </thead>
+        </tbody>
     </table>
         <form action="{{ route('admin.club.approve.update', $clubMember->first()->member_id) }}" method="POST">
             @csrf
