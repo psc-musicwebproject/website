@@ -6,6 +6,7 @@
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AppSettingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -59,6 +60,13 @@ Route::middleware(['auth:web,admin'])->group(function () {
 
     Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount'])
         ->name('auth.bind.line');
+
+    // Forced Password Reset Routes
+    Route::get('/auth/new-password', [App\Http\Controllers\NewPasswordController::class, 'create'])
+        ->name('auth.web.newpass.form');
+
+    Route::post('/auth/new-password', [App\Http\Controllers\NewPasswordController::class, 'store'])
+        ->name('auth.web.newpass');
 });
 
 // Group: authenticated user dashboard routes
@@ -120,12 +128,21 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/manage/app/update', AppSettingController::class)->name('admin.appsetting.update');
 
     Route::get('/admin/manage/user', function () {
-        $users = \app\Models\User::all();
+        $users = \App\Models\User::where('type', '!=', 'guest')->get();
+        $userTypes = \App\Models\UserTypeMapping::where('db_type', '!=', 'guest')->get();
         return view('admin.usersetting', [
             'title' => 'ตั้งค่าผู้ใช้',
-            'users' => $users
+            'users' => $users,
+            'userTypes' => $userTypes
         ]);
     })->name('admin.usersetting');
+
+    Route::post('/admin/manage/user/store', [\App\Http\Controllers\UserManagerController::class, 'store'])->name('admin.user.store');
+    Route::post('/admin/manage/user/import', [\App\Http\Controllers\UserManagerController::class, 'import'])->name('admin.user.import');
+    Route::get('/admin/manage/user/template', [\App\Http\Controllers\UserManagerController::class, 'downloadTemplate'])->name('admin.user.template');
+    Route::get('/admin/manage/user/download-credits/{id}', [\App\Http\Controllers\UserManagerController::class, 'downloadGeneratedCredentials'])->name('admin.user.download_credits');
+    Route::post('/admin/manage/user/update/{id}', [UserController::class, 'update'])->name('admin.user.update');
+    Route::post('/admin/manage/user/delete/{id}', [UserController::class, 'destroy'])->name('admin.user.delete');
 
     Route::get('/admin/club/approve', function () {
         return view('admin.club.approve.main', [

@@ -52,6 +52,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsurePasswordIsReset::class,
+        ]);
+
         $middleware->redirectGuestsTo(function ($request) {
             // Check the route middleware to see which guard is being used
             $route = $request->route();
