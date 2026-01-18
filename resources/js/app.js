@@ -25,39 +25,43 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
-window.Echo = new Echo({
-    broadcaster: 'reverb',
-    key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-    authorizer: (channel, options) => {
-        return {
-            authorize: (socketId, callback) => {
-                axios.post('/broadcasting/auth', {
-                    socket_id: socketId,
-                    channel_name: channel.name
-                }, {
-                    withCredentials: true,
-                    headers: {
-                        'X-CSRF-TOKEN': token ? token.content : '',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    console.log('Broadcasting auth success:', response.data);
-                    callback(null, response.data);
-                })
-                .catch(error => {
-                    console.error('Broadcasting auth error:', error.response?.data || error.message);
-                    callback(error);
-                });
-            }
-        };
-    },
-});
+if (import.meta.env.VITE_REVERB_APP_KEY) {
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: import.meta.env.VITE_REVERB_APP_KEY,
+        wsHost: import.meta.env.VITE_REVERB_HOST,
+        wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+        wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+        authorizer: (channel, options) => {
+            return {
+                authorize: (socketId, callback) => {
+                    axios.post('/broadcasting/auth', {
+                        socket_id: socketId,
+                        channel_name: channel.name
+                    }, {
+                        withCredentials: true,
+                        headers: {
+                            'X-CSRF-TOKEN': token ? token.content : '',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        console.log('Broadcasting auth success:', response.data);
+                        callback(null, response.data);
+                    })
+                    .catch(error => {
+                        console.error('Broadcasting auth error:', error.response?.data || error.message);
+                        callback(error);
+                    });
+                }
+            };
+        },
+    });
+} else {
+    console.warn('VITE_REVERB_APP_KEY is missing. Echo (real-time features) will not be initialized.');
+}
 
 import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
