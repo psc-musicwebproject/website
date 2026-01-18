@@ -40,6 +40,12 @@
                         <p>ตั้งค่าระบบ</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href=" {{ route('admin.usersetting') }}" class="nav-link {{ request()->routeIs('admin.usersetting') ? 'active' : '' }}">
+                        <i class="bi bi-person-badge"></i>
+                        <p>ตั้งค่าผู้ใช้</p>
+                    </a>
+                </li>
                 <li class="nav-header">ห้องดนตรี</li>
                 <li class="nav-item">
                     <a href="{{ route('admin.roomsetting') }}" class="nav-link {{ request()->routeIs('admin.roomsetting') ? 'active' : '' }}">
