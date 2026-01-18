@@ -20,9 +20,9 @@ return new class extends Migration
 
         // Insert default mappings
         DB::table('user_type_mappings')->insert([
-            ['db_type' => 'user', 'named_type' => 'Student'],
-            ['db_type' => 'admin', 'named_type' => 'Admin'],
-            ['db_type' => 'teacher', 'named_type' => 'Teacher'],
+            ['db_type' => 'student', 'named_type' => 'นักเรียน'],
+            ['db_type' => 'admin', 'named_type' => 'ผู้ดูแลระบบ'],
+            ['db_type' => 'teacher', 'named_type' => 'อาจารย์'],
         ]);
     }
 
