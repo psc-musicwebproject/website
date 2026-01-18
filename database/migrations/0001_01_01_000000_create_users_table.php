@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
 
 return new class extends Migration
 {
@@ -21,6 +23,9 @@ return new class extends Migration
             $table->string('type');
             $table->string('class')->nullable();
             $table->string('password');
+            $table->rememberToken();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('reset_password_on_next_login')->default(false);
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -31,6 +36,17 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        DB::table('users')->insert([
+            'name' => 'Default',
+            'surname' => 'Admin',
+            'email' => 'admin@example.com',
+            'username' => 'admin',
+            'student_id' => '012345',
+            'type' => 'admin',
+            'password' => \Illuminate\Support\Facades\Hash::make('admin'),
+            'reset_password_on_next_login' => true,
+        ]);
     }
 
     /**
