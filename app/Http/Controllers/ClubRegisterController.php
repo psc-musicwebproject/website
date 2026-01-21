@@ -14,11 +14,12 @@ class ClubRegisterController extends Controller
     public function __invoke(Request $request): RedirectResponse
     {
         // Validate the request
+        // Validate the request
         $request->validate([
-            'ability' => 'required|string|max:255',
-        ], [
-            'ability.required' => 'กรุณากรอกความสามารถที่มี',
-            'ability.max' => 'ความสามารถที่มีต้องไม่เกิน 255 ตัวอักษร',
+            'contact_info' => 'required',
+            'instrument' => 'required',
+            'experience' => 'required',
+            'wanted_duty' => 'required',
         ]);
 
         try {
@@ -40,17 +41,32 @@ class ClubRegisterController extends Controller
                 ->where('status', 'rejected')
                 ->delete();
 
+            // Decode JSON inputs if they are strings
+            $contactInfo = is_string($request->input('contact_info')) ?
+                json_decode($request->input('contact_info'), true) : $request->input('contact_info');
+
+            $instrument = is_string($request->input('instrument')) ?
+                json_decode($request->input('instrument'), true) : $request->input('instrument');
+
+            $experience = is_string($request->input('experience')) ?
+                json_decode($request->input('experience'), true) : $request->input('experience');
+
+            $wantedDuty = is_string($request->input('wanted_duty')) ?
+                json_decode($request->input('wanted_duty'), true) : $request->input('wanted_duty');
+
             // Create new club membership application
             ClubMember::create([
                 'user_id' => Auth::id(),
                 'status' => 'waiting',
-                'ability' => $request->input('ability'),
+                'contact_info' => $contactInfo,
+                'instrument' => $instrument,
+                'experience' => $experience,
+                'wanted_duty' => $wantedDuty,
             ]);
 
             Auth::user()->notify(new ClubRegisterSentNoti());
 
             return redirect()->back()->with('success', 'ส่งใบสมัครเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลชมรม');
-
         } catch (\Exception $e) {
             Log::error('Club registration error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');

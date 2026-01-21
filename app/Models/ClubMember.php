@@ -27,7 +27,10 @@ class ClubMember extends Model
         'member_id',
         'user_id',
         'status',
-        'ability',
+        'contact_info',
+        'instrument',
+        'experience',
+        'wanted_duty',
         'approval_person_id',
         'approval_time',
         'approval_comment',
@@ -39,6 +42,10 @@ class ClubMember extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'contact_info' => 'array',
+        'instrument' => 'array',
+        'experience' => 'array',
+        'wanted_duty' => 'array',
         'approval_time' => 'datetime',
     ];
 
@@ -170,5 +177,4 @@ class ClubMember extends Model
             ->first()
             ->get();
     }
-
 }
