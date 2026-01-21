@@ -4,175 +4,504 @@
             <h3 class="card-title">แบบฟอร์มสมัครเข้าชมรมดนตรี</h3>
         </div>
 
-        <div class="card-body">
-            @if($clubMembership && $clubMembership->status === 'approved')
+        @if ($clubMembership && $clubMembership->status === 'approved')
+            <div class="card-body">
                 <div class="alert alert-success">
-                    <h4><i class="fas fa-check-circle"></i> คุณเป็นสมาชิกชมรมดนตรีแล้ว</h4>
+                    <h4><i class="bi bi-check-circle-fill"></i> คุณเป็นสมาชิกชมรมดนตรีแล้ว</h4>
                     <p>คุณได้รับการอนุมัติให้เป็นสมาชิกชมรมดนตรีเมื่อ:
                         {{ $clubMembership->approval_time?->format('d/m/Y H:i') ?? 'ไม่ระบุ' }}
                     </p>
                     <p>ผู้อนุมัติ: {{ $clubMembership->approvalPerson->name }}
                         {{ $clubMembership->approvalPerson->surname }}
                     </p>
-                    @if($clubMembership->approval_comment)
+                    @if ($clubMembership->approval_comment)
                         <p>ความเห็น: {{ $clubMembership->approval_comment }}</p>
                     @endif
                 </div>
-            @elseif($clubMembership && $clubMembership->status === 'waiting')
+            </div>
+        @elseif($clubMembership && $clubMembership->status === 'waiting')
+            <div class="card-body">
                 <div class="alert alert-info">
-                    <h4><i class="fas fa-clock"></i> ใบสมัครของคุณกำลังรอการอนุมัติ</h4>
+                    <h4><i class="bi bi-clock-fill"></i> ใบสมัครของคุณกำลังรอการอนุมัติ</h4>
                     <p>วันที่ส่งใบสมัคร: {{ $clubMembership->created_at->format('d/m/Y H:i') }}</p>
                     <p>สถานะ: รอการอนุมัติจากผู้ดูแลชมรม</p>
                 </div>
-            @elseif($clubMembership && $clubMembership->status === 'rejected')
-                <div class="alert alert-warning">
-                    <h4><i class="fas fa-exclamation-triangle"></i> ใบสมัครของคุณไม่ได้รับการอนุมัติ</h4>
-                    <p>วันที่พิจารณา: {{ $clubMembership->approval_time?->format('d/m/Y H:i') ?? 'ไม่ระบุ' }}</p>
-                    <p>ผู้พิจารณา: {{ $clubMembership->approvalPerson->name }}
-                        {{ $clubMembership->approvalPerson->surname }}
-                    </p>
-                    @if($clubMembership->approval_comment)
-                        <p>เหตุผล: {{ $clubMembership->approval_comment }}</p>
-                    @endif
-                    <p class="mb-0">คุณสามารถสมัครใหม่ได้อีกครั้ง</p>
-                </div>
-            @endif
-
-            <form action="{{ route('dash.club.register.submit') }}" method="POST">
-                @csrf
-
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                @if ($clubMembership && $clubMembership->status === 'rejected' || !$clubMembership)
-                    <div class="mb-3 mt-2 col-12 col-lg-3">
-                        <h1 class="fs-4 fw-bold">ข้อมูลส่วนตัว</h1>
-                    </div>
-                @endif
-
-                <div class="row">
-                    <div class="mb-3 col-12 col-lg-3">
-                        <label for="name" class="form-label">ชื่อ</label>
-                        <input type="text" class="form-control" id="name" readonly value="{{ Auth::user()->name }}">
-                    </div>
-                    <div class="mb-3 col-12 col-lg-3">
-                        <label for="surname" class="form-label">นามสกุล</label>
-                        <input type="text" class="form-control" id="surname" readonly
-                            value="{{ Auth::user()->surname }}">
-                    </div>
-                    <div class="mb-3 col-12 col-lg-3">
-                        <label for="student_id" class="form-label">รหัสประจำตัว</label>
-                        <input type="text" class="form-control" id="student_id" readonly
-                            value="{{ Auth::user()->student_id }}">
-                    </div>
-                    <div class="mb-3 col-12 col-lg-3">
-                        <label for="class" class="form-label">ระดับชั้น</label>
-                        <input type="text" class="form-control" id="class" readonly value="{{ Auth::user()->class }}">
-                    </div>
-                </div>
-
-                @if($clubMembership && $clubMembership->status === 'rejected' || !$clubMembership)
-                    <div class="mb-3 mt-2">
-                        <h1 class="fs-4 fw-bold">ความสนใจทางด้านดนตรี</h1>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ability" class="form-label">เครื่องดนตรีที่สามารถเล่นได้ / หรือมีความสนใจ<span
-                                class="text-danger">*</span></label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability1" value="1" required>
-                            <label class="form-check-label" for="ability1">
-                                กีตาร์ (โปร่ง / ไฟฟ้า)
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                เบส
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability3" value="3" required>
-                            <label class="form-check-label" for="ability3">
-                                กลองชุด
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                คีย์บอร์ด / เปียโน
-                            </label>
-                        </div>
-                        <!-- This one should have a text input for the instument they play, same line and make it like a line for typing or writing -->
-                        <div class="input-group">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                เครื่องเป่าลม (เช่น ขลุ่ย แซกโซโฟน ฯลฯ)
-                            </label>
-                            <input type="text" class="form-control" name="ability2" id="ability2" required>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                ร้องเพลง
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <input class="form-check-input" type="checkbox" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                อื่น ๆ
-                            </label>
-                            <input type="text" class="form-control" name="ability2" id="ability2" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ability" class="form-label">ประสบการณ์การเล่นดนตรี<span
-                                class="text-danger">*</span></label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="ability" id="ability1" value="1" required>
-                            <label class="form-check-label" for="ability1">
-                                ไม่มีประสบการณ์
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                เล่นเพื่อความบันเทิง
-                            </label>
-                        </div>
-                        <div class="input-group">
-                            <input class="form-check-input" type="radio" name="ability" id="ability2" value="2" required>
-                            <label class="form-check-label" for="ability2">
-                                เล่นแสดง / ประกวด
-                            </label>
-                            <input type="text" class="form-control" name="ability2" id="ability2" required>
-                        </div>
-                    </div>
-                @endif
-        </div>
-        @if(!$clubMembership || $clubMembership->status === 'rejected')
-            <div class="card-footer">
-
-                <div class="d-flex align-items-start mb-3">
-                    <input id="agree-rules" type="checkbox" class="me-2 mt-1" required>
-                    <label for="agree-rules" class="form-check-label">นักเรียน / นักศึกษามีเวลาฝึกซ้อมในช่วงหลักเลิกเรียนได้
-                        รวมถึงสามารถเดินทางมายังวิทยาลัยในวันหยุดที่จำเป็นต้องเข้ามาได้</label>
-                </div>
-                <div class="d-flex justify-content-end">
-                    <button type="submit" name="send-application" class="btn btn-primary">ส่ง</button>
-                </div>
-                </form>
             </div>
         @else
+            {{-- Form for New Application or Rejected --}}
+            <form action="{{ route('dash.club.register.submit') }}" method="POST" id="club-register-form">
+                @csrf
+                <input type="hidden" name="contact_info" id="contact_info_input">
+                <input type="hidden" name="instrument" id="instrument_input">
+                <input type="hidden" name="experience" id="experience_input">
+                <input type="hidden" name="wanted_duty" id="wanted_duty_input">
+
+                <div class="card-body">
+                    @if ($clubMembership && $clubMembership->status === 'rejected')
+                        <div class="alert alert-warning">
+                            <h4><i class="bi bi-exclamation-triangle-fill"></i> ใบสมัครของคุณไม่ได้รับการอนุมัติ</h4>
+                            <p>วันที่พิจารณา: {{ $clubMembership->approval_time?->format('d/m/Y H:i') ?? 'ไม่ระบุ' }}
+                            </p>
+                            <p>ผู้พิจารณา: {{ $clubMembership->approvalPerson->name }}
+                                {{ $clubMembership->approvalPerson->surname }}
+                            </p>
+                            @if ($clubMembership->approval_comment)
+                                <p>เหตุผล: {{ $clubMembership->approval_comment }}</p>
+                            @endif
+                            <p class="mb-0">คุณสามารถสมัครใหม่ได้อีกครั้ง</p>
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    <div class="mb-3 mt-2">
+                        <h4 class="fw-bold border-bottom pb-2">ข้อมูลส่วนตัว</h4>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">ชื่อ</label>
+                            <input type="text" class="form-control" readonly
+                                value="{{ Auth::user()->name_title . Auth::user()->name }}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">นามสกุล</label>
+                            <input type="text" class="form-control" readonly value="{{ Auth::user()->surname }}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">ชื่อเล่น</label>
+                            <input type="text" class="form-control" readonly value="{{ Auth::user()->nickname }}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">รหัสประจำตัว</label>
+                            <input type="text" class="form-control" readonly value="{{ Auth::user()->student_id }}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">ระดับชั้น</label>
+                            <input type="text" class="form-control" readonly value="{{ Auth::user()->class }}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">สาขาวิชาชีพ</label>
+                            <input type="text" class="form-control" readonly value="{{ Auth::user()->major }}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">เบอร์โทรศัพท์</label>
+                            <input type="text" class="form-control" readonly
+                                value="{{ Auth::user()->phone_number }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <div class="row">
+                            <div class="col-12 col-md-2">
+                                <h4 class="fw-bold border-bottom pb-2">ช่องทางติดต่อโซเชียลมีเดีย <span
+                                        class="text-danger">*</span></h4>
+                                <div class="social-input-group">
+                                    <div class="row g-2 mb-2 align-items-center">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input social-check" type="checkbox"
+                                                    data-type="facebook" id="check_facebook">
+                                                <label class="form-check-label" for="check_facebook"
+                                                    style="width: 80px;">Facebook</label>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control social-text" data-type="facebook"
+                                                id="text_social_facebook" placeholder="ชื่อ Facebook / Link Profile" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-2 align-items-center">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input social-check" type="checkbox" data-type="line"
+                                                    id="check_line">
+                                                <label class="form-check-label" for="check_line"
+                                                    style="width: 80px;">Line</label>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control social-text" data-type="line"
+                                                id="text_social_line" placeholder="Line ID" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-2 align-items-center">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input social-check" type="checkbox"
+                                                    data-type="instagram" id="check_ig">
+                                                <label class="form-check-label" for="check_ig"
+                                                    style="width: 80px;">Instagram</label>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control social-text" data-type="instagram"
+                                                id="text_social_instagram" placeholder="Instagram Account" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-2 align-items-center">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input social-check" type="checkbox"
+                                                    data-type="discord" id="check_discord">
+                                                <label class="form-check-label" for="check_discord"
+                                                    style="width: 80px;">Discord</label>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control social-text" data-type="discord"
+                                                id="text_social_discord" placeholder="Discord Username" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-2 align-items-center">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input social-check" type="checkbox"
+                                                    data-type="other" id="check_social_other">
+                                                <label class="form-check-label" for="check_social_other"
+                                                    style="width: 80px;">อื่นๆ</label>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control social-text" data-type="other"
+                                                id="text_social_other" placeholder="ระบุช่องทางติดต่อเพิ่มเติม" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h2>Kuy</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <h4 class="fw-bold border-bottom pb-2">ความสนใจทางด้านดนตรี <span class="text-danger">*</span>
+                        </h4>
+                        <label class="form-label mb-3">เครื่องดนตรีที่สามารถเล่นได้ / หรือมีความสนใจ</label>
+                        <div class="row g-3 instrument-group">
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input instrument-check" type="checkbox"
+                                        data-type="guitar" id="inst_guitar">
+                                    <label class="form-check-label" for="inst_guitar">กีตาร์ (โปร่ง / ไฟฟ้า)</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input instrument-check" type="checkbox" data-type="bass"
+                                        id="inst_bass">
+                                    <label class="form-check-label" for="inst_bass">เบส</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input instrument-check" type="checkbox"
+                                        data-type="drums" id="inst_drums">
+                                    <label class="form-check-label" for="inst_drums">กลองชุด</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input instrument-check" type="checkbox"
+                                        data-type="keyboard" id="inst_keyboard">
+                                    <label class="form-check-label" for="inst_keyboard">คีย์บอร์ด / เปียโน</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input instrument-check" type="checkbox"
+                                        data-type="vocal" id="inst_vocal">
+                                    <label class="form-check-label" for="inst_vocal">ร้องเพลง</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row align-items-center g-2">
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input instrument-check" type="checkbox"
+                                                data-type="wind" id="inst_wind">
+                                            <label class="form-check-label" for="inst_wind">เครื่องเป่าลม</label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control instrument-text" data-type="wind"
+                                            id="text_instrument_wind" placeholder="ระบุชนิดเครื่องเป่า" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row align-items-center g-2">
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input instrument-check" type="checkbox"
+                                                data-type="other" id="inst_other">
+                                            <label class="form-check-label" for="inst_other">อื่นๆ</label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control instrument-text" data-type="other"
+                                            id="text_instrument_other" placeholder="ระบุเครื่องดนตรีอื่น ๆ" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <h4 class="fw-bold border-bottom pb-2">ประสบการณ์การเล่นดนตรี <span
+                                class="text-danger">*</span></h4>
+                        <div class="experience-group">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input exp-check" type="radio" name="exp_option"
+                                    data-type="no_experience" id="exp_none" value="none">
+                                <label class="form-check-label" for="exp_none">ไม่มีประสบการณ์</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input exp-check" type="radio" name="exp_option"
+                                    data-type="hobby" id="exp_hobby" value="hobby">
+                                <label class="form-check-label" for="exp_hobby">เล่นเพื่อความบันเทิง</label>
+                            </div>
+                            <div class="row align-items-center g-2">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input exp-check" type="radio" name="exp_option"
+                                            data-type="contest" id="exp_contest" value="contest">
+                                        <label class="form-check-label" for="exp_contest">เล่นแสดง / ประกวด</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control exp-text" data-type="contest"
+                                        id="text_exp_contest" placeholder="ระบุรายการประกวด หรือประสบการณ์ที่สำคัญ"
+                                        disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <h4 class="fw-bold border-bottom pb-2">บทบาทที่ต้องการในชมรม <span
+                                class="text-danger">*</span></h4>
+                        <div class="row g-3 duty-group">
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input duty-check" type="checkbox" data-type="musician"
+                                        id="duty_musician">
+                                    <label class="form-check-label" for="duty_musician">นักดนตรี</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input duty-check" type="checkbox" data-type="singer"
+                                        id="duty_singer">
+                                    <label class="form-check-label" for="duty_singer">นักร้อง</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input duty-check" type="checkbox"
+                                        data-type="sound_stage" id="duty_sound">
+                                    <label class="form-check-label" for="duty_sound">ดูแลเครื่องเสียง /
+                                        จัดเวที</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input duty-check" type="checkbox" data-type="media"
+                                        id="duty_media">
+                                    <label class="form-check-label" for="duty_media">ถ่ายภาพ / วิดีโอ /
+                                        ประชาสัมพันธ์</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row align-items-center g-2">
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input duty-check" type="checkbox"
+                                                data-type="manager" id="duty_manager">
+                                            <label class="form-check-label" for="duty_manager">ผู้ดูแลวงดนตรี</label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control duty-text" data-type="manager"
+                                            id="text_duty_manager" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="row align-items-center g-2">
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input duty-check" type="checkbox"
+                                                data-type="other" id="duty_other">
+                                            <label class="form-check-label" for="duty_other">อื่นๆ</label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control duty-text" data-type="other"
+                                            id="text_duty_other" placeholder="ระบุบทบาทที่ต้องการ" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer pt-4">
+                    <div class="form-check mb-3">
+                        <input id="agree-rules" type="checkbox" class="form-check-input" required>
+                        <label for="agree-rules" class="form-check-label">
+                            ข้าพเจ้ายินดีปฏิบัติตามกฎระเบียบของชมรม
+                            และสามารถเข้าร่วมกิจกรรมหรือการฝึกซ้อมได้ตามตารางที่ชมรมกำหนด
+                            รวมถึงในกรณีที่มีความจำเป็นเร่งด่วน
+                        </label>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary"><i
+                                class="bi bi-send-fill me-2"></i>ส่งใบสมัคร</button>
+                    </div>
+                </div>
             </form>
         @endif
     </div>
-    </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Helper to toggle inputs based on checkbox/radio
+                function setupToggle(checkClass, textClass, prefix) {
+                    const checks = document.querySelectorAll(checkClass);
+                    checks.forEach(check => {
+                        check.addEventListener('change', function() {
+                            const type = this.getAttribute('data-type');
+                            if (this.type === 'checkbox') {
+                                const textInput = document.getElementById(prefix + type);
+                                if (textInput) {
+                                    textInput.disabled = !this.checked;
+                                    if (!this.checked) textInput.value = '';
+                                }
+                            }
+                        });
+                    });
+                }
+
+                // Experience radio logic specific
+                const expRadios = document.querySelectorAll('.exp-check');
+                expRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        // Disable all text inputs in exp group first
+                        document.querySelectorAll('.exp-text').forEach(t => {
+                            t.disabled = true;
+                            t.value = '';
+                        });
+
+                        // Enable relevant one if exists
+                        const type = this.getAttribute('data-type');
+                        const textInput = document.getElementById('text_exp_' + type);
+                        if (textInput) {
+                            textInput.disabled = false;
+                        }
+                    });
+                });
+
+                setupToggle('.social-check', '.social-text', 'text_social_');
+                setupToggle('.instrument-check', '.instrument-text', 'text_instrument_');
+                setupToggle('.duty-check', '.duty-text', 'text_duty_');
+
+
+                const form = document.getElementById('club-register-form');
+                form.addEventListener('submit', function(e) {
+                    // e.preventDefault(); // Debugging
+
+                    // 1. Collect Socials
+                    const socials = [];
+                    document.querySelectorAll('.social-check:checked').forEach(chk => {
+                        const type = chk.getAttribute('data-type');
+                        const textInput = document.getElementById('text_social_' + type);
+                        const data = textInput ? textInput.value : '';
+                        if (data.trim() !== '') { // Only add if data is present
+                            socials.push({
+                                type: type,
+                                data: data
+                            });
+                        }
+                    });
+                    document.getElementById('contact_info_input').value = JSON.stringify(socials);
+
+                    // 2. Collect Instruments
+                    const instruments = [];
+                    document.querySelectorAll('.instrument-check:checked').forEach(chk => {
+                        const type = chk.getAttribute('data-type');
+                        const textInput = document.getElementById('text_instrument_' + type);
+                        const data = textInput ? textInput.value :
+                            'checked'; // Default to 'checked' if no text input
+                        instruments.push({
+                            type: type,
+                            data: data
+                        });
+                    });
+                    document.getElementById('instrument_input').value = JSON.stringify(instruments);
+
+                    // 3. Collect Experience
+                    const experience = [];
+                    const checkedExp = document.querySelector('.exp-check:checked');
+                    if (checkedExp) {
+                        const type = checkedExp.getAttribute('data-type');
+                        const textInput = document.getElementById('text_exp_' + type);
+                        const data = textInput ? textInput.value : 'checked';
+                        experience.push({
+                            type: type,
+                            data: data
+                        });
+                    }
+                    document.getElementById('experience_input').value = JSON.stringify(experience);
+
+                    // 4. Collect Duty
+                    const duties = [];
+                    document.querySelectorAll('.duty-check:checked').forEach(chk => {
+                        const type = chk.getAttribute('data-type');
+                        const textInput = document.getElementById('text_duty_' + type);
+                        const data = textInput ? textInput.value : 'checked';
+                        duties.push({
+                            type: type,
+                            data: data
+                        });
+                    });
+                    document.getElementById('wanted_duty_input').value = JSON.stringify(duties);
+
+                    // Basic validation (optional, as HTML5 'required' might not work on hidden fields or unchecked textual inputs)
+                    if (socials.length === 0) {
+                        alert('กรุณาระบุช่องทางติดต่ออย่างน้อย 1 ช่องทาง');
+                        e.preventDefault();
+                        return;
+                    }
+                    if (instruments.length === 0) {
+                        alert('กรุณาระบุเครื่องดนตรีที่สนใจ');
+                        e.preventDefault();
+                        return;
+                    }
+                    if (!checkedExp) {
+                        alert('กรุณาระบุประสบการณ์ทางดนตรี');
+                        e.preventDefault();
+                        return;
+                    }
+                    if (duties.length === 0) {
+                        alert('กรุณาระบุบทบาทที่ต้องการ');
+                        e.preventDefault();
+                        return;
+                    }
+                });
+            });
+        </script>
+    @endpush
 </x-dash.layout>

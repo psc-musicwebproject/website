@@ -73,15 +73,33 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
 
+    function getHeaderToolbar(width) {
+        if (width < 500) {
+            return {
+                left: 'prev,next',
+                center: 'title',
+                right: 'timeGridDay,timeGridWeek,dayGridMonth'
+            };
+        } else if (width < 768) {
+            return {
+                left: 'prev,next',
+                center: 'title',
+                right: 'dayGridMonth,timeGridDay,listMonth'
+            };
+        } else {
+            return {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            };
+        }
+    }
+
     var calendar = new Calendar(calendarEl, {
         plugins: [ dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin ],
         themeSystem: 'bootstrap5',
         initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
+        headerToolbar: getHeaderToolbar(calendarEl.offsetWidth),
         events: calendarEl.dataset.eventRoute || '/dash/calendar/events',
         eventClick: function(info) {
             var props = info.event.extendedProps;
@@ -139,4 +157,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     calendar.render();
+
+    // Auto-resize calendar when container size changes (e.g. sidebar toggle)
+    const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+            calendar.updateSize();
+            const width = entry.contentRect.width;
+            calendar.setOption('headerToolbar', getHeaderToolbar(width));
+            
+            if (width < 500) {
+                calendarEl.classList.add('fc-toolbar-stack');
+            } else {
+                calendarEl.classList.remove('fc-toolbar-stack');
+            }
+        }
+    });
+    resizeObserver.observe(calendarEl);
 });

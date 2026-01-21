@@ -31,3 +31,15 @@ body {
 .EasyMDEContainer.fullscreen {
     z-index: 9999 !important;
 }
+
+/* FullCalendar Mobile Stacked Toolbar */
+.fc-toolbar-stack .fc-header-toolbar {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fc-toolbar-stack .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
