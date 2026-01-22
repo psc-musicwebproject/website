@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/php:1-8.2-bookworm
+FROM mcr.microsoft.com/devcontainers/php:8.4-trixie
 
 # Install MariaDB client
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
