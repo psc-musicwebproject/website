@@ -18,7 +18,11 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"onecentlin.laravel5-snippets"
+				"onecentlin.laravel5-snippets",
+				"oven.bun-vscode",
+				"hossaini.bootstrap-intellisense",
+				"onecentlin.laravel-extension-pack",
+				"Wscats.html-snippets"
 			]
 		}
 	}
