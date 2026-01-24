@@ -47,6 +47,8 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         // Replace the default Authenticate middleware with our custom one
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
