@@ -2,7 +2,7 @@
   "type": "bubble",
   "hero": {
     "type": "image",
-    "url": "https://file.smilekrub.net/file/sk-blob/web/user/pic/j2udatskvm8w2bofnplsnb0lbqh44rn1",
+    "url": "https://file.smilekrub.net/file/sk-blob/web/user/pic/vkkyc7yi8hqs42pydrree2omz1udirso",
     "size": "full",
     "aspectRatio": "20:13",
     "aspectMode": "cover"
@@ -13,7 +13,7 @@
     "contents": [
       {
         "type": "text",
-        "text": "สมัครสมาชิกชมรมสำเร็จแล้ว",
+        "text": "ท่านได้รับการสมัครใหม่",
         "weight": "bold",
         "size": "lg"
       },
@@ -23,7 +23,7 @@
         "contents": [
           {
             "type": "text",
-            "text": "คุณได้ส่งใบสมัครสมาชิกชมรมเรียบร้อยแล้ว เราจะแจ้งสถานะการสมัครให้ท่านหลังจากการอนุมัติ",
+            "text": "คุณได้รับการสมัครสมาชิกใหม่ เชิญตรวจสอบใบสมัครต่อไป",
             "wrap": true
           }
         ]
@@ -41,14 +41,14 @@
             "contents": [
               {
                 "type": "text",
-                "text": "Place",
+                "text": "ชื่อ",
                 "color": "#aaaaaa",
                 "size": "sm",
                 "flex": 1
               },
               {
                 "type": "text",
-                "text": "Flex Tower, 7-7-4 Midori-ku, Tokyo",
+                "text": "นางสาวโอกุริ แคป",
                 "wrap": true,
                 "color": "#666666",
                 "size": "sm",
@@ -63,14 +63,15 @@
             "contents": [
               {
                 "type": "text",
-                "text": "Time",
+                "text": "สาขาวิชาชีพ",
                 "color": "#aaaaaa",
                 "size": "sm",
-                "flex": 1
+                "flex": 1,
+                "wrap": false
               },
               {
                 "type": "text",
-                "text": "10:00 - 23:00",
+                "text": "อาหารและโภชนาการ",
                 "wrap": true,
                 "color": "#666666",
                 "size": "sm",
