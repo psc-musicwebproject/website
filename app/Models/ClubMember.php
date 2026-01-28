@@ -34,6 +34,7 @@ class ClubMember extends Model
         'approval_person_id',
         'approval_time',
         'approval_comment',
+        'image',
     ];
 
     /**

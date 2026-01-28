@@ -104,7 +104,7 @@ Route::middleware('auth')->group(function () {
         $user = auth()->user();
         $clubMembership = $user->clubMembership;
 
-        return view('dash.clubregis', [
+        return view('dash.club.register', [
             'title' => 'สมัครสมาชิก',
             'clubMembership' => $clubMembership
         ]);
@@ -115,6 +115,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dash/calendar/events', [\App\Http\Controllers\Api\CalendarController::class, 'events'])->name('dash.calendar.events');
 });
+
+// Shared route for photo access (User + Admin)
+Route::get('/dash/club/photo/{member_id}', [\App\Http\Controllers\ClubPhotoController::class, 'show'])
+    ->middleware('auth:web,admin')
+    ->name('dash.club.photo');
 
 // Admin-only routes
 Route::middleware('auth:admin')->group(function () {

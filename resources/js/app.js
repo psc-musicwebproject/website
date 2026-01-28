@@ -19,6 +19,11 @@ import 'admin-lte/dist/js/adminlte.min.js';
 import EasyMDE from 'easymde';
 window.EasyMDE = EasyMDE;
 
+// Cropper.js
+import Cropper from 'cropperjs';
+import 'cropperjs/dist/cropper.css';
+window.Cropper = Cropper;
+
 // Import and configure Laravel Echo
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';

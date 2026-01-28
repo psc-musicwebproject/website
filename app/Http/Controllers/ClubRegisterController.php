@@ -14,12 +14,13 @@ class ClubRegisterController extends Controller
     public function __invoke(Request $request): RedirectResponse
     {
         // Validate the request
-        // Validate the request
         $request->validate([
             'contact_info' => 'required',
             'instrument' => 'required',
             'experience' => 'required',
             'wanted_duty' => 'required',
+            'image_file' => 'nullable|image|max:2048',
+            'image_base64' => 'required_without:image_file|string|nullable', // Require at least one
         ]);
 
         try {
@@ -41,7 +42,7 @@ class ClubRegisterController extends Controller
                 ->where('status', 'rejected')
                 ->delete();
 
-            // Decode JSON inputs if they are strings
+            // Decode JSON inputs
             $contactInfo = is_string($request->input('contact_info')) ?
                 json_decode($request->input('contact_info'), true) : $request->input('contact_info');
 
@@ -54,6 +55,26 @@ class ClubRegisterController extends Controller
             $wantedDuty = is_string($request->input('wanted_duty')) ?
                 json_decode($request->input('wanted_duty'), true) : $request->input('wanted_duty');
 
+            // Handle Image Upload
+            $imagePath = null;
+            $destinationPath = 'private/club_member/application/profile_pic';
+
+            if ($request->has('image_base64') && !empty($request->input('image_base64'))) {
+                // Handle Base64 from Cropper
+                $image_parts = explode(";base64,", $request->input('image_base64'));
+                if (count($image_parts) >= 2) {
+                    $image_base64 = base64_decode($image_parts[1]);
+                    $filename = (string) \Illuminate\Support\Str::uuid() . '.jpg';
+                    $imagePath = $destinationPath . '/' . $filename;
+                    \Illuminate\Support\Facades\Storage::put($imagePath, $image_base64);
+                }
+            } elseif ($request->hasFile('image_file')) {
+                // Handle Normal File Upload (Fallback)
+                $file = $request->file('image_file');
+                $filename = (string) \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $imagePath = $file->storeAs($destinationPath, $filename);
+            }
+
             // Create new club membership application
             ClubMember::create([
                 'user_id' => Auth::id(),
@@ -62,6 +83,7 @@ class ClubRegisterController extends Controller
                 'instrument' => $instrument,
                 'experience' => $experience,
                 'wanted_duty' => $wantedDuty,
+                'image' => $imagePath,
             ]);
 
             Auth::user()->notify(new ClubRegisterSentNoti());

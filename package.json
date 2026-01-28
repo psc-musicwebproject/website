@@ -21,6 +21,7 @@
         "@fullcalendar/daygrid": "^6.1.20",
         "@fullcalendar/interaction": "^6.1.20",
         "@fullcalendar/timegrid": "^6.1.20",
+        "cropperjs": "1.6.0",
         "easymde": "^2.20.0",
         "laravel-echo": "^2.2.6",
         "pusher-js": "^8.4.0"
