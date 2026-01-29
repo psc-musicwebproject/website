@@ -53,13 +53,17 @@ Route::middleware(['auth:web,admin'])->group(function () {
             $defaultRedirect = Auth::guard('admin')->check() ? route('admin.dash') : route('dash');
         }
 
-        $skipUrl = $defaultRedirect;
+        // Use the preserved intended URL from session, or fall back to default
+        $skipUrl = session('line_intended_url', $defaultRedirect);
         $title = 'ผูกบัญชี LINE';
         return view('auth.bindline', compact('title', 'skipUrl'));
     })->name('auth.line.bind');
 
     Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount'])
         ->name('auth.bind.line');
+
+    Route::post('auth/unbind/line', [App\Http\Controllers\LineIntegrationController::class, 'UnbindLineAccount'])
+        ->name('auth.unbind.line');
 
     // Forced Password Reset Routes
     Route::get('/auth/new-password', [App\Http\Controllers\NewPasswordController::class, 'create'])
