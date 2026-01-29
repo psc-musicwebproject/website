@@ -24,6 +24,58 @@ import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 window.Cropper = Cropper;
 
+// Tempus Dominus (Bootstrap 5 DateTime Picker)
+import { TempusDominus, loadLocale, locale } from '@eonasdan/tempus-dominus';
+import '@eonasdan/tempus-dominus/dist/css/tempus-dominus.css';
+
+// Thai locale for Tempus Dominus
+const thaiLocale = {
+    today: 'วันนี้',
+    clear: 'ล้าง',
+    close: 'ปิด',
+    selectMonth: 'เลือกเดือน',
+    previousMonth: 'เดือนก่อน',
+    nextMonth: 'เดือนถัดไป',
+    selectYear: 'เลือกปี',
+    previousYear: 'ปีก่อน',
+    nextYear: 'ปีถัดไป',
+    selectDecade: 'เลือกทศวรรษ',
+    previousDecade: 'ทศวรรษก่อน',
+    nextDecade: 'ทศวรรษถัดไป',
+    previousCentury: 'ศตวรรษก่อน',
+    nextCentury: 'ศตวรรษถัดไป',
+    pickHour: 'เลือกชั่วโมง',
+    incrementHour: 'เพิ่มชั่วโมง',
+    decrementHour: 'ลดชั่วโมง',
+    pickMinute: 'เลือกนาที',
+    incrementMinute: 'เพิ่มนาที',
+    decrementMinute: 'ลดนาที',
+    pickSecond: 'เลือกวินาที',
+    incrementSecond: 'เพิ่มวินาที',
+    decrementSecond: 'ลดวินาที',
+    toggleMeridiem: 'สลับ AM/PM',
+    selectTime: 'เลือกเวลา',
+    selectDate: 'เลือกวันที่',
+    dayViewHeaderFormat: { month: 'long', year: 'numeric' },
+    locale: 'th',
+    hourCycle: 'h23',
+    startOfTheWeek: 0,
+    dateFormats: {
+        LT: 'HH:mm',
+        LTS: 'HH:mm:ss',
+        L: 'DD/MM/YYYY',
+        LL: 'D MMMM YYYY',
+        LLL: 'D MMMM YYYY HH:mm',
+        LLLL: 'dddd D MMMM YYYY HH:mm'
+    }
+};
+
+loadLocale(thaiLocale);
+locale(thaiLocale.locale);
+
+window.TempusDominus = TempusDominus;
+window.TempusDominusLocale = thaiLocale;
+
 // Import and configure Laravel Echo
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';

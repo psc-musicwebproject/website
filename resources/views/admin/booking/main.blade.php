@@ -76,21 +76,48 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">ระยะเวลาการจอง</label>
-                                    <div class="row">
-                                        <div class="col-md-4">
+                                    <div class="row g-2">
+                                        <div class="col-12 mb-2">
                                             <label class="form-label small">วันที่</label>
-                                            <input type="date" class="form-control" id="date" name="date"
-                                                placeholder="วันที่" required>
+                                            <div class="input-group" id="date_picker" data-td-target-input="nearest"
+                                                data-td-target-toggle="nearest">
+                                                <input type="text" class="form-control" id="date_display"
+                                                    data-td-target="#date_picker" readonly placeholder="เลือกวันที่"
+                                                    required>
+                                                <span class="input-group-text" data-td-target="#date_picker"
+                                                    data-td-toggle="datetimepicker">
+                                                    <i class="bi bi-calendar"></i>
+                                                </span>
+                                            </div>
+                                            <input type="hidden" id="date" name="date">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-6">
                                             <label class="form-label small">เวลาเริ่ม</label>
-                                            <input type="time" class="form-control" id="time_from" name="time_from"
-                                                placeholder="เวลาเริ่ม" required>
+                                            <div class="input-group" id="time_from_picker"
+                                                data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                                <input type="text" class="form-control" id="time_from_display"
+                                                    data-td-target="#time_from_picker" readonly placeholder="--:--"
+                                                    required>
+                                                <span class="input-group-text" data-td-target="#time_from_picker"
+                                                    data-td-toggle="datetimepicker">
+                                                    <i class="bi bi-clock"></i>
+                                                </span>
+                                            </div>
+                                            <input type="hidden" id="time_from" name="time_from">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-6">
                                             <label class="form-label small">เวลาสิ้นสุด</label>
-                                            <input type="time" class="form-control" id="time_to" name="time_to"
-                                                placeholder="เวลาสิ้นสุด" required>
+                                            <div class="input-group" id="time_to_picker"
+                                                data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                                <input type="text" class="form-control" id="time_to_display"
+                                                    data-td-target="#time_to_picker" readonly placeholder="--:--"
+                                                    required>
+                                                <span class="input-group-text" data-td-target="#time_to_picker"
+                                                    data-td-toggle="datetimepicker">
+                                                    <i class="bi bi-clock"></i>
+                                                </span>
+                                            </div>
+                                            <input type="hidden" id="time_to" name="time_to">
                                         </div>
                                     </div>
                                 </div>
@@ -161,6 +188,92 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Date Picker Options (Calendar only)
+            const datePickerOptions = {
+                display: {
+                    viewMode: 'calendar',
+                    components: {
+                        calendar: true,
+                        date: true,
+                        month: true,
+                        year: true,
+                        decades: true,
+                        clock: false,
+                        hours: false,
+                        minutes: false,
+                        seconds: false
+                    },
+                    icons: {
+                        date: 'bi bi-calendar',
+                        previous: 'bi bi-chevron-left',
+                        next: 'bi bi-chevron-right',
+                        today: 'bi bi-calendar-check'
+                    },
+                    buttons: {
+                        today: true,
+                        clear: false,
+                        close: true
+                    }
+                },
+                localization: {
+                    ...TempusDominusLocale,
+                    format: 'dd/MM/yyyy'
+                }
+            };
+
+            // Time Picker Options (Clock only, 24-hour)
+            const timePickerOptions = {
+                display: {
+                    viewMode: 'clock',
+                    components: {
+                        calendar: false,
+                        date: false,
+                        month: false,
+                        year: false,
+                        decades: false,
+                        clock: true,
+                        hours: true,
+                        minutes: true,
+                        seconds: false
+                    },
+                    icons: {
+                        time: 'bi bi-clock',
+                        up: 'bi bi-chevron-up',
+                        down: 'bi bi-chevron-down'
+                    }
+                },
+                localization: {
+                    ...TempusDominusLocale,
+                    format: 'HH:mm'
+                },
+                stepping: 5
+            };
+
+            // Initialize Pickers
+            const datePicker = new TempusDominus(document.getElementById('date_picker'), datePickerOptions);
+            const timeFromPicker = new TempusDominus(document.getElementById('time_from_picker'),
+                timePickerOptions);
+            const timeToPicker = new TempusDominus(document.getElementById('time_to_picker'), timePickerOptions);
+
+            // Sync picker values to hidden inputs
+            document.getElementById('date_picker').addEventListener('change.td', function(e) {
+                if (e.detail.date) {
+                    document.getElementById('date').value = e.detail.date.format('YYYY-MM-DD');
+                }
+            });
+
+            document.getElementById('time_from_picker').addEventListener('change.td', function(e) {
+                if (e.detail.date) {
+                    document.getElementById('time_from').value = e.detail.date.format('HH:mm');
+                }
+            });
+
+            document.getElementById('time_to_picker').addEventListener('change.td', function(e) {
+                if (e.detail.date) {
+                    document.getElementById('time_to').value = e.detail.date.format('HH:mm');
+                }
+            });
+
             // Modal instances
             const addBookingModalEl = document.getElementById('addBooking');
             const guestModalEl = document.getElementById('guestNameModalAdmin');
@@ -293,7 +406,7 @@
 
                 // Self Check
                 if (query === currentBooker.id || (currentBooker.email && query === currentBooker
-                    .email)) {
+                        .email)) {
                     attendeeInput.classList.add('is-invalid');
                     feedbackDiv.textContent =
                         'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
@@ -408,7 +521,8 @@
                             <p>คุณแน่ใจหรือไม่ว่าต้องการลบการจองห้องนี้?</p>
                             <p>ชื่อการจอง: {{ $booking->booking_name }}</p>
                             <p>โดย: {{ $booking->user->name }} {{ $booking->user->surname }}
-                                ({{ $booking->user->student_id }})</p>
+                                ({{ $booking->user->student_id }})
+                            </p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
