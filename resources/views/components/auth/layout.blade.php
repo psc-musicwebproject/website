@@ -33,14 +33,14 @@
             </div>
         </div>
 
-        @if (request()->query('guard') != 'admin' && ($notice = $AppSetting::getNotice()))
+        @if ($AppSetting::getNotice() && (request()->query('guard') != 'admin' || request()->routeIs('login')))
             <div class="card card-outline card-warning mt-2 mb-0">
                 <div class="card-header">
                     <strong>ประกาศ</strong>
                 </div>
                 <div class="card-body">
                     <div class="mb-3 markdown-content">
-                        {!! Illuminate\Support\Str::markdown($notice) !!}
+                        {!! Illuminate\Support\Str::markdown($AppSetting::getNotice()) !!}
                     </div>
                 </div>
             </div>
