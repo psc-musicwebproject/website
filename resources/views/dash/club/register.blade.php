@@ -193,22 +193,24 @@
                                 <div id="error-image" class="text-danger mt-1 mb-2 d-none"><small><i
                                             class="bi bi-exclamation-circle-fill"></i> กรุณาอัปโหลดรูปถ่าย</small>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 text-center">
                                     <img id="preview-image" src="{{ asset('assets/image/astonholder.png') }}"
-                                        class="img-fluid rounded-circle shadow-sm"
-                                        style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;"
+                                        class="img-fluid rounded shadow-sm"
+                                        style="width: 180px; height: 240px; object-fit: cover; cursor: pointer;"
                                         onclick="document.getElementById('input_image').click();" alt="รูปถ่าย">
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 text-center">
                                     <label for="input_image" class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-camera-fill me-1"></i> เลือกรูปภาพ
                                     </label>
                                     <input type="file" class="d-none" id="input_image" name="image_file"
                                         accept="image/*">
                                     <input type="hidden" name="image_base64" id="image_base64">
+                                    <div class="mt-2">
+                                        <small class="text-muted d-block">คลิกที่รูปหรือปุ่มเพื่ออัปโหลด</small>
+                                        <small class="text-muted d-block">ขนาดไฟล์ไม่เกิน 2MB</small>
+                                    </div>
                                 </div>
-                                <small class="text-muted d-block">คลิกที่รูปหรือปุ่มเพื่ออัปโหลด</small>
-                                <small class="text-muted d-block">ขนาดไฟล์ไม่เกิน 2MB</small>
                             </div>
 
                             <!-- Cropper Modal -->
