@@ -53,18 +53,6 @@
                         </div>
                     @endif
 
-                    @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                aria-label="Close"></button>
-                        </div>
-                    @endif
-
                     <div class="mb-3 mt-2">
                         <h4 class="fw-bold border-bottom pb-2">ข้อมูลส่วนตัว</h4>
                     </div>

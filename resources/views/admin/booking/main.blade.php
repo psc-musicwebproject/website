@@ -1,13 +1,4 @@
 <x-dash.admin.layout>
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @elseif (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -16,30 +7,34 @@
                 <th scope="col">เวลาการจอง</th>
                 <th scope="col">สถานะ</th>
                 <th scope="col">
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBooking">เพิ่มการจองห้อง</button>
+                    <button class="btn btn-success" data-bs-toggle="modal"
+                        data-bs-target="#addBooking">เพิ่มการจองห้อง</button>
                 </th>
             </tr>
         </thead>
         <tbody>
-            @foreach($bookings as $booking)
-            <tr>
-                <td>{{ $booking->booking_id }}</td>
-                <td>{{ $booking->booking_name }}</td>
-                <td>
-                    {{ \Carbon\Carbon::parse($booking->booked_from)->format('d/m/Y H:i') }} -
-                    {{ \Carbon\Carbon::parse($booking->booked_to)->format('d/m/Y H:i') }}
-                </td>
-                <td>{{ App\Models\Booking::bookingStatusToText($booking->approval_status) }}</td>
-                <td>
-                    <a href="{{ route('admin.booking.detail', ['id' => $booking->booking_id]) }}" class="btn btn-primary btn-sm">ดูรายละเอียด</a>
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteBooking-{{ $booking->booking_id }}">ลบ</button>
-                </td>
-            </tr>
+            @foreach ($bookings as $booking)
+                <tr>
+                    <td>{{ $booking->booking_id }}</td>
+                    <td>{{ $booking->booking_name }}</td>
+                    <td>
+                        {{ \Carbon\Carbon::parse($booking->booked_from)->format('d/m/Y H:i') }} -
+                        {{ \Carbon\Carbon::parse($booking->booked_to)->format('d/m/Y H:i') }}
+                    </td>
+                    <td>{{ App\Models\Booking::bookingStatusToText($booking->approval_status) }}</td>
+                    <td>
+                        <a href="{{ route('admin.booking.detail', ['id' => $booking->booking_id]) }}"
+                            class="btn btn-primary btn-sm">ดูรายละเอียด</a>
+                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#deleteBooking-{{ $booking->booking_id }}">ลบ</button>
+                    </td>
+                </tr>
             @endforeach
         </tbody>
     </table>
 
-    <div class="modal fade" id="addBooking" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="addBooking" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -53,22 +48,29 @@
                             <div class="col-12">
                                 <h6>ผู้จอง (Booker)</h6>
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" id="booker_input" placeholder="ค้นหาผู้จอง (รหัสนักศึกษา / อีเมล)" value="{{ Auth::user()->student_id }}">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-search-booker"><i class="bi bi-search"></i></button>
+                                    <input type="text" class="form-control" id="booker_input"
+                                        placeholder="ค้นหาผู้จอง (รหัสนักศึกษา / อีเมล)"
+                                        value="{{ Auth::user()->student_id }}">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        id="button-search-booker"><i class="bi bi-search"></i></button>
                                 </div>
                                 <div class="invalid-feedback" id="bookerFeedback"></div>
                                 <div class="alert alert-info py-2" id="booker-info">
-                                    <strong>ผู้จองปัจจุบัน:</strong> <span id="booker-name">{{ Auth::user()->name }} {{ Auth::user()->surname }}</span> (<span id="booker-status">{{ Auth::user()->role_label }}</span>)
+                                    <strong>ผู้จองปัจจุบัน:</strong> <span id="booker-name">{{ Auth::user()->name }}
+                                        {{ Auth::user()->surname }}</span> (<span
+                                        id="booker-status">{{ Auth::user()->role_label }}</span>)
                                 </div>
-                                <input type="hidden" name="book_owner_id" id="book_owner_id" value="{{ Auth::id() }}">
+                                <input type="hidden" name="book_owner_id" id="book_owner_id"
+                                    value="{{ Auth::id() }}">
                             </div>
                             <hr>
                             <div class="col-12">
                                 <div class="mb-3">
                                     <label for="room_id" class="form-label">ห้องที่ต้องการจอง</label>
-                                    <select class="form-select" id="room_id" name="room_id" required @if(count($rooms)==0) disabled @endif>
-                                        @foreach($rooms as $room)
-                                        <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
+                                    <select class="form-select" id="room_id" name="room_id" required
+                                        @if (count($rooms) == 0) disabled @endif>
+                                        @foreach ($rooms as $room)
+                                            <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -77,21 +79,25 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label class="form-label small">วันที่</label>
-                                            <input type="date" class="form-control" id="date" name="date" placeholder="วันที่" required>
+                                            <input type="date" class="form-control" id="date" name="date"
+                                                placeholder="วันที่" required>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small">เวลาเริ่ม</label>
-                                            <input type="time" class="form-control" id="time_from" name="time_from" placeholder="เวลาเริ่ม" required>
+                                            <input type="time" class="form-control" id="time_from" name="time_from"
+                                                placeholder="เวลาเริ่ม" required>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small">เวลาสิ้นสุด</label>
-                                            <input type="time" class="form-control" id="time_to" name="time_to" placeholder="เวลาสิ้นสุด" required>
+                                            <input type="time" class="form-control" id="time_to" name="time_to"
+                                                placeholder="เวลาสิ้นสุด" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="name" class="form-label">ชื่อการจอง</label>
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="หัวข้อการจอง / ใช้ห้อง" required>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        placeholder="หัวข้อการจอง / ใช้ห้อง" required>
                                 </div>
                             </div>
                             <hr>
@@ -99,11 +105,13 @@
                             <div class="col-12">
                                 <h6>รายชื่อผู้เข้าร่วม</h6>
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" id="attendee_input" placeholder="รหัสนักศึกษา / อีเมล">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-add-attendee"><i class="bi bi-plus-square-fill"></i></button>
+                                    <input type="text" class="form-control" id="attendee_input"
+                                        placeholder="รหัสนักศึกษา / อีเมล">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        id="button-add-attendee"><i class="bi bi-plus-square-fill"></i></button>
                                 </div>
                                 <div class="invalid-feedback" id="attendee-feedback" style="display: none;"></div>
-                                
+
                                 <table class="table table-sm table-bordered">
                                     <thead>
                                         <tr>
@@ -140,7 +148,8 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="guest_name_input" class="form-label">ชื่อ-นามสกุล</label>
-                        <input type="text" class="form-control" id="guest_name_input" placeholder="กรอกชื่อผู้เข้าร่วม">
+                        <input type="text" class="form-control" id="guest_name_input"
+                            placeholder="กรอกชื่อผู้เข้าร่วม">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -155,10 +164,10 @@
             // Modal instances
             const addBookingModalEl = document.getElementById('addBooking');
             const guestModalEl = document.getElementById('guestNameModalAdmin');
-            
+
             const addBookingModal = bootstrap.Modal.getOrCreateInstance(addBookingModalEl);
             const guestModal = new bootstrap.Modal(guestModalEl);
-            
+
             // Booker Elements
             const bookerInput = document.getElementById('booker_input');
             const searchBookerBtn = document.getElementById('button-search-booker');
@@ -176,7 +185,7 @@
             const saveGuestBtn = document.getElementById('saveGuestNameBtn');
 
             // Handle Guest Modal Close -> Reopen Booking Modal
-            guestModalEl.addEventListener('hidden.bs.modal', function () {
+            guestModalEl.addEventListener('hidden.bs.modal', function() {
                 // Check if addBooking is already open to avoid flickering or errors (though .show() is usually idempotent)
                 // We always want to return to the main modal after the sub-modal closes
                 addBookingModal.show();
@@ -201,8 +210,13 @@
                 try {
                     const response = await fetch('{{ route('admin.booking.find_user') }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ query: query })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            query: query
+                        })
                     });
                     const result = await response.json();
 
@@ -232,14 +246,16 @@
             });
 
             function updateAttendeesJson() {
-                attendeesJsonInput.value = JSON.stringify({ attendee: attendees });
+                attendeesJsonInput.value = JSON.stringify({
+                    attendee: attendees
+                });
             }
 
             function renderTable() {
                 attendeesTableBody.innerHTML = '';
                 attendees.forEach((item, index) => {
                     const tr = document.createElement('tr');
-                    
+
                     let displayName = item.user_name || cachedUserNames[item.user_identify] || '-';
                     let displayStatus = item.user_status; // Already label from backend
 
@@ -276,9 +292,11 @@
                 feedbackDiv.style.display = 'none';
 
                 // Self Check
-                if (query === currentBooker.id || (currentBooker.email && query === currentBooker.email)) {
+                if (query === currentBooker.id || (currentBooker.email && query === currentBooker
+                    .email)) {
                     attendeeInput.classList.add('is-invalid');
-                    feedbackDiv.textContent = 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
+                    feedbackDiv.textContent =
+                        'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
                     feedbackDiv.style.display = 'block';
                     return;
                 }
@@ -300,17 +318,20 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({ query: query })
+                        body: JSON.stringify({
+                            query: query
+                        })
                     });
-                    
+
                     const result = await response.json();
 
                     if (response.ok && result.found) {
                         const user = result.user;
-                        
+
                         if (user.id == currentBooker.db_id) {
-                             attendeeInput.classList.add('is-invalid');
-                            feedbackDiv.textContent = 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
+                            attendeeInput.classList.add('is-invalid');
+                            feedbackDiv.textContent =
+                                'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
                             feedbackDiv.style.display = 'block';
                             return;
                         }
@@ -321,22 +342,22 @@
                         // User found
                         attendees.push({
                             user_from: 'id',
-                            user_status: user.role_label, 
-                            user_identify: user.student_id, 
+                            user_status: user.role_label,
+                            user_identify: user.student_id,
                         });
 
                         renderTable();
                         updateAttendeesJson();
-                        attendeeInput.value = ''; 
+                        attendeeInput.value = '';
                     } else {
                         // Not found
-                        if (hasAtSymbol) { 
-                             pendingGuestEmail = query;
-                             guestNameInput.value = '';
-                             
-                             // Swap Modals
-                             addBookingModal.hide();
-                             guestModal.show();
+                        if (hasAtSymbol) {
+                            pendingGuestEmail = query;
+                            guestNameInput.value = '';
+
+                            // Swap Modals
+                            addBookingModal.hide();
+                            guestModal.show();
                         } else {
                             attendeeInput.classList.add('is-invalid');
                             feedbackDiv.textContent = 'ไม่พบรหัสนักศึกษา/ผู้ใช้นี้ในระบบ';
@@ -370,28 +391,32 @@
         });
     </script>
 
-    @foreach($bookings as $booking)
-    <div class="modal fade" id="deleteBooking-{{ $booking->booking_id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">ลบการจองห้อง</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    @foreach ($bookings as $booking)
+        <div class="modal fade" id="deleteBooking-{{ $booking->booking_id }}" data-bs-backdrop="static"
+            data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">ลบการจองห้อง</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form method="POST"
+                        action="{{ route('admin.booking.delete', ['id' => $booking->booking_id]) }}">
+                        @csrf
+                        <div class="modal-body">
+                            <p>คุณแน่ใจหรือไม่ว่าต้องการลบการจองห้องนี้?</p>
+                            <p>ชื่อการจอง: {{ $booking->booking_name }}</p>
+                            <p>โดย: {{ $booking->user->name }} {{ $booking->user->surname }}
+                                ({{ $booking->user->student_id }})</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                            <button type="submit" class="btn btn-danger">ลบการจอง</button>
+                        </div>
+                    </form>
                 </div>
-                <form method="POST" action="{{ route('admin.booking.delete', ['id' => $booking->booking_id]) }}">
-                    @csrf
-                    <div class="modal-body">
-                        <p>คุณแน่ใจหรือไม่ว่าต้องการลบการจองห้องนี้?</p>
-                        <p>ชื่อการจอง: {{ $booking->booking_name }}</p>
-                        <p>โดย: {{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->student_id }})</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                        <button type="submit" class="btn btn-danger">ลบการจอง</button>
-                    </div>
-                </form>
             </div>
         </div>
-    </div>
     @endforeach
 </x-dash.admin.layout>

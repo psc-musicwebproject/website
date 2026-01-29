@@ -20,6 +20,17 @@
                 <h3>{{ $title ?? 'Dashboard' }}</h3>
             </div>
             <div class="app-content">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <div>{{ session('success') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @elseif(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div>{{ session('error') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
                 {{ $slot }}
             </div>
 
