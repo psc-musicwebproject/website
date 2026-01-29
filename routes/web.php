@@ -67,6 +67,12 @@ Route::middleware(['auth:web,admin'])->group(function () {
 
     Route::post('/auth/new-password', [App\Http\Controllers\NewPasswordController::class, 'store'])
         ->name('auth.web.newpass');
+
+    Route::get('/auth/user/setting', function () {
+        return view('auth.usersetting', [
+            'title' => 'ตั้งค่าผู้ใช้',
+        ]);
+    })->name('auth.user.setting');
 });
 
 // Group: authenticated user dashboard routes
