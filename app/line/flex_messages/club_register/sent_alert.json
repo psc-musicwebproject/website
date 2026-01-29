@@ -94,7 +94,7 @@
         "height": "sm",
         "action": {
           "type": "uri",
-          "label": "ตรวจสอบใบสมัคร",
+          "label": "ตรวจสอบสถานะการสมัคร",
           "uri": "https://line.me/"
         }
       }

@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\ClubMember;
 use App\Notifications\ClubRegisterSentNoti;
+use App\Notifications\Admin\NewClubRegisterNotice;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ClubRegisterController extends Controller
 {
@@ -75,18 +77,35 @@ class ClubRegisterController extends Controller
                 $imagePath = $file->storeAs($destinationPath, $filename);
             }
 
-            // Create new club membership application
-            ClubMember::create([
-                'user_id' => Auth::id(),
-                'status' => 'waiting',
-                'contact_info' => $contactInfo,
-                'instrument' => $instrument,
-                'experience' => $experience,
-                'wanted_duty' => $wantedDuty,
-                'image' => $imagePath,
-            ]);
+            // Refine Club Member Save Mechanics to make notification don't need to use latest()->first()
+            // Make it less confused for the system
+            // 
+            // ClubMember::create([
+            //     'user_id' => Auth::id(),
+            //     'status' => 'waiting',
+            //     'contact_info' => $contactInfo,
+            //     'instrument' => $instrument,
+            //     'experience' => $experience,
+            //     'wanted_duty' => $wantedDuty,
+            //     'image' => $imagePath,
+            // ]);
 
-            Auth::user()->notify(new ClubRegisterSentNoti());
+            $clubMember = new ClubMember();
+            $clubMember->user_id = Auth::id();
+            $clubMember->status = 'waiting';
+            $clubMember->contact_info = $contactInfo;
+            $clubMember->instrument = $instrument;
+            $clubMember->experience = $experience;
+            $clubMember->wanted_duty = $wantedDuty;
+            $clubMember->image = $imagePath;
+            $clubMember->save();
+
+            Auth::user()->notify(new ClubRegisterSentNoti($clubMember));
+
+            $admin = \App\Models\User::where('type', 'admin')->get();
+            if ($admin->isNotEmpty()) {
+                Notification::send($admin, new NewClubRegisterNotice($clubMember));
+            }
 
             return redirect()->back()->with('success', 'ส่งใบสมัครเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลชมรม');
         } catch (\Exception $e) {

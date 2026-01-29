@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Notifications\Admin;
 
+use App\Channels\LineChannel;
 use Illuminate\Bus\Queueable;
 use App\Http\Controllers\LineIntegrationController;
-use App\Channels\LineChannel;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\ClubMember;
 
-class ClubRegisterSentNoti extends Notification
+class NewClubRegisterNotice extends Notification
 {
     use Queueable;
 
-    protected ClubMember $clubMember;
+    protected $clubMember;
 
     /**
      * Create a new notification instance.
@@ -30,7 +32,7 @@ class ClubRegisterSentNoti extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', LineChannel::class];
+        return ['mail', LineChannel::class, 'broadcast'];
     }
 
     /**
@@ -56,23 +58,32 @@ class ClubRegisterSentNoti extends Notification
         ];
     }
 
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'message' => 'มีการสมัครสมาชิกใหม่โดย ' . $this->clubMember->user->name . ' ' . $this->clubMember->user->surname,
+            'type' => 'new_club_member',
+            'club_member_id' => $this->clubMember->id,
+        ]);
+    }
+
     public function toLineIntegration(object $notifiable): string
     {
-        // Importing Line Flex Message Template from JSON file
+        // Importing Line Flex Message Template from JSON
         if ($notifiable->line_id == null) {
             return "No Line User ID";
         }
 
-        $jStr = file_get_contents(app_path('line/flex_messages/club_register_alert.json'));
+        $jStr = file_get_contents(app_path('line/flex_messages/club_register/admin/sent_alert.json'));
         $fTem = json_decode($jStr, true);
 
         // Replace Placeholder data to real data
         $fTem['body']['contents'][2]['contents'][0]['contents'][1]['text'] = $this->clubMember->user->name_title . $this->clubMember->user->name . ' ' . $this->clubMember->user->surname;
         $fTem['body']['contents'][2]['contents'][1]['contents'][1]['text'] = $this->clubMember->user->major;
 
-        $fTem['footer']['contents'][0]['action']['uri'] = route('dash.club.register');
+        $fTem['footer']['contents'][0]['action']['uri'] = route('admin.club.approve.detail', ['id' => $this->clubMember->member_id]);
 
-        $lCon = new LineIntegrationController();
-        return $lCon->pushFlexMessage($notifiable->line_id, "สมัครสมาชิกชมรมสำเร็จแล้ว", $fTem);
+        $lineController = new LineIntegrationController();
+        return $lineController->pushFlexMessage($notifiable->line_id, "แจ้งเตือนการสมัครสมาชิกใหม่", $fTem);
     }
 }
