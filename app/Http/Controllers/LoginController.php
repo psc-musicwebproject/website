@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LineIntegrationController;
+use LINE\Clients\MessagingApi\ApiException;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -43,17 +45,21 @@ class LoginController extends Controller
             /** * BEST PRACTICE: Use config() instead of env() 
              * Ensure you have 'line_enabled' => env('LINE_ENABLED', false) in a config file.
              */
-            $lineEnabled = config('app.line_enabled', false); 
+            $lineEnabled = config('app.line_enabled', false);
 
             // LINE Binding Check
             if ($lineEnabled && in_array($guard, ['web', 'admin'])) {
                 $user = Auth::guard($guard)->user();
-                
+
                 if (empty($user->line_id)) {
                     // Assuming 'line_bound' is a column you need to toggle
-                    $user->line_bound = false; 
+                    $user->line_bound = false;
                     $user->save();
-                    
+
+                    // Store the intended URL in session so it's preserved through the binding flow
+                    $intendedUrl = session()->pull('url.intended', $guard === 'admin' ? '/admin' : '/dash');
+                    session(['line_intended_url' => $intendedUrl]);
+
                     // Preserve the current guard when redirecting so the
                     // bind route can operate in the same auth context.
                     return redirect()->route('auth.line.bind', ['guard' => $guard]);
@@ -61,6 +67,16 @@ class LoginController extends Controller
             }
 
             // Success Redirect
+            // Send messesage to user via LINE Messaging API that login was successful
+
+            $user = Auth::guard($guard)->user();
+
+            try {
+                $this->lineController->SendNormalTextMessage($user->line_id, 'คุณ ' . $user->name . ' เข้าสู่ระบบสำเร็จแล้ว, ยินดีต้อนรับเข้าสู่ระบบ!');
+            } catch (ApiException $e) {
+                Log::error('Failed to send LINE login success message: ' . $e->getMessage());
+            }
+
             return redirect()->intended($guard === 'admin' ? '/admin' : '/dash');
         }
 
