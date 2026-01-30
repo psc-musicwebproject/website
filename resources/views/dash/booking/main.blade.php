@@ -13,8 +13,8 @@
             @endif
             <form method="POST" action="{{ route('dash.booking.submit') }}">
                 @csrf
-                <div class="row">
-                    <div class="col">
+                <div class="row g-3">
+                    <div class="col-12 col-lg-6">
                         <div class="mb-3">
                             <label for="room_id" class="form-label">ห้องที่ต้องการจอง</label>
                             <select class="form-select" id="room_id" name="room_id" required
@@ -74,7 +74,7 @@
                                 placeholder="หัวข้อการจอง / ใช้ห้อง" required>
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="col-12 col-lg-6">
                         <div class="mb-3">
                             <label for="attendee_input" class="form-label">ผู้ร่วมใช้ห้อง</label>
                             <div class="input-group">
@@ -86,19 +86,21 @@
                             <div id="attendee_feedback" class="invalid-feedback" style="display: none;"></div>
                         </div>
                         <div class="mb-3">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">ชื่อ - นามสกุล</th>
-                                        <th scope="col">สถานะ</th>
-                                        <th scope="col">รหัส/อีเมล</th>
-                                        <th scope="col"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="attendees-table-body">
-                                </tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="min-width: 40px;">#</th>
+                                            <th scope="col" style="min-width: 150px;">ชื่อ - นามสกุล</th>
+                                            <th scope="col" style="min-width: 80px;">สถานะ</th>
+                                            <th scope="col" style="min-width: 150px;">รหัส/อีเมล</th>
+                                            <th scope="col" style="min-width: 70px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendees-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         <input type="hidden" name="attendees" id="attendees_json" value="[]">
                     </div>
