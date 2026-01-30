@@ -63,7 +63,7 @@ class ClubRegisterSentNoti extends Notification
             return "No Line User ID";
         }
 
-        $jStr = file_get_contents(app_path('line/flex_messages/club_register_alert.json'));
+        $jStr = file_get_contents(app_path('line/flex_messages/club_member/sent_alert.json'));
         $fTem = json_decode($jStr, true);
 
         // Replace Placeholder data to real data
