@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Notifications\BookingAlert;
-use App\Notifications\Admin\Broadcast\AdminBookingToast;
+use App\Notifications\Admin\BookingNotice;
 use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
@@ -81,7 +81,7 @@ class BookingController extends Controller
             if ($booking->user && ($booking->user->type != "admin" || Auth::user()->type != 'admin') ) {
                 $admin = \App\Models\User::where('type', 'admin')->get();
                 if ($admin->isNotEmpty()) {
-                    Notification::send($admin, new AdminBookingToast($booking));
+                    Notification::send($admin, new BookingNotice($booking));
                 }
             }
 
