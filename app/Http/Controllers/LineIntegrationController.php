@@ -212,7 +212,7 @@ class LineIntegrationController extends Controller
             if ($user) {
                 // Check if account is disabled
                 if (!$user->is_active) {
-                    return redirect()->route('login')->with('error', 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ');
+                    return redirect()->route('login')->withErrors(['credentials' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ']);
                 }
 
                 // For admin guard, verify user is an admin
