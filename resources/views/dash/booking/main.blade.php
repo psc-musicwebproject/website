@@ -1,4 +1,6 @@
-<x-dash.layout>
+@extends('layouts.dash')
+
+@section('content')
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">แบบฟอร์มจองห้อง</h3>
@@ -407,4 +409,4 @@
             });
         });
     </script>
-</x-dash.layout>
+@endsection

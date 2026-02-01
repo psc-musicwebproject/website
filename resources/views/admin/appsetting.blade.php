@@ -1,4 +1,6 @@
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     <div class="accordion" id="appSettingsAccordion">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingOne">
@@ -224,4 +226,4 @@
             });
         });
     </script>
-</x-dash.admin.layout>
+@endsection

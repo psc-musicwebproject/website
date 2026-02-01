@@ -1,4 +1,6 @@
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -533,4 +535,4 @@
             </div>
         </div>
     @endforeach
-</x-dash.admin.layout>
+@endsection

@@ -1,4 +1,6 @@
-<x-dash.layout>
+@extends('layouts.dash')
+
+@section('content')
     @foreach($booking as $detail)
         <table class="table table-bordered table-striped">
             <tr>
@@ -12,7 +14,7 @@
             <tr>
                 <th scope="col">เวลาการจอง</th>
                 <td>
-                    {{ \Carbon\Carbon::parse($detail->booked_from)->format('d/m/Y H:i') }} - 
+                    {{ \Carbon\Carbon::parse($detail->booked_from)->format('d/m/Y H:i') }} -
                     {{ \Carbon\Carbon::parse($detail->booked_to)->format('d/m/Y H:i') }}
                 </td>
             </tr>
@@ -49,4 +51,4 @@
             @endif
         </table>
     @endforeach
-</x-dash.layout>
+@endsection

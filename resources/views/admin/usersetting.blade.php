@@ -1,4 +1,6 @@
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     @php
         // Manually pull session data to retrieve and forget it (simulating flash)
         $successMsg = session()->pull('success');
@@ -532,4 +534,4 @@
             });
         });
     </script>
-</x-dash.admin.layout>
+@endsection

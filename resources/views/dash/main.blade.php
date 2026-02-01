@@ -1,4 +1,6 @@
-<x-dash.layout>
+@extends('layouts.dash')
+
+@section('content')
     <div class="row">
         <div class="col-12 col-sm-6 col-md-3">
             <x-dash.widgets.AllBooking />
@@ -40,6 +42,4 @@
             </div>
         </div>
     </div>
-</x-dash.layout>
-
-
+@endsection

@@ -1,4 +1,6 @@
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
@@ -26,4 +28,4 @@
             @endforeach
         </tbody>
     </table>
-</x-dash.admin.layout>
+@endsection

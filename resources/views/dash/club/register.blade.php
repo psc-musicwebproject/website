@@ -1,4 +1,6 @@
-<x-dash.layout>
+@extends('layouts.dash')
+
+@section('content')
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">แบบฟอร์มสมัครเข้าชมรมดนตรี</h3>
@@ -700,4 +702,4 @@
             });
         </script>
     @endpush
-</x-dash.layout>
+@endsection

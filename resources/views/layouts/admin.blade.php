@@ -1,5 +1,3 @@
-@props(['title' => 'Dashboard'])
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,7 +31,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
-                {{ $slot }}
+                @yield('content')
             </div>
         </main>
 
@@ -97,6 +95,7 @@
             </script>
         @endif
     @endauth
+    @stack('scripts')
 </body>
 
 </html>

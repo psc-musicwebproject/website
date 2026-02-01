@@ -1,4 +1,6 @@
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     @if (session('error'))
         <div class="alert alert-danger">
             {{ session('error') }}
@@ -298,4 +300,4 @@
             </div>
         </form>
     @endforeach
-</x-dash.admin.layout>
+@endsection
