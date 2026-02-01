@@ -36,5 +36,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('line', \SocialiteProviders\Line\Provider::class);
         });
+
+        if (! $this->app->runningInConsole()) {
+        $appName = \App\Models\AppSetting::getSetting('name') ?? config('app.name');
+        config(['mail.from.name' => $appName]);
+        }
     }
 }

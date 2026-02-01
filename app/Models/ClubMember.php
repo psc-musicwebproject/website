@@ -175,7 +175,6 @@ class ClubMember extends Model
     {
         return self::with('user')
             ->where('member_id', $id)
-            ->first()
             ->get();
     }
 }
