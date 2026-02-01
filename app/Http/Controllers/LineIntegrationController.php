@@ -210,6 +210,11 @@ class LineIntegrationController extends Controller
             $user = User::where('line_id', $lineUser->id)->first();
 
             if ($user) {
+                // Check if account is disabled
+                if (!$user->is_active) {
+                    return redirect()->route('login')->with('error', 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ');
+                }
+
                 // For admin guard, verify user is an admin
                 if ($guard === 'admin' && $user->type !== 'admin') {
                     return back()->withErrors([
@@ -358,7 +363,7 @@ class LineIntegrationController extends Controller
 
     /**
      * Call LINE deauthorize API to revoke user access token
-     * 
+     *
      * @param string $userAccessToken The user's LINE access token
      * @return bool
      * @throws \Exception
@@ -388,7 +393,7 @@ class LineIntegrationController extends Controller
 
     /**
      * Issue LINE Login channel access token using client credentials
-     * 
+     *
      * @return string
      * @throws \Exception
      */

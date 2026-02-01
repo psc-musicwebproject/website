@@ -33,11 +33,13 @@ class User extends Authenticatable
         'student_id',
         'major',
         'phone_number',
+        'email',
         'type',
         'class',
         'password',
         'line_id',
         'line_bound',
+        'is_active',
         'reset_password_on_next_login',
     ];
 
@@ -60,6 +62,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_active' => 'boolean',
             'reset_password_on_next_login' => 'boolean',
         ];
     }

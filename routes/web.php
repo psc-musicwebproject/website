@@ -158,6 +158,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/admin/manage/user/download-credits/{id}', [\App\Http\Controllers\UserManagerController::class, 'downloadGeneratedCredentials'])->name('admin.user.download_credits');
     Route::post('/admin/manage/user/update/{id}', [UserController::class, 'update'])->name('admin.user.update');
     Route::post('/admin/manage/user/delete/{id}', [UserController::class, 'destroy'])->name('admin.user.delete');
+    Route::post('/admin/manage/user/unbind-line/{id}', [UserController::class, 'unbindLine'])->name('admin.user.unbind_line');
 
     Route::get('/admin/club/approve', function () {
         return view('admin.club.approve.main', [

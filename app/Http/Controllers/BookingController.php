@@ -59,7 +59,7 @@ class BookingController extends Controller
                 }
             }
             $booking->attendees = empty($attendees) ? null : $attendees;
-            
+
             // Handle "Book on Behalf" for Admins
             if (Auth::user()->type === 'admin' && $request->has('book_owner_id')) {
                  $ownerId = $request->input('book_owner_id');
@@ -123,8 +123,12 @@ class BookingController extends Controller
             return response()->json(['error' => 'Query is required'], 400);
         }
 
-        $user = \App\Models\User::where('student_id', $query)
-            ->orWhere('email', $query)
+        $searchQuery = $query;
+        $user = \App\Models\User::where('is_active', true)
+            ->where(function ($q) use ($searchQuery) {
+                $q->where('student_id', $searchQuery)
+                  ->orWhere('email', $searchQuery);
+            })
             ->first();
 
         if ($user) {

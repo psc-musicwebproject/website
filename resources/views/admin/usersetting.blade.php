@@ -24,7 +24,7 @@
             {!! $successMsg !!}
         </div>
     @endif
-    
+
     @if($importErrors)
         <div class="alert alert-danger mt-4 alert-dismissible fade show">
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -57,11 +57,13 @@
     @if($downloadId)
         <div class="alert alert-success mt-4 alert-dismissible fade show">
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            <p>ระบบกำลังดาวน์โหลดไฟล์รหัสผ่านให้อัตโนมัติ (เนื่องจากผู้ใช้ใหม่มีรหัสผ่านถูกสุ่ม)... หากไม่เริ่มดาวน์โหลด <a href="{{ route('admin.user.download_credits', $downloadId) }}" class="alert-link">คลิกที่นี่เพื่อดาวน์โหลด</a></p>
+            <p>ระบบกำลังดาวน์โหลดไฟล์รหัสผ่านให้อัตโนมัติ (เนื่องจากผู้ใช้ใหม่มีรหัสผ่านถูกสุ่ม)... หากไม่เริ่มดาวน์โหลด <a
+                    href="{{ route('admin.user.download_credits', $downloadId) }}"
+                    class="alert-link">คลิกที่นี่เพื่อดาวน์โหลด</a></p>
         </div>
         <script type="module">
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(function() {
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(function () {
                     window.location.href = "{{ route('admin.user.download_credits', $downloadId) }}";
                 }, 1000); // Small delay to ensure page load
             });
@@ -83,8 +85,10 @@
                         <th>รหัสนักเรียน/ผู้ใช้</th>
                         <th>ชื่อ-นามสกุล</th>
                         <th>ชื่อเล่น</th>
+                        <th>อีเมล</th>
                         <th>คณะ/สาขา</th>
                         <th>สถานะ (Type)</th>
+                        <th>สถานะบัญชี</th>
                         <th>สถานะไลน์</th>
                         <th>จัดการ</th>
                     </tr>
@@ -98,20 +102,28 @@
                                 <div class="text-muted text-sm">{{ $user->username }}</div>
                             </td>
                             <td>{{ $user->nickname ?? '-' }}</td>
+                            <td>{{ $user->email ?? '-' }}</td>
                             <td>{{ $user->major ?? '-' }}</td>
                             <td><span class="badge bg-info">{{ $user->role_label }}</span></td>
+                            <td>
+                                @if($user->is_active)
+                                    <span class="badge bg-success">เปิดใช้งาน</span>
+                                @else
+                                    <span class="badge bg-danger">ปิดใช้งาน</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($user->line_bound)
                                     <span class="badge bg-success">Linked</span>
                                     <br>
-                                    <span class="text-muted">{{ \App\Services\LineService::getProfileName($user->line_id) }}</span>
+                                    <span
+                                        class="text-muted">{{ \App\Services\LineService::getProfileName($user->line_id) }}</span>
                                 @else
                                     <span class="badge bg-secondary">Unlinked</span>
                                 @endif
                             </td>
                             <td>
-                                <button class="btn btn-primary edit-user-btn" 
-                                    data-user="{{ json_encode($user) }}"
+                                <button class="btn btn-primary edit-user-btn" data-user="{{ json_encode($user) }}"
                                     data-update-url="{{ route('admin.user.update', ['id' => $user->id]) }}">
                                     <i class="bi bi-pencil-square"></i> แก้ไข
                                 </button>
@@ -120,6 +132,14 @@
                                     data-delete-url="{{ route('admin.user.delete', ['id' => $user->id]) }}">
                                     <i class="bi bi-trash"></i> ลบ
                                 </button>
+                                @if($user->line_bound)
+                                    <button class="btn btn-warning unbind-line-btn"
+                                        data-username="{{ $user->name_title }}{{ $user->name }} {{ $user->surname }}"
+                                        data-linename="{{ \App\Services\LineService::getProfileName($user->line_id) }}"
+                                        data-unbind-url="{{ route('admin.user.unbind_line', ['id' => $user->id]) }}">
+                                        <i class="bi bi-person-x"></i> ยกเลิกการผูกบัญชี LINE
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -177,26 +197,44 @@
                                 <input type="text" class="form-control" id="edit_class" name="class">
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="edit_phone_number" class="form-label">เบอร์โทรศัพท์</label>
-                            <input type="text" class="form-control" id="edit_phone_number" name="phone_number">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_phone_number" class="form-label">เบอร์โทรศัพท์</label>
+                                <input type="text" class="form-control" id="edit_phone_number" name="phone_number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_email" class="form-label">อีเมล</label>
+                                <input type="email" class="form-control" id="edit_email" name="email">
+                            </div>
                         </div>
-                        <div class="mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="edit_type" class="form-label">ประเภทผู้ใช้ (Type)</label>
                             <select class="form-select" id="edit_type" name="type" required>
                                 @foreach($userTypes as $type)
-                                    <option value="{{ $type->db_type }}">{{ $type->named_type }} ({{ $type->db_type }})</option>
+                                    <option value="{{ $type->db_type }}">{{ $type->named_type }} ({{ $type->db_type }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
                         <hr>
                         <div class="mb-3">
-                            <label for="edit_password" class="form-label">เปลี่ยนรหัสผ่าน <span class="text-muted">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span></label>
-                            <input type="password" class="form-control" id="edit_password" name="password" placeholder="ระบุรหัสผ่านใหม่..." autocomplete="new-password">
+                            <label for="edit_password" class="form-label">เปลี่ยนรหัสผ่าน <span
+                                    class="text-muted">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span></label>
+                            <input type="password" class="form-control" id="edit_password" name="password"
+                                placeholder="ระบุรหัสผ่านใหม่..." autocomplete="new-password">
                         </div>
                         <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="edit_reset_password_on_next_login" name="reset_password_on_next_login" value="1">
-                            <label class="form-check-label" for="edit_reset_password_on_next_login">บังคับให้ผู้ใช้เปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป</label>
+                            <input type="checkbox" class="form-check-input" id="edit_reset_password_on_next_login"
+                                name="reset_password_on_next_login" value="1">
+                            <label class="form-check-label"
+                                for="edit_reset_password_on_next_login">บังคับให้ผู้ใช้เปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป</label>
+                        </div>
+                        <hr>
+                        <div class="mb-3 form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="edit_is_active"
+                                name="is_active" value="1">
+                            <label class="form-check-label"
+                                for="edit_is_active">เปิดใช้งานบัญชี <span class="text-muted">(หากปิด ผู้ใช้จะไม่สามารถเข้าสู่ระบบได้)</span></label>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -219,10 +257,14 @@
                 <div class="modal-body">
                     <ul class="nav nav-tabs" id="addUserTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button" role="tab" aria-controls="custom" aria-selected="true">เพิ่มทีละคน (Custom)</button>
+                            <button class="nav-link active" id="custom-tab" data-bs-toggle="tab"
+                                data-bs-target="#custom" type="button" role="tab" aria-controls="custom"
+                                aria-selected="true">เพิ่มทีละคน (Custom)</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv" type="button" role="tab" aria-controls="csv" aria-selected="false">นำเข้าจาก CSV</button>
+                            <button class="nav-link" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv"
+                                type="button" role="tab" aria-controls="csv" aria-selected="false">นำเข้าจาก
+                                CSV</button>
                         </li>
                     </ul>
                     <div class="tab-content mt-3" id="addUserTabContent">
@@ -243,7 +285,8 @@
                                 <div class="row">
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">คำนำหน้า</label>
-                                        <input type="text" class="form-control" name="name_title" placeholder="นาย/นางสาว">
+                                        <input type="text" class="form-control" name="name_title"
+                                            placeholder="นาย/นางสาว">
                                     </div>
                                     <div class="col-md-5 mb-3">
                                         <label class="form-label">ชื่อ *</label>
@@ -260,17 +303,25 @@
                                         <input type="text" class="form-control" name="nickname">
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <label class="form-label">คณะ/สาขา <span class="text-danger" id="req_major">* (เฉพาะนักเรียน)</span></label>
+                                        <label class="form-label">คณะ/สาขา <span class="text-danger" id="req_major">*
+                                                (เฉพาะนักเรียน)</span></label>
                                         <input type="text" class="form-control" name="major">
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <label class="form-label">ระดับชั้น <span class="text-danger" id="req_class">* (เฉพาะนักเรียน)</span></label>
+                                        <label class="form-label">ระดับชั้น <span class="text-danger" id="req_class">*
+                                                (เฉพาะนักเรียน)</span></label>
                                         <input type="text" class="form-control" name="class">
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">เบอร์โทรศัพท์</label>
-                                    <input type="text" class="form-control" name="phone_number">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">เบอร์โทรศัพท์</label>
+                                        <input type="text" class="form-control" name="phone_number">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">อีเมล</label>
+                                        <input type="email" class="form-control" name="email">
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">ประเภทผู้ใช้ (Type) *</label>
@@ -281,40 +332,62 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">รหัสผ่าน <span class="text-muted">(เว้นว่างเพื่อสุ่มรหัสผ่านอัตโนมัติ)</span></label>
-                                    <input type="password" class="form-control" name="password" placeholder="ปล่อยว่างเพื่อรับรหัสผ่านที่ระบบสุ่มให้">
+                                    <label class="form-label">รหัสผ่าน <span
+                                            class="text-muted">(เว้นว่างเพื่อสุ่มรหัสผ่านอัตโนมัติ)</span></label>
+                                    <input type="password" class="form-control" name="password"
+                                        placeholder="ปล่อยว่างเพื่อรับรหัสผ่านที่ระบบสุ่มให้">
                                 </div>
                                 <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="add_reset_password_on_next_login" name="reset_password_on_next_login" value="1" checked>
-                                    <label class="form-check-label" for="add_reset_password_on_next_login">บังคับให้ผู้ใช้เปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป</label>
+                                    <input type="checkbox" class="form-check-input"
+                                        id="add_reset_password_on_next_login" name="reset_password_on_next_login"
+                                        value="1" checked>
+                                    <label class="form-check-label"
+                                        for="add_reset_password_on_next_login">บังคับให้ผู้ใช้เปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป</label>
+                                </div>
+                                <div class="mb-3 form-check form-switch">
+                                    <input type="checkbox" class="form-check-input"
+                                        id="add_is_active" name="is_active"
+                                        value="1" checked>
+                                    <label class="form-check-label"
+                                        for="add_is_active">เปิดใช้งานบัญชี</label>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">บันทึกข้อมูล</button>
                             </form>
                         </div>
-                        
+
                         <!-- CSV Tab -->
                         <div class="tab-pane fade" id="csv" role="tabpanel" aria-labelledby="csv-tab">
                             <form action="{{ route('admin.user.import') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="alert alert-info">
                                     <strong>รูปแบบไฟล์ CSV (ต้องมี Header บรรทัดแรก):</strong><br>
-                                    <code>student_id, username, title, name, surname, type, major, class, phone, nickname, password, force_reset</code><br>
-                                    <small class="text-muted">* หากไม่ระบุ password ระบบจะสุ่มให้และดาวน์โหลดไฟล์รหัสผ่านอัตโนมัติ</small><br>
-                                    <small class="text-muted">** <b>force_reset</b>: ระบุ 1/yes เพื่อบังคับเปลี่ยนรหัส, 0/no เพื่อไม่บังคับ (หากเว้นว่างจะยึดตาม Checkbox ด้านล่าง)</small><br>
-                                    <small class="text-muted">*** สำหรับประเภทนักเรียน <b>ต้องห้ามลืมระบุ major และ class ด้วย!</b></small>
+                                    <code>{{ implode(', ', \App\Http\Controllers\UserManagerController::CSV_COLUMNS) }}</code><br>
+                                    <small class="text-muted">* หากไม่ระบุ password
+                                        ระบบจะสุ่มให้และดาวน์โหลดไฟล์รหัสผ่านอัตโนมัติ</small><br>
+                                    <small class="text-muted">** <b>force_reset</b>: ระบุ 1/yes เพื่อบังคับเปลี่ยนรหัส,
+                                        0/no เพื่อไม่บังคับ (หากเว้นว่างจะยึดตาม Checkbox ด้านล่าง)</small><br>
+                                    <small class="text-muted">*** <b>is_active</b>: ระบุ 1/yes เพื่อเปิดใช้งาน,
+                                        0/no เพื่อปิดใช้งาน (หากเว้นว่างจะเปิดใช้งานอัตโนมัติ)</small><br>
+                                    <small class="text-muted">**** สำหรับประเภทนักเรียน <b>ต้องห้ามลืมระบุ major และ
+                                            class ด้วย!</b></small>
                                 </div>
                                 <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="import_reset_password_on_next_login" name="reset_password_on_next_login" value="1" checked>
-                                    <label class="form-check-label" for="import_reset_password_on_next_login">บังคับให้ผู้ใช้ที่นำเข้าทั้งหมดเปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป</label>
+                                    <input type="checkbox" class="form-check-input"
+                                        id="import_reset_password_on_next_login" name="reset_password_on_next_login"
+                                        value="1" checked>
+                                    <label class="form-check-label"
+                                        for="import_reset_password_on_next_login">บังคับให้ผู้ใช้ที่นำเข้าทั้งหมดเปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป</label>
                                 </div>
                                 <div class="mb-3 text-end">
-                                    <a href="{{ route('admin.user.template') }}" class="btn btn-outline-secondary btn-sm">
+                                    <a href="{{ route('admin.user.template') }}"
+                                        class="btn btn-outline-secondary btn-sm">
                                         <i class="bi bi-file-earmark-arrow-down"></i> ดาวน์โหลด Template
                                     </a>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">เลือกไฟล์ CSV</label>
-                                    <input type="file" class="form-control" name="csv_file" accept=".csv, .txt" required>
+                                    <input type="file" class="form-control" name="csv_file" accept=".csv, .txt"
+                                        required>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">นำเข้าข้อมูล</button>
                             </form>
@@ -326,12 +399,15 @@
     </div>
 
     <!-- Delete User Modal -->
-    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteUserModalLabel"><i class="bi bi-exclamation-triangle"></i> ยืนยันการลบผู้ใช้</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="deleteUserModalLabel"><i class="bi bi-exclamation-triangle"></i>
+                        ยืนยันการลบผู้ใช้</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <form id="deleteUserForm" method="POST">
                     @csrf
@@ -349,9 +425,37 @@
         </div>
     </div>
 
+    <!-- Unbind LINE Modal -->
+    <div class="modal fade" id="unbindLineModal" tabindex="-1" aria-labelledby="unbindLineModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="unbindLineModalLabel"><i class="bi bi-exclamation-triangle"></i>
+                        ยืนยันการยกเลิกผูก LINE</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form id="unbindLineForm" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p>คุณแน่ใจหรือไม่ที่จะยกเลิกการผูกบัญชี LINE ของผู้ใช้รายนี้?</p>
+                        <h4 class="text-center text-warning fw-bold" id="unbind_user_name"></h4>
+                        <p class="text-muted text-sm text-center mt-2">ผู้ใช้จะต้องผูกบัญชี LINE ใหม่เมื่อเข้าสู่ระบบ</p>
+                        <p class="text-muted text-sm text-center mt-2">* การยกเลิกการผูกบัญชี LINE ผ่านวิธีนี้ จะไม่ได้ยกเลิกสิทธิ์การเข้าถึงข้อมูลจากบัญชีนี้ โดยผู้ใช้จะต้องไปยกเลิกการผูกบัญชี LINE ด้วยตนเอง</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-warning">ยืนยันการยกเลิก LINE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Script to handle modals -->
     <script type="module">
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Edit User Modal Logic
             var editButtons = document.querySelectorAll('.edit-user-btn');
             var editModalEl = document.getElementById('editUserModal');
@@ -359,8 +463,8 @@
             var editModal = new bootstrap.Modal(editModalEl);
             var editForm = document.getElementById('editUserForm');
 
-            editButtons.forEach(function(btn) {
-                btn.addEventListener('click', function() {
+            editButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
                     var userData = JSON.parse(this.dataset.user);
                     var updateUrl = this.dataset.updateUrl;
 
@@ -369,7 +473,7 @@
                     document.getElementById('edit_name').value = userData.name;
                     document.getElementById('edit_surname').value = userData.surname;
                     document.getElementById('edit_type').value = userData.type;
-                    
+
                     // New Fields
                     document.getElementById('edit_name_title').value = userData.name_title || '';
                     document.getElementById('edit_nickname').value = userData.nickname || '';
@@ -380,6 +484,10 @@
                     // Reset password fields
                     document.getElementById('edit_password').value = '';
                     document.getElementById('edit_reset_password_on_next_login').checked = userData.reset_password_on_next_login == 1;
+
+                    // Email and account status
+                    document.getElementById('edit_email').value = userData.email || '';
+                    document.getElementById('edit_is_active').checked = userData.is_active == 1;
 
                     editForm.action = updateUrl;
                     editModal.show();
@@ -393,14 +501,33 @@
             var deleteForm = document.getElementById('deleteUserForm');
             var deleteNameEl = document.getElementById('delete_user_name');
 
-            deleteButtons.forEach(function(btn) {
-                btn.addEventListener('click', function() {
+            deleteButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
                     var username = this.dataset.username;
                     var deleteUrl = this.dataset.deleteUrl;
 
                     deleteNameEl.textContent = username;
                     deleteForm.action = deleteUrl; // Set form action to the specific user delete URL
                     deleteModal.show();
+                });
+            });
+
+            // Unbind LINE Modal Logic
+            var unbindButtons = document.querySelectorAll('.unbind-line-btn');
+            var unbindModalEl = document.getElementById('unbindLineModal');
+            var unbindModal = new bootstrap.Modal(unbindModalEl);
+            var unbindForm = document.getElementById('unbindLineForm');
+            var unbindNameEl = document.getElementById('unbind_user_name');
+
+            unbindButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var username = this.dataset.username;
+                    var linename = this.dataset.linename;
+                    var unbindUrl = this.dataset.unbindUrl;
+
+                    unbindNameEl.textContent = username + ' (' + linename + ')';
+                    unbindForm.action = unbindUrl;
+                    unbindModal.show();
                 });
             });
         });

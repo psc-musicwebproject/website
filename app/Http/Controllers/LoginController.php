@@ -40,9 +40,21 @@ class LoginController extends Controller
 
         // Attempt login
         if (Auth::guard($guard)->attempt($credentials)) {
+            $user = Auth::guard($guard)->user();
+
+            // Check if account is disabled
+            if (!$user->is_active) {
+                Auth::guard($guard)->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()
+                    ->withErrors(['credentials' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ'])
+                    ->onlyInput('student_id');
+            }
+
             $request->session()->regenerate();
 
-            /** * BEST PRACTICE: Use config() instead of env() 
+            /** * BEST PRACTICE: Use config() instead of env()
              * Ensure you have 'line_enabled' => env('LINE_ENABLED', false) in a config file.
              */
             $lineEnabled = config('app.line_enabled', false);

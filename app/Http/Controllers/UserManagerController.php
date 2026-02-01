@@ -10,6 +10,16 @@ use Illuminate\Support\Str;
 class UserManagerController extends Controller
 {
     /**
+     * CSV column headers for import/export.
+     * This is the single source of truth for CSV format.
+     */
+    public const CSV_COLUMNS = [
+        'student_id', 'username', 'title', 'name', 'surname', 'type',
+        'major', 'class', 'phone', 'nickname', 'password', 'force_reset',
+        'email', 'is_active'
+    ];
+
+    /**
      * Store a newly created user in storage.
      */
     public function store(Request $request)
@@ -24,10 +34,12 @@ class UserManagerController extends Controller
             'nickname' => 'nullable|string',
             'type' => 'required|string',
             'phone_number' => 'nullable|string',
+            'email' => 'nullable|email|unique:users,email',
             // Conditional validation: Class and Major required for students
             'major' => 'nullable|string|required_if:type,student',
             'class' => 'nullable|string|required_if:type,student',
             'reset_password_on_next_login' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
         ]);
 
         if (empty($validated['password'])) {
@@ -41,6 +53,7 @@ class UserManagerController extends Controller
 
         // Checkbox handling
         $validated['reset_password_on_next_login'] = $request->has('reset_password_on_next_login');
+        $validated['is_active'] = $request->has('is_active');
 
         User::create($validated);
 
@@ -78,7 +91,10 @@ class UserManagerController extends Controller
             // Skip empty rows
             if (empty($row) || count($row) < 5) continue;
 
-            // Mapping based on index
+            // Mapping based on index (matches CSV_COLUMNS order)
+            // 0:student_id, 1:username, 2:title, 3:name, 4:surname, 5:type,
+            // 6:major, 7:class, 8:phone, 9:nickname, 10:password, 11:force_reset,
+            // 12:email, 13:is_active
             $userData = [
                 'student_id' => $row[0] ?? null,
                 'username'   => $row[1] ?? null,
@@ -90,6 +106,7 @@ class UserManagerController extends Controller
                 'class'      => $row[7] ?? null,
                 'phone_number' => $row[8] ?? null,
                 'nickname'   => $row[9] ?? null,
+                'email'      => !empty($row[12]) ? trim($row[12]) : null,
             ];
 
             // CSV Column 11: force_reset
@@ -116,6 +133,17 @@ class UserManagerController extends Controller
 
             $userData['reset_password_on_next_login'] = $finalResetValue;
 
+            // Parse is_active (column 13) - defaults to true if not specified
+            $rawIsActive = $row[13] ?? null;
+            $finalIsActive = true; // Default to active
+            if ($rawIsActive !== null && $rawIsActive !== '') {
+                $lowerVal = strtolower(trim($rawIsActive));
+                if (in_array($lowerVal, ['0', 'false', 'no', 'n'])) {
+                    $finalIsActive = false;
+                }
+            }
+            $userData['is_active'] = $finalIsActive;
+
             // Validation: Student requires Major and Class
             $missing = [];
             if ($userData['type'] === 'student') {
@@ -134,14 +162,31 @@ class UserManagerController extends Controller
                 continue;
             }
 
-            // Check for existing fields to prevent error
-            if (User::where('student_id', '=', $userData['student_id'])->orWhere('username', '=', $userData['username'])->exists()) {
+            // Check for existing fields to prevent error (including email if provided)
+            $existsQuery = User::where('student_id', '=', $userData['student_id'])
+                ->orWhere('username', '=', $userData['username']);
+            if (!empty($userData['email'])) {
+                $existsQuery->orWhere('email', '=', $userData['email']);
+            }
+            if ($existsQuery->exists()) {
                 $skippedRows[] = [
                     'line' => $lineNum,
                     'sid' => $userData['student_id'] ?? '-',
                     'name' => $userData['name'] ?? '-',
-                    'raw_data' => 'Duplicate ID/Username',
+                    'raw_data' => 'Duplicate ID/Username/Email',
                     'missing' => 'Already exists'
+                ];
+                continue;
+            }
+
+            // Validate email format if provided
+            if (!empty($userData['email']) && !filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
+                $skippedRows[] = [
+                    'line' => $lineNum,
+                    'sid' => $userData['student_id'] ?? '-',
+                    'name' => $userData['name'] ?? '-',
+                    'raw_data' => 'Invalid email: ' . $userData['email'],
+                    'missing' => 'Valid email format'
                 ];
                 continue;
             }
@@ -238,12 +283,13 @@ class UserManagerController extends Controller
      */
     public function downloadTemplate()
     {
-        $callback = function () {
+        $columns = self::CSV_COLUMNS;
+        $callback = function () use ($columns) {
             $file = fopen('php://output', 'w');
             // BOM for Excel
             fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
 
-            fputcsv($file, ['student_id', 'username', 'title', 'name', 'surname', 'type', 'major', 'class', 'phone', 'nickname', 'password', 'force_reset'], ",", "\"", "\\");
+            fputcsv($file, $columns, ",", "\"", "\\");
 
             fclose($file);
         };
