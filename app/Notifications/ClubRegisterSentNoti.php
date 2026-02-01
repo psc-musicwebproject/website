@@ -39,9 +39,12 @@ class ClubRegisterSentNoti extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject('สมัครสมาชิกชมรมดนตรีสำเร็จ - รอการอนุมัติ - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
+            ->greeting('เรียน คุณ' . $this->clubMember->user->name . ',')
+            ->line('คุณได้สมัครสมาชิกชมรมดนตรีเรียบร้อยแล้ว กรุณารอการอนุมัติจากผู้ดูแลระบบ ระบบจะแจ้งเตือนเมื่อการสมัครสมาชิกของคุณได้รับการอนุมัติ')
+            ->line('หรือสามารถตรวจสอบสถานะการสมัครสมาชิกได้ที่หน้าชมรมดนตรี ตามลิงก์ด้านล่างนี้')
+            ->action('ตรวจสอบสถานะสมาชิก', route('dash.club.register'))
+            ->line('ขอบคุณครับ/ค่ะ');
     }
 
     /**
