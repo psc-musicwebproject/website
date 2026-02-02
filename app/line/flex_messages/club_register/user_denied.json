@@ -1,0 +1,110 @@
+{
+  "type": "bubble",
+  "hero": {
+    "type": "image",
+    "url": "https://file.smilekrub.net/file/sk-blob/web/user/pic/vkkyc7yi8hqs42pydrree2omz1udirso",
+    "size": "full",
+    "aspectRatio": "20:13",
+    "aspectMode": "cover"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "เสียใจด้วย! คุณไม่ได้รับการอนุมัติ",
+        "weight": "bold",
+        "size": "lg"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "หลังจากการพิจารณาใบสมัครสมาชิกชมรมของคุณ เราเสียใจที่จะแจ้งให้ทราบว่าคุณไม่ได้รับการอนุมัติเป็นสมาชิกชมรมในครั้งนี้ ขอขอบคุณที่ให้ความสนใจและสมัครเข้าร่วมชมรมของเรา และหวังว่าจะมีโอกาสได้ร่วมงานกันในอนาคต",
+            "wrap": true
+          }
+        ]
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "margin": "lg",
+        "spacing": "sm",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "lg",
+            "contents": [
+              {
+                "type": "text",
+                "text": "ชื่อ",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "นางสาวโอกุริ แคป",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "lg",
+            "contents": [
+              {
+                "type": "text",
+                "text": "สาขาวิชาชีพ",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1,
+                "wrap": false
+              },
+              {
+                "type": "text",
+                "text": "อาหารและโภชนาการ",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "lg",
+            "contents": [
+              {
+                "type": "text",
+                "text": "อนุมัติโดย",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1,
+                "wrap": false,
+                "margin": "none"
+              },
+              {
+                "type": "text",
+                "text": "นางสาวยาโยอิ อาคิคาวะ",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
