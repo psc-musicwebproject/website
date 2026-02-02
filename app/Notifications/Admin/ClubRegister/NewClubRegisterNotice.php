@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications\Admin;
+namespace App\Notifications\Admin\ClubRegister;
 
 use App\Channels\LineChannel;
 use Illuminate\Bus\Queueable;
@@ -41,9 +41,12 @@ class NewClubRegisterNotice extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject('สมาชิกใหม่รอการอนุมัติ - ' . $this->clubMember->user->name_title . $this->clubMember->user->name . ' ' . $this->clubMember->user->surname  . ' - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
+            ->greeting('เรียน คุณ' . $notifiable->name . ',')
+            ->line('คุณมีสมาชิกใหม่รอการอนุมัติ')
+            ->line('โปรดตรวจสอบและอนุมัติสมาชิกผ่านลิงก์ด้านล่างนี้')
+            ->action('ตรวจสอบสถานะสมาชิก', route('admin.club.approve.detail', ['id' => $this->clubMember->member_id]))
+            ->line('ขอบคุณครับ/ค่ะ');
     }
 
     /**
