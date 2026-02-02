@@ -10,7 +10,7 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\ClubMember;
 
-class ApprovedUserNotify extends Notification
+class DeniedUserNotify extends Notification
 {
     use Queueable;
 
@@ -39,8 +39,8 @@ class ApprovedUserNotify extends Notification
         $mail = (new MailMessage)
             ->subject('ผลการสมัครสมาชิกชมรม ฯ - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
             ->greeting('เรียน คุณ' . $this->clubMember->user->name . ',')
-            ->line('ก่อนอื่น ต้องขอแสดงความยินดีที่การสมัครสมาชิกชมรมดนตรีของคุณได้รับการอนุมัติแล้ว')
-            ->line('โดยคุณสามารถเข้าร่วมกิจกรรมต่าง ๆ ที่ชมรมดนตรีจัดขึ้น รวมถึงการใช้สิทธิประโยชน์ต่าง ๆ ที่สมาชิกชมรมจะได้รับในอนาคต')
+            ->line('ก่อนอื่น ต้องขอขอบคุณที่ให้ความสนใจและสมัครเป็นสมาชิกชมรมดนตรีของเรา ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
+            ->line('แต่เราเสียใจที่จะแจ้งให้คุณทราบว่าการสมัครสมาชิกชมรมดนตรีของคุณไม่ได้รับการอนุมัติในครั้งนี้')
             ->line('');
 
         $mail->line('ผู้อนุมัติ: ' . $this->clubMember->approvalPerson->name_title . $this->clubMember->approvalPerson->name . ' ' . $this->clubMember->approvalPerson->surname);
@@ -51,19 +51,20 @@ class ApprovedUserNotify extends Notification
 
         $mail->line('วันที่อนุมัติ: ' . $this->clubMember->approval_time->format('d/m/Y H:i'))
             ->line('')
-            ->line('หวังเป็นอย่างยิ่งว่าคุณจะมีช่วงเวลาที่ดีและได้รับประสบการณ์ที่น่าจดจำในฐานะสมาชิกชมรมดนตรีของเรา');
+            ->line('หวังเป็นอย่างยิ่งว่าเราจะมีโอกาสได้ต้อนรับคุณเป็นสมาชิกชมรมดนตรีของเราในอนาคต หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อผู้อนุมัติที่ระบุไว้ข้างต้น');
 
         return $mail;
     }
 
-    public function toLineIntegration(object $notifiable): string {
+    public function toLineIntegration(object $notifiable): string
+    {
         // Check if user has linked Line account
         if ($notifiable->line_id === null) {
             return 'No Line User ID';
         }
 
         // Importing Template from JSON file
-        $jStr = file_get_contents(app_path('line/flex_messages/club_register/user_approved.json'));
+        $jStr = file_get_contents(app_path('line/flex_messages/club_register/user_denied.json'));
         $fTem = json_decode($jStr, true);
 
         // Customize Template with dynamic data
@@ -103,20 +104,13 @@ class ApprovedUserNotify extends Notification
         return $LineController->pushFlexMessage($notifiable->line_id, 'ผลการสมัครสมาชิกชมรมดนตรี', $fTem);
     }
 
-    public function toBroadcast(object $notifiable): BroadcastMessage
+        public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
             'title' => 'ผลการสมัครสมาชิกชมรมดนตรี',
             'message' => 'ผลการสมัครสมาชิกชมรมดนตรีของคุณได้รับการพิจารณาแล้ว กรุณาตรวจสอบรายละเอียดเพิ่มเติม',
             'action_url' => route('dash.club.register'),
-            'type' => 'success'
+            'type' => 'error'
         ]);
-    }
-
-    public function toArray(object $notifiable): array
-    {
-        return [
-            //
-        ];
     }
 }
