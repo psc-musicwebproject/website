@@ -114,4 +114,14 @@ class User extends Authenticatable
     {
         return UserTypeMapping::where('db_type', $this->type)->value('named_type') ?? ucfirst($this->type);
     }
+
+    /**
+     * The channels the user receives notification broadcasts on.
+     */
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return $this->type === 'admin'
+            ? 'admin.'.$this->id
+            : 'user.'.$this->id;
+    }
 }

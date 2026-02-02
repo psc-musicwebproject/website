@@ -89,7 +89,7 @@ if (import.meta.env.VITE_REVERB_APP_KEY) {
         wsHost: import.meta.env.VITE_REVERB_HOST,
         wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
         wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
         enabledTransports: ['ws', 'wss'],
         authorizer: (channel, options) => {
             return {
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         events: calendarEl.dataset.eventRoute || '/dash/calendar/events',
         eventClick: function(info) {
             var props = info.event.extendedProps;
-            
+
             // Populate Modal
             document.getElementById('modalRoom').textContent = props.room_name;
             document.getElementById('modalTitle').textContent = props.booking_name;
@@ -171,21 +171,21 @@ document.addEventListener('DOMContentLoaded', function() {
             var attendeeList = document.getElementById('modalAttendeesList');
             var attendeeSection = document.getElementById('modalAttendeesSection');
             attendeeList.innerHTML = '';
-            
+
             if (props.attendees && props.attendees.length > 0) {
                  attendeeSection.style.display = 'block';
-                 
+
                  var attendeesData = props.attendees;
                  if (typeof attendeesData === 'string') {
                      attendeesData = attendeesData.split(', ');
                  }
-                 
+
                  attendeesData.forEach(function(att) {
                      var li = document.createElement('li');
                      if (typeof att === 'string') {
                          li.textContent = att;
                      } else {
-                         li.textContent = att.user_name || att.user_identify || 'Unknown'; 
+                         li.textContent = att.user_name || att.user_identify || 'Unknown';
                      }
                      attendeeList.appendChild(li);
                  });
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
             calendar.updateSize();
             const width = entry.contentRect.width;
             calendar.setOption('headerToolbar', getHeaderToolbar(width));
-            
+
             if (width < 500) {
                 calendarEl.classList.add('fc-toolbar-stack');
             } else {

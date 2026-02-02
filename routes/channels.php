@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    // Allow users to listen to their own channel if they are admin
+Broadcast::channel('admin.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id && $user->type === 'admin';
+});
+
+Broadcast::channel('user.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id && $user->type !== 'admin';
 });
