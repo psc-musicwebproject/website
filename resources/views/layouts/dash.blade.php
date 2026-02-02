@@ -36,6 +36,9 @@
 
         </main>
     </div>
+
+    <x-dash.notification channel="user.{{ auth()->id() }}" />
+
     @stack('scripts')
 </body>
 
