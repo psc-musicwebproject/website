@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClubMember;
-use App\Notifications\ClubRegisterSentNoti;
-use App\Notifications\Admin\NewClubRegisterNotice;
+use App\Notifications\User\ClubRegister\ClubRegisterSentNoti;
+use App\Notifications\Admin\ClubRegister\NewClubRegisterNotice;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -79,7 +79,7 @@ class ClubRegisterController extends Controller
 
             // Refine Club Member Save Mechanics to make notification don't need to use latest()->first()
             // Make it less confused for the system
-            // 
+            //
             // ClubMember::create([
             //     'user_id' => Auth::id(),
             //     'status' => 'waiting',
