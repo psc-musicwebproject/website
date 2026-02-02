@@ -2,7 +2,7 @@
   "type": "bubble",
   "hero": {
     "type": "image",
-    "url": "https://file.smilekrub.net/file/sk-blob/web/user/pic/vkkyc7yi8hqs42pydrree2omz1udirso",
+    "url": "https://i2.ruliweb.com/ori/25/11/09/19a675492c42ce634.png",
     "size": "full",
     "aspectRatio": "20:13",
     "aspectMode": "cover"
@@ -15,7 +15,8 @@
         "type": "text",
         "text": "เสียใจด้วย! คุณไม่ได้รับการอนุมัติ",
         "weight": "bold",
-        "size": "lg"
+        "size": "lg",
+        "wrap": true
       },
       {
         "type": "box",
@@ -67,7 +68,7 @@
                 "color": "#aaaaaa",
                 "size": "sm",
                 "flex": 1,
-                "wrap": false
+                "wrap": true
               },
               {
                 "type": "text",
@@ -90,7 +91,7 @@
                 "color": "#aaaaaa",
                 "size": "sm",
                 "flex": 1,
-                "wrap": false,
+                "wrap": true,
                 "margin": "none"
               },
               {

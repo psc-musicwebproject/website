@@ -15,7 +15,8 @@
         "type": "text",
         "text": "ยินดีด้วย! คุณได้รับการอนุมัติแล้ว!!",
         "weight": "bold",
-        "size": "lg"
+        "size": "lg",
+        "wrap": true
       },
       {
         "type": "box",
@@ -67,7 +68,7 @@
                 "color": "#aaaaaa",
                 "size": "sm",
                 "flex": 1,
-                "wrap": false
+                "wrap": true
               },
               {
                 "type": "text",
@@ -90,7 +91,7 @@
                 "color": "#aaaaaa",
                 "size": "sm",
                 "flex": 1,
-                "wrap": false,
+                "wrap": true,
                 "margin": "none"
               },
               {

@@ -85,7 +85,7 @@ class DeniedUserNotify extends Notification
                         "color" => "#aaaaaa",
                         "size" => "sm",
                         "flex" => 1,
-                        "wrap" => false,
+                        "wrap" => true,
                         "margin" => "none"
                     ],
                     [
