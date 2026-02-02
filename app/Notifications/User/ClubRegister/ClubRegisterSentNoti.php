@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Notifications\User\ClubRegister;
 
 use Illuminate\Bus\Queueable;
 use App\Http\Controllers\LineIntegrationController;
