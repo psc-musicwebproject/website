@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
-use App\Notifications\BookingAlert;
-use App\Notifications\Admin\BookingNotice;
+use App\Notifications\User\Booking\NewBooking;
+use App\Notifications\Admin\Booking\BookingNotice;
 use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
@@ -75,7 +75,7 @@ class BookingController extends Controller
             $booking->save();
 
             if ($booking->user) {
-                $booking->user->notify(new BookingAlert($booking, Auth::user()));
+                $booking->user->notify(new NewBooking($booking, Auth::user()));
             }
 
             if ($booking->user && ($booking->user->type != "admin" || Auth::user()->type != 'admin') ) {

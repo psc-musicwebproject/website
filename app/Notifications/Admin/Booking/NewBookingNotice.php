@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Notifications\Admin;
+namespace App\Notifications\Admin\Booking;
 
 use App\Channels\LineChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 use App\Models\Booking;
 use App\Http\Controllers\LineIntegrationController;
 
@@ -21,6 +22,29 @@ class BookingNotice extends Notification
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $bookedFrom = \Carbon\Carbon::parse($this->booking->booked_from);
+        $bookedTo = \Carbon\Carbon::parse($this->booking->booked_to);
+
+        return (new MailMessage)
+            ->subject('การจองใหม่รออนุมัติ - ' . $this->booking->booking_name . ' ' . $bookedFrom->format('Y-m-d') . ' - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
+            ->greeting('เรียน คุณ' . $notifiable->name . ',')
+            ->line('คุณได้รับคำขออนุมัติการจองห้องดนตรีใหม่จากผู้ใช้ระบบ โดยมีรายละเอียดดังนี้:')
+            ->line('')
+            ->line('- ชื่อการจอง: ' . $this->booking->booking_name)
+            ->line('- วันที่จอง: ' . $bookedFrom->locale('th')->isoFormat('DD MMMM YYYY'))
+            ->line('- เวลา: ' . $bookedFrom->format('H:i') . ' - ' . $bookedTo->format('H:i'))
+            ->line('- ผู้เข้าร่วม: ' . (!empty($this->booking->parseAttendeeforDisplay()) ? implode(', ', $this->booking->parseAttendeeforDisplay()) : 'ไม่ระบุผู้เข้าร่วม'))
+            ->line('')
+            ->line('คุณสามารถตรวจสอบและอนุมัติการจองได้ที่ลิงก์ด้านล่างนี้')
+            ->action('ตรวจสอบและอนุมัติการจอง', route('admin.booking.detail', ['id' => $this->booking->booking_id]))
+            ->line('ขอบคุณครับ/ค่ะ');
     }
 
     /**
