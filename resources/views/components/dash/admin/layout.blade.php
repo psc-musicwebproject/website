@@ -41,7 +41,7 @@
 
     @auth
         @if (auth()->user()->type === 'admin')
-            <x-notification-listener channel="admin.{{ auth()->id() }}" />
+            <x-dash.notification channel="admin.{{ auth()->id() }}" />
         @endif
     @endauth
 </body>
