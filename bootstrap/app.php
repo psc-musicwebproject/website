@@ -26,54 +26,27 @@ return Application::configure(basePath: dirname(__DIR__))
                     $user = Auth::guard('admin')->user() ?? Auth::guard('web')->user();
 
                     if (!$user) {
-                        \Illuminate\Support\Facades\Log::debug('Broadcasting auth: no user found');
                         return response()->json(['error' => 'Unauthenticated'], 403);
                     }
 
                     $channelName = $request->input('channel_name');
                     $socketId = $request->input('socket_id');
 
-                    \Illuminate\Support\Facades\Log::debug('Broadcasting auth attempt', [
-                        'user_id' => $user->id,
-                        'user_type' => $user->type,
-                        'channel' => $channelName,
-                        'socket_id' => $socketId,
-                    ]);
-
                     // Remove 'private-' prefix for matching
                     $channelWithoutPrefix = preg_replace('/^private-/', '', $channelName);
 
                     // Direct channel authorization
                     $authorized = false;
-                    $channelData = [];
 
                     // Match admin.{id} pattern
                     if (preg_match('/^admin\.(\d+)$/', $channelWithoutPrefix, $matches)) {
                         $channelId = (int) $matches[1];
                         $authorized = (int) $user->id === $channelId && $user->type === 'admin';
-                        \Illuminate\Support\Facades\Log::debug('Admin channel check', [
-                            'channel_id' => $channelId,
-                            'user_id' => $user->id,
-                            'user_type' => $user->type,
-                            'id_match' => (int) $user->id === $channelId,
-                            'type_match' => $user->type === 'admin',
-                            'authorized' => $authorized,
-                        ]);
                     }
                     // Match user.{id} pattern
                     elseif (preg_match('/^user\.(\d+)$/', $channelWithoutPrefix, $matches)) {
                         $channelId = (int) $matches[1];
                         $authorized = (int) $user->id === $channelId && $user->type !== 'admin';
-                        \Illuminate\Support\Facades\Log::debug('User channel check', [
-                            'channel_id' => $channelId,
-                            'user_id' => $user->id,
-                            'user_type' => $user->type,
-                            'id_match' => (int) $user->id === $channelId,
-                            'type_match' => $user->type !== 'admin',
-                            'authorized' => $authorized,
-                        ]);
-                    } else {
-                        \Illuminate\Support\Facades\Log::warning('Unknown channel pattern', ['channel' => $channelWithoutPrefix]);
                     }
 
                     if (!$authorized) {

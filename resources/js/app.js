@@ -94,16 +94,7 @@ if (import.meta.env.VITE_REVERB_APP_KEY) {
         authorizer: (channel, options) => {
             return {
                 authorize: (socketId, callback) => {
-                    const authUrl = window.location.origin + '/broadcasting/auth';
-                    console.log('Broadcasting auth request:', {
-                        url: authUrl,
-                        socketId: socketId,
-                        channel: channel.name,
-                        hasCsrfToken: !!token,
-                        cookies: document.cookie ? 'present' : 'none'
-                    });
-                    
-                    axios.post(authUrl, {
+                    axios.post(window.location.origin + '/broadcasting/auth', {
                         socket_id: socketId,
                         channel_name: channel.name
                     }, {
@@ -114,15 +105,10 @@ if (import.meta.env.VITE_REVERB_APP_KEY) {
                         }
                     })
                     .then(response => {
-                        console.log('Broadcasting auth success:', response.data);
                         callback(null, response.data);
                     })
                     .catch(error => {
-                        console.error('Broadcasting auth error:', {
-                            status: error.response?.status,
-                            data: error.response?.data,
-                            message: error.message
-                        });
+                        console.error('Broadcasting auth error:', error.response?.data || error.message);
                         callback(error);
                     });
                 }
