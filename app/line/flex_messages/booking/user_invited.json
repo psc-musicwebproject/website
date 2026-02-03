@@ -2,7 +2,7 @@
   "type": "bubble",
   "hero": {
     "type": "image",
-    "url": "https://static.wikitide.net/bluearchivewiki/4/44/Event_Photo_CollectionCG_836_04_Full.png",
+    "url": "https://file.smilekrub.net/file/sk-blob/web/user/pic/1z0n9l468h7j0tzxxpsq1f9neg1kz4n5",
     "size": "full",
     "aspectRatio": "20:13",
     "aspectMode": "cover"
@@ -13,7 +13,7 @@
     "contents": [
       {
         "type": "text",
-        "text": "การจองห้องสำเร็จ",
+        "text": "คุณได้รับคำเชิญเข้าร่วมการใช้ห้อง",
         "weight": "bold",
         "size": "xl"
       },
@@ -23,7 +23,7 @@
         "contents": [
           {
             "type": "text",
-            "text": "คุณได้จองการใช้ห้องดนตรีสำเร็จ เมื่อผู้ดูแลระบบตรวจสอบการอนุมัติเสร็จสิ้น ท่านจะได้รับการแจ้งเตือนอีกครั้ง",
+            "text": "นางสาวเบลโน ไลท์ ได้เชิญคุณเข้าร่วมการใช้ห้องดนตรี กรุณาตรวจสอบรายละเอียดด้านล่าง",
             "margin": "sm",
             "size": "sm",
             "wrap": true

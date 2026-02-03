@@ -2,7 +2,7 @@
   "type": "bubble",
   "hero": {
     "type": "image",
-    "url": "https://static.wikitide.net/bluearchivewiki/4/44/Event_Photo_CollectionCG_836_04_Full.png",
+    "url": "https://static.wikitide.net/bluearchivewiki/0/09/Event_Photo_CollectionCG_836_02_Full.png",
     "size": "full",
     "aspectRatio": "20:13",
     "aspectMode": "cover"
@@ -13,7 +13,7 @@
     "contents": [
       {
         "type": "text",
-        "text": "การจองห้องสำเร็จ",
+        "text": "การจองของคุณถูกปฏิเสธ",
         "weight": "bold",
         "size": "xl"
       },
@@ -23,7 +23,7 @@
         "contents": [
           {
             "type": "text",
-            "text": "คุณได้จองการใช้ห้องดนตรีสำเร็จ เมื่อผู้ดูแลระบบตรวจสอบการอนุมัติเสร็จสิ้น ท่านจะได้รับการแจ้งเตือนอีกครั้ง",
+            "text": "การจองของคุณถูกปฏิเสธโดย นางสาวยาโยอิ อาคิคาวะ ด้วยเหตุผล: กูนม้า, หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ",
             "margin": "sm",
             "size": "sm",
             "wrap": true
