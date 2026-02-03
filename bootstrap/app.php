@@ -34,13 +34,28 @@ return Application::configure(basePath: dirname(__DIR__))
                         return $user;
                     });
 
+                    // Also set the user on the appropriate guard
+                    if ($user->type === 'admin') {
+                        Auth::guard('admin')->setUser($user);
+                    } else {
+                        Auth::guard('web')->setUser($user);
+                    }
+
                     try {
                         // Use Laravel's channel authorization from routes/channels.php
-                        // This will automatically use whatever channel callbacks you define
                         return Broadcast::auth($request);
+                    } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
+                        // Authorization explicitly denied by channel callback
+                        return response()->json(['error' => 'Forbidden', 'message' => 'Channel authorization failed'], 403);
                     } catch (\Exception $e) {
-                        // Authorization failed
-                        return response()->json(['error' => 'Forbidden'], 403);
+                        // Log the actual error for debugging
+                        \Illuminate\Support\Facades\Log::error('Broadcasting auth error', [
+                            'user_id' => $user->id,
+                            'user_type' => $user->type,
+                            'channel' => $request->input('channel_name'),
+                            'error' => $e->getMessage(),
+                        ]);
+                        return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()], 403);
                     }
                 })->name('broadcasting.auth');
             });

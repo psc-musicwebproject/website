@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,9 +15,33 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 Broadcast::channel('admin.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id && $user->type === 'admin';
+    $authorized = (int) $user->id === (int) $id && $user->type === 'admin';
+
+    if (!$authorized) {
+        Log::debug('Admin channel auth failed', [
+            'user_id' => $user->id,
+            'channel_id' => $id,
+            'user_type' => $user->type,
+            'id_match' => (int) $user->id === (int) $id,
+            'type_match' => $user->type === 'admin',
+        ]);
+    }
+
+    return $authorized;
 });
 
 Broadcast::channel('user.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id && $user->type !== 'admin';
+    $authorized = (int) $user->id === (int) $id && $user->type !== 'admin';
+
+    if (!$authorized) {
+        Log::debug('User channel auth failed', [
+            'user_id' => $user->id,
+            'channel_id' => $id,
+            'user_type' => $user->type,
+            'id_match' => (int) $user->id === (int) $id,
+            'type_match' => $user->type !== 'admin',
+        ]);
+    }
+
+    return $authorized;
 });
