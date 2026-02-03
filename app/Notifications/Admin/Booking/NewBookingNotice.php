@@ -10,7 +10,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\Models\Booking;
 use App\Http\Controllers\LineIntegrationController;
 
-class BookingNotice extends Notification
+class NewBookingNotice extends Notification
 {
     use Queueable;
 
