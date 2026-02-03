@@ -43,9 +43,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     try {
                         // Use Laravel's channel authorization from routes/channels.php
+                        \Illuminate\Support\Facades\Log::debug('Broadcasting auth attempt', [
+                            'user_id' => $user->id,
+                            'user_type' => $user->type,
+                            'channel' => $request->input('channel_name'),
+                        ]);
                         return Broadcast::auth($request);
                     } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
                         // Authorization explicitly denied by channel callback
+                        \Illuminate\Support\Facades\Log::warning('Broadcasting auth denied', [
+                            'user_id' => $user->id,
+                            'user_type' => $user->type,
+                            'channel' => $request->input('channel_name'),
+                            'reason' => 'Channel callback returned false or channel not found',
+                        ]);
                         return response()->json(['error' => 'Forbidden', 'message' => 'Channel authorization failed'], 403);
                     } catch (\Exception $e) {
                         // Log the actual error for debugging
