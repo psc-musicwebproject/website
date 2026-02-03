@@ -48,8 +48,8 @@ class NewBooking extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $roomName = $this->booking->room->room_name;
-        $bookedFrom = \Carbon\Carbon::parse($this->booking->booked_from);
-        $bookedTo = \Carbon\Carbon::parse($this->booking->booked_to);
+        $bookedFrom = $this->booking->booked_from;
+        $bookedTo = $this->booking->booked_to;
 
         // Build subject
         $subject = $this->isAdminBooking
@@ -123,12 +123,12 @@ class NewBooking extends Notification
 
         // Date
         $flexMessage['body']['contents'][2]['contents'][1]['contents'][1]['text'] =
-            \Carbon\Carbon::parse($this->booking->booked_from)->locale('th')->isoFormat('DD MMMM YYYY');
+            $this->booking->booked_from->locale('th')->isoFormat('DD MMMM YYYY');
 
         // Time
         $flexMessage['body']['contents'][2]['contents'][2]['contents'][1]['text'] =
-            \Carbon\Carbon::parse($this->booking->booked_from)->format('H:i') . ' - ' .
-            \Carbon\Carbon::parse($this->booking->booked_to)->format('H:i');
+            $this->booking->booked_from->format('H:i') . ' - ' .
+            $this->booking->booked_to->format('H:i');
 
         // Participants
         $attendeeList = $this->booking->parseAttendeeforDisplay();

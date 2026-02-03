@@ -29,8 +29,8 @@ class NewBookingNotice extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $bookedFrom = \Carbon\Carbon::parse($this->booking->booked_from);
-        $bookedTo = \Carbon\Carbon::parse($this->booking->booked_to);
+        $bookedFrom = $this->booking->booked_from;
+        $bookedTo = $this->booking->booked_to;
 
         return (new MailMessage)
             ->subject('การจองใหม่รออนุมัติ - ' . $this->booking->booking_name . ' ' . $bookedFrom->format('Y-m-d') . ' - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
@@ -103,12 +103,12 @@ class NewBookingNotice extends Notification
 
         // Date
         $fTem['body']['contents'][2]['contents'][1]['contents'][1]['text'] =
-            \Carbon\Carbon::parse($this->booking->booked_from)->locale('th')->isoFormat('DD MMMM YYYY');
+            $this->booking->booked_from->locale('th')->isoFormat('DD MMMM YYYY');
 
         // Time
         $fTem['body']['contents'][2]['contents'][2]['contents'][1]['text'] =
-            \Carbon\Carbon::parse($this->booking->booked_from)->format('H:i') . ' - ' .
-            \Carbon\Carbon::parse($this->booking->booked_to)->format('H:i');
+            $this->booking->booked_from->format('H:i') . ' - ' .
+            $this->booking->booked_to->format('H:i');
 
         // Participants
         $attendeeList = $this->booking->parseAttendeeforDisplay();

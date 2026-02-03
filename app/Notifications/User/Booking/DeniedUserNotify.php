@@ -40,8 +40,8 @@ class DeniedUserNotify extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $bookedFrom = \Carbon\Carbon::parse($this->booking->booked_from);
-        $bookedTo = \Carbon\Carbon::parse($this->booking->booked_to);
+        $bookedFrom = $this->booking->booked_from;
+        $bookedTo = $this->booking->booked_to;
 
         $mail = new MailMessage()
             ->subject('ผลการจองห้อง - ' . $this->booking->booking_name . ' ' . $bookedFrom->format('Y-m-d') . ' - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
@@ -86,21 +86,21 @@ class DeniedUserNotify extends Notification
 
         // Replace placeholders with actual booking data
         // Room name
-        $flexMessage['body']['contents'][2]['contents'][0]['contents'][1]['text'] =
+        $fTem['body']['contents'][2]['contents'][0]['contents'][1]['text'] =
             $this->booking->room->room_name ?? 'ไม่ระบุ';
 
         // Date
-        $flexMessage['body']['contents'][2]['contents'][1]['contents'][1]['text'] =
-            \Carbon\Carbon::parse($this->booking->booked_from)->locale('th')->isoFormat('DD MMMM YYYY');
+        $fTem['body']['contents'][2]['contents'][1]['contents'][1]['text'] =
+            $this->booking->booked_from->locale('th')->isoFormat('DD MMMM YYYY');
 
         // Time
-        $flexMessage['body']['contents'][2]['contents'][2]['contents'][1]['text'] =
-            \Carbon\Carbon::parse($this->booking->booked_from)->format('H:i') . ' - ' .
-            \Carbon\Carbon::parse($this->booking->booked_to)->format('H:i');
+        $fTem['body']['contents'][2]['contents'][2]['contents'][1]['text'] =
+            $this->booking->booked_from->format('H:i') . ' - ' .
+            $this->booking->booked_to->format('H:i');
 
         // Participants
         $attendeeList = $this->booking->parseAttendeeforDisplay();
-        $flexMessage['body']['contents'][2]['contents'][3]['contents'][1]['text'] =
+        $fTem['body']['contents'][2]['contents'][3]['contents'][1]['text'] =
             !empty($attendeeList) ? implode(', ', $attendeeList) : 'ไม่ระบุผู้เข้าร่วม';
 
         $lineCon = new LineIntegrationController();
