@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Notifications\User\Booking\NewBooking;
 use App\Notifications\Admin\Booking\BookingNotice;
+use App\Notifications\User\Booking\UserInvitedNotify;
 use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
@@ -95,6 +96,19 @@ class BookingController extends Controller
     {
         try {
             Booking::approveBooking($request, $bookingId);
+            $booking = Booking::find($bookingId);
+            if ($booking->attendees) {
+                $InternalList = Booking::fetchInternalAttendeeList($booking);
+                foreach ($InternalList as $user) {
+                    $user->notify(new UserInvitedNotify($booking, Auth::user()));
+                }
+                $GuestList = Booking::fetchGuestAttendeeList($booking);
+                foreach ($GuestList as $guest) {
+                    // Send invitation email to guest with their name
+                    Notification::route('mail', $guest['email'])
+                        ->notify(new UserInvitedNotify($booking, Auth::user(), $guest['name']));
+                }
+            }
             return redirect()->route('admin.booking')->with('success', 'อัปเดตสถานะการจองเรียบร้อยแล้ว');
         } catch (\InvalidArgumentException $e) {
             return redirect()->route('admin.booking')->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());

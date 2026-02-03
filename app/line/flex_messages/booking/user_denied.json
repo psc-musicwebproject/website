@@ -128,23 +128,5 @@
         ]
       }
     ]
-  },
-  "footer": {
-    "type": "box",
-    "layout": "vertical",
-    "spacing": "sm",
-    "contents": [
-      {
-        "type": "button",
-        "style": "link",
-        "height": "sm",
-        "action": {
-          "type": "uri",
-          "label": "ดูสถานะการจอง",
-          "uri": "https://line.me/"
-        }
-      }
-    ],
-    "flex": 0
   }
 }
