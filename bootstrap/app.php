@@ -26,48 +26,70 @@ return Application::configure(basePath: dirname(__DIR__))
                     $user = Auth::guard('admin')->user() ?? Auth::guard('web')->user();
 
                     if (!$user) {
+                        \Illuminate\Support\Facades\Log::debug('Broadcasting auth: no user found');
                         return response()->json(['error' => 'Unauthenticated'], 403);
                     }
 
-                    // Set user resolver so Broadcast facade can find the authenticated user
-                    $request->setUserResolver(function () use ($user) {
-                        return $user;
-                    });
+                    $channelName = $request->input('channel_name');
+                    $socketId = $request->input('socket_id');
 
-                    // Also set the user on the appropriate guard
-                    if ($user->type === 'admin') {
-                        Auth::guard('admin')->setUser($user);
+                    \Illuminate\Support\Facades\Log::debug('Broadcasting auth attempt', [
+                        'user_id' => $user->id,
+                        'user_type' => $user->type,
+                        'channel' => $channelName,
+                        'socket_id' => $socketId,
+                    ]);
+
+                    // Remove 'private-' prefix for matching
+                    $channelWithoutPrefix = preg_replace('/^private-/', '', $channelName);
+
+                    // Direct channel authorization
+                    $authorized = false;
+                    $channelData = [];
+
+                    // Match admin.{id} pattern
+                    if (preg_match('/^admin\.(\d+)$/', $channelWithoutPrefix, $matches)) {
+                        $channelId = (int) $matches[1];
+                        $authorized = (int) $user->id === $channelId && $user->type === 'admin';
+                        \Illuminate\Support\Facades\Log::debug('Admin channel check', [
+                            'channel_id' => $channelId,
+                            'user_id' => $user->id,
+                            'user_type' => $user->type,
+                            'id_match' => (int) $user->id === $channelId,
+                            'type_match' => $user->type === 'admin',
+                            'authorized' => $authorized,
+                        ]);
+                    }
+                    // Match user.{id} pattern
+                    elseif (preg_match('/^user\.(\d+)$/', $channelWithoutPrefix, $matches)) {
+                        $channelId = (int) $matches[1];
+                        $authorized = (int) $user->id === $channelId && $user->type !== 'admin';
+                        \Illuminate\Support\Facades\Log::debug('User channel check', [
+                            'channel_id' => $channelId,
+                            'user_id' => $user->id,
+                            'user_type' => $user->type,
+                            'id_match' => (int) $user->id === $channelId,
+                            'type_match' => $user->type !== 'admin',
+                            'authorized' => $authorized,
+                        ]);
                     } else {
-                        Auth::guard('web')->setUser($user);
+                        \Illuminate\Support\Facades\Log::warning('Unknown channel pattern', ['channel' => $channelWithoutPrefix]);
                     }
 
-                    try {
-                        // Use Laravel's channel authorization from routes/channels.php
-                        \Illuminate\Support\Facades\Log::debug('Broadcasting auth attempt', [
-                            'user_id' => $user->id,
-                            'user_type' => $user->type,
-                            'channel' => $request->input('channel_name'),
-                        ]);
-                        return Broadcast::auth($request);
-                    } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
-                        // Authorization explicitly denied by channel callback
-                        \Illuminate\Support\Facades\Log::warning('Broadcasting auth denied', [
-                            'user_id' => $user->id,
-                            'user_type' => $user->type,
-                            'channel' => $request->input('channel_name'),
-                            'reason' => 'Channel callback returned false or channel not found',
-                        ]);
+                    if (!$authorized) {
                         return response()->json(['error' => 'Forbidden', 'message' => 'Channel authorization failed'], 403);
-                    } catch (\Exception $e) {
-                        // Log the actual error for debugging
-                        \Illuminate\Support\Facades\Log::error('Broadcasting auth error', [
-                            'user_id' => $user->id,
-                            'user_type' => $user->type,
-                            'channel' => $request->input('channel_name'),
-                            'error' => $e->getMessage(),
-                        ]);
-                        return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()], 403);
                     }
+
+                    // Return Pusher/Reverb compatible auth response
+                    $pusher = new \Pusher\Pusher(
+                        config('broadcasting.connections.reverb.key'),
+                        config('broadcasting.connections.reverb.secret'),
+                        config('broadcasting.connections.reverb.app_id')
+                    );
+
+                    $auth = $pusher->authorizeChannel($channelName, $socketId);
+
+                    return response()->json(json_decode($auth, true));
                 })->name('broadcasting.auth');
             });
         },
