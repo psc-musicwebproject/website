@@ -15,7 +15,7 @@
                 <tr>
                     <td>{{ $booking->booking_name }}</td>
                     <td>{{ $booking->booking_time }}</td>
-                    <td>{{ $booking->status }}</td>
+                    <td>{{ App\Model\Booking::bookingStatusToText($booking->approval_status) }}</td>
                     <td>
                         <a href="{{ route('dash.booking.history.detail', ['id' => $booking->booking_id]) }}" class="btn btn-primary btn-sm">
                             ดูรายละเอียด
