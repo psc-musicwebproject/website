@@ -113,7 +113,7 @@ class BookingController extends Controller
             Booking::approveBooking($request, $bookingId);
             $booking = Booking::where('booking_id', $bookingId)->first();
 
-            if ($booking->booking_status === 'denied') {
+            if ($booking->booking_status === 'rejected') {
                 $booking->user->notify(new \App\Notifications\User\Booking\DeniedUserNotify($booking));
             } elseif ($booking->booking_status === 'approved') {
                 $booking->user->notify(new \App\Notifications\User\Booking\ApprovedUserNotify($booking));
