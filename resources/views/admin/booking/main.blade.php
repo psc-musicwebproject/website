@@ -260,19 +260,32 @@
             // Sync picker values to hidden inputs
             document.getElementById('date_picker').addEventListener('change.td', function(e) {
                 if (e.detail.date) {
-                    document.getElementById('date').value = e.detail.date.format('YYYY-MM-DD');
+                    // Use native date to ensure YYYY-MM-DD format regardless of locale
+                    const d = e.detail.date;
+                    const year = d.year;
+                    const month = String(d.month + 1).padStart(2, '0');
+                    const day = String(d.date).padStart(2, '0');
+                    document.getElementById('date').value = `${year}-${month}-${day}`;
                 }
             });
 
             document.getElementById('time_from_picker').addEventListener('change.td', function(e) {
                 if (e.detail.date) {
-                    document.getElementById('time_from').value = e.detail.date.format('HH:mm');
+                    // Use native time to ensure HH:mm format regardless of locale
+                    const d = e.detail.date;
+                    const hours = String(d.hours).padStart(2, '0');
+                    const minutes = String(d.minutes).padStart(2, '0');
+                    document.getElementById('time_from').value = `${hours}:${minutes}`;
                 }
             });
 
             document.getElementById('time_to_picker').addEventListener('change.td', function(e) {
                 if (e.detail.date) {
-                    document.getElementById('time_to').value = e.detail.date.format('HH:mm');
+                    // Use native time to ensure HH:mm format regardless of locale
+                    const d = e.detail.date;
+                    const hours = String(d.hours).padStart(2, '0');
+                    const minutes = String(d.minutes).padStart(2, '0');
+                    document.getElementById('time_to').value = `${hours}:${minutes}`;
                 }
             });
 
