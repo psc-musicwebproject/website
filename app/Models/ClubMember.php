@@ -177,4 +177,40 @@ class ClubMember extends Model
             ->where('member_id', $id)
             ->get();
     }
+
+    // Parse array attributes for display, from json
+    // [{"type":"guitar","data":"checked"},{"type":"bass","data":"checked"}]
+    // we won't show the checked text, just other data with type
+    public static function parseAbilitiesForDisplay($ability) {
+        if (empty($ability) || !is_array($ability)) {
+            return '-';
+        }
+
+        $options = [
+            'guitar'   => 'กีตาร์ (โปร่ง / ไฟฟ้า)',
+            'bass'     => 'เบส',
+            'drums'    => 'กลองชุด',
+            'keyboard' => 'คีย์บอร์ด / เปียโน',
+            'vocal'    => 'ร้องเพลง',
+            'wind'     => 'เครื่องเป่าลม',
+            'other'    => 'อื่นๆ',
+        ];
+
+        $display = [];
+
+        foreach ($ability as $item) {
+            $type = $item['type'] ?? '';
+            $data = $item['data'] ?? '';
+
+            if (array_key_exists($type, $options)) {
+                $text = $options[$type];
+                if (!empty($data) && $data !== 'checked') {
+                    $text .= ' (' . $data . ')';
+                }
+                $display[] = $text;
+            }
+        }
+
+        return empty($display) ? '-' : implode(', ', $display);
+    }
 }
