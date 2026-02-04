@@ -111,7 +111,7 @@ class UserInvitedNotify extends Notification
             !empty($attendeeList) ? implode(', ', $attendeeList) : 'ไม่ระบุผู้เข้าร่วม';
 
         $lineCon = new LineIntegrationController();
-        return $lineCon->pushFlexMessage($notifiable->line_id, "ผลการจอง" . $this->booking->room->room_name, $fTem);
+        return $lineCon->pushFlexMessage($notifiable->line_id, "คำเชิญเข้าห้อง" . $this->booking->room->room_name . " - " . $this->booking->booking_name, $fTem);
     }
 
     /**
