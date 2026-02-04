@@ -93,7 +93,7 @@ class NewBookingNotice extends Notification
             return "No Line User ID";
         }
 
-        $jStr = file_get_contents(app_path('line/flex_messages/booking/admin/new_booking_alert.json'));
+        $jStr = file_get_contents(app_path('line/flex_messages/booking/admin/new_user_booking.json'));
         $fTem = json_decode($jStr, true);
 
         // Replace Placeholder daya to real data
