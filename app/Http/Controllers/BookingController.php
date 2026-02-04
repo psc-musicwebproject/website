@@ -80,13 +80,13 @@ class BookingController extends Controller
                 if ($isAdmin && $booking->attendees) {
                     $InternalList = Booking::fetchInternalAttendeeList($booking);
                     foreach ($InternalList as $user) {
-                        $user->notify(new UserInvitedNotify($booking, Auth::user()));
+                        $user->notify(new UserInvitedNotify($booking));
                     }
                     $GuestList = Booking::fetchGuestAttendeeList($booking);
                     foreach ($GuestList as $guest) {
                         // Send invitation email to guest with their name
                         Notification::route('mail', $guest['email'])
-                            ->notify(new UserInvitedNotify($booking, Auth::user(), $guest['name']));
+                            ->notify(new UserInvitedNotify($booking, $guest['name']));
                     }
                 }
             }
@@ -116,13 +116,13 @@ class BookingController extends Controller
             if ($wasWaiting && $booking && $booking->attendees) {
                 $InternalList = Booking::fetchInternalAttendeeList($booking);
                 foreach ($InternalList as $user) {
-                    $user->notify(new UserInvitedNotify($booking, Auth::user()));
+                    $user->notify(new UserInvitedNotify($booking));
                 }
                 $GuestList = Booking::fetchGuestAttendeeList($booking);
                 foreach ($GuestList as $guest) {
                     // Send invitation email to guest with their name
                     Notification::route('mail', $guest['email'])
-                        ->notify(new UserInvitedNotify($booking, Auth::user(), $guest['name']));
+                        ->notify(new UserInvitedNotify($booking, $guest['name']));
                 }
             }
             return redirect()->route('admin.booking')->with('success', 'อัปเดตสถานะการจองเรียบร้อยแล้ว');
