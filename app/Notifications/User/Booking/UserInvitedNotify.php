@@ -82,6 +82,12 @@ class UserInvitedNotify extends Notification
         $jStr = file_get_contents(app_path('line/flex_messages/booking/user_invited.json'));
         $fTem = json_decode($jStr, true);
 
+        // If current host aren't localhost, change the image from public-hosted image for placeholder to self-hosted one
+        if (!in_array(request()->getHost(), ['localhost', '127.0.0.1'])) {
+            $fTem['hero']['url'] = asset('assets/image/line/booking_approved.png');
+        }
+
+
         // Replace placeholders with real data
         $fTem['body']['contents'][1]['contents'][0]['text'] = $this->booking->user->name_title . $this->booking->user->name . ' ' . $this->booking->user->surname . ' ได้เชิญคุณให้เข้าร่วมการใช้ห้อง "' . $this->booking->room->room_name . '" กรุณาตรวจสอบรายละเอียดการจองด้านล่าง';
 

@@ -20,9 +20,9 @@ class ApprovedUserNotify extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(Booking $booking)
     {
-        //
+        $this->booking = $booking;
     }
 
     /**
@@ -79,7 +79,7 @@ class ApprovedUserNotify extends Notification
 
         // If current host aren't localhost, change the image from public-hosted image for placeholder to self-hosted one
         if (!in_array(request()->getHost(), ['localhost', '127.0.0.1'])) {
-            $fTem['hero']['url'] = asset('images/line/booking_approved.png');
+            $fTem['hero']['url'] = asset('assets/image/line/booking_approved.png');
         }
 
         // Replace placeholders with real data

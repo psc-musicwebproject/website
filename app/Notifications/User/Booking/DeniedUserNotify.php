@@ -20,9 +20,9 @@ class DeniedUserNotify extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(Booking $booking)
     {
-        //
+        $this->booking = $booking;
     }
 
     /**
@@ -76,6 +76,12 @@ class DeniedUserNotify extends Notification
         // Importing Line Flex Message Template from JSON file
         $jStr = file_get_contents(app_path('line/flex_messages/booking/user_denied.json'));
         $fTem = json_decode($jStr, true);
+
+        // If current host aren't localhost, change the image from public-hosted image for placeholder to self-hosted one
+        if (!in_array(request()->getHost(), ['localhost', '127.0.0.1'])) {
+            $fTem['hero']['url'] = asset('assets/image/line/booking_denied.png');
+        }
+
 
         // Replace placeholders with real data
         if ($this->booking->approval_comment) {
