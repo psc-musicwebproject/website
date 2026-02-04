@@ -25,13 +25,22 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'name_title',
         'name',
         'surname',
-        'username', 
+        'nickname',
+        'username',
         'student_id',
+        'major',
+        'phone_number',
+        'email',
         'type',
         'class',
         'password',
+        'line_id',
+        'line_bound',
+        'is_active',
+        'reset_password_on_next_login',
     ];
 
     /**
@@ -53,6 +62,8 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'reset_password_on_next_login' => 'boolean',
         ];
     }
 
@@ -86,5 +97,31 @@ class User extends Authenticatable
     public function hasPendingClubApplication(): bool
     {
         return $this->clubMembership()->where('status', 'waiting')->exists();
+    }
+
+    public static function isThisLineIDAlreadyBound(string $lineID, ?int $excludeUserId = null): bool
+    {
+        $query = self::where('line_id', $lineID);
+
+        if ($excludeUserId !== null) {
+            $query->where('id', '!=', $excludeUserId);
+        }
+
+        return $query->exists();
+    }
+
+    public function getRoleLabelAttribute()
+    {
+        return UserTypeMapping::where('db_type', $this->type)->value('named_type') ?? ucfirst($this->type);
+    }
+
+    /**
+     * The channels the user receives notification broadcasts on.
+     */
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return $this->type === 'admin'
+            ? 'admin.'.$this->id
+            : 'user.'.$this->id;
     }
 }

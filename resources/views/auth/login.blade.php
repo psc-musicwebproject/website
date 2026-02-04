@@ -30,12 +30,16 @@
                 <label for="password">รหัสผ่าน</label>
             </div>
         </div>
-        <div class="row justify-content-end">
-            <div class="col-4">
-                <div class="d-grid gap-2">
-                  <button type="submit" name="login_user" class="btn btn-primary">Sign In</button>
-                </div>
-            </div>
+        <div class="d-grid gap-2">
+            <button type="submit" name="action" value="cred_login" class="btn btn-primary">Sign In</button>
+        </div>
+        <div class="text-center mt-3">
+            <span>หรือเข้าสู่ระบบด้วย</span>
+        </div>
+        <div class="d-grid gap-2 mt-2">
+            <button type="submit" name="action" value="line_login" class="btn btn-success">
+                <i class="bi bi-line"></i> Sign In with LINE
+            </button>
         </div>
     </form>
     <p class="mt-3 mb-0">

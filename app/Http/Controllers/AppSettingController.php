@@ -10,31 +10,76 @@ class AppSettingController extends Controller
 {
     public function __invoke(Request $request): RedirectResponse
     {
-        $request->validate([
-            'app_name' => 'required|string|max:255',
-            'app_header' => 'required|string|max:255',
-            'app_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-        ], [
-            'app_name.required' => 'กรุณากรอกชื่อแอปพลิเคชัน',
-            'app_name.max' => 'ชื่อแอปพลิเคชันต้องไม่เกิน 255 ตัวอักษร',
-            'app_header.required' => 'กรุณากรอกหัวแอป',
-            'app_header.max' => 'หัวแอปต้องไม่เกิน 255 ตัวอักษร',
-            'app_logo.image' => 'ไฟล์โลโก้ต้องเป็นรูปภาพ',
-            'app_logo.mimes' => 'ไฟล์โลโก้ต้องเป็นไฟล์ประเภท: jpeg, png, jpg, gif, svg',
-            'app_logo.max' => 'ขนาดไฟล์โลโก้ต้องไม่เกิน 4MB',
-        ]);
+        $action = $request->input('action');
 
-        try {
-            AppSetting::updateSetting('name', $request->input('app_name'));
-            AppSetting::updateSetting('header', $request->input('app_header'));
+        if ($action === 'note') {
+            $request->validate([
+                'notice' => 'nullable|string',
+            ]);
 
-            if ($request->hasFile('app_logo')) {
-                $request->file('app_logo')->move(public_path('assets/image'), 'logo.png');
+            try {
+                AppSetting::updateNotice($request->input('notice'));
+                return redirect()->back()->with('success', 'บันทึกประกาศเรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
             }
+        } elseif ($action === 'general') {
+            $request->validate([
+                'app_name' => 'nullable|string|max:255',
+                'app_header' => 'nullable|string|max:255',
+                'app_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+            ], [
+                'app_name.max' => 'ชื่อแอปพลิเคชันต้องไม่เกิน 255 ตัวอักษร',
+                'app_header.max' => 'หัวแอปต้องไม่เกิน 255 ตัวอักษร',
+                'app_logo.image' => 'ไฟล์โลโก้ต้องเป็นรูปภาพ',
+                'app_logo.mimes' => 'ไฟล์โลโก้ต้องเป็นไฟล์ประเภท: jpeg, png, jpg, gif, svg',
+                'app_logo.max' => 'ขนาดไฟล์โลโก้ต้องไม่เกิน 4MB',
+            ]);
 
-            return redirect()->back()->with('success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกการตั้งค่า: ' . $e->getMessage());
+            try {
+                if ($request->has('app_name')) {
+                    AppSetting::updateSetting('name', $request->input('app_name'));
+                }
+                if ($request->has('app_header')) {
+                    AppSetting::updateSetting('header', $request->input('app_header'));
+                }
+
+                if ($request->hasFile('app_logo')) {
+                    $request->file('app_logo')->move(public_path('assets/image'), 'logo.png');
+                }
+
+                return redirect()->back()->with('success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกการตั้งค่า: ' . $e->getMessage());
+            }
+        } elseif ($action === 'user_type_update') {
+            $request->validate([
+                'db_type' => 'required|string|max:255',
+                'named_type' => 'required|string|max:255',
+            ]);
+
+            try {
+                \App\Models\UserTypeMapping::updateOrCreate(
+                    ['db_type' => $request->input('db_type')],
+                    ['named_type' => $request->input('named_type')]
+                );
+                return redirect()->back()->with('success', 'บันทึกประเภทผู้ใช้เรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+            }
+        } elseif ($action === 'user_type_delete') {
+            $request->validate([
+                'db_type' => 'required|string|max:255',
+            ]);
+
+            try {
+                \App\Models\UserTypeMapping::where('db_type', $request->input('db_type'))->delete();
+                return redirect()->back()->with('success', 'ลบประเภทผู้ใช้เรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+            }
         }
+        
+        return redirect()->back()->with('error', 'Unknown Action');
     }
 }

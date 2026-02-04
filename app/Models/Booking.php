@@ -121,7 +121,7 @@ class Booking extends Model
             })
             ->count();
     }
-    
+
     public static function getBookingByID($bookingId)
     {
         return self::where('booking_id', $bookingId)->get();
@@ -130,13 +130,13 @@ class Booking extends Model
     public static function getAllBookings($status = null, $quantity = null)
     {
         return self::orderBy('booking_time', 'desc')
-        ->when($status, function ($query, $status) {
-            return $query->where('approval_status', $status);
-        })
-        ->when($quantity, function ($query, $quantity) {
-            return $query->limit($quantity);
-        })
-        ->get();
+            ->when($status, function ($query, $status) {
+                return $query->where('approval_status', $status);
+            })
+            ->when($quantity, function ($query, $quantity) {
+                return $query->limit($quantity);
+            })
+            ->get();
     }
 
     public static function countAllBookings($status = null, $quantity = null)
@@ -144,10 +144,10 @@ class Booking extends Model
         return self::when($status, function ($query, $status) {
             return $query->where('approval_status', $status);
         })
-        ->when($quantity, function ($query, $quantity) {
-            return $query->limit($quantity);
-        })
-        ->count();
+            ->when($quantity, function ($query, $quantity) {
+                return $query->limit($quantity);
+            })
+            ->count();
     }
 
     public static function bookingStatusToText($status)
@@ -186,5 +186,201 @@ class Booking extends Model
             return true;
         }
         return false;
+    }
+
+    public function parseAttendeeforDisplay()
+    {
+        $attendees = $this->attendees;
+
+        if (empty($attendees) || !is_array($attendees) || !isset($attendees['attendee'])) {
+            return [];
+        }
+        if (is_string($attendees)) {
+            $attendees = json_decode($attendees, true);
+        }
+
+        $attendeeList = [];
+        if ($this->user) {
+            $attendeeList[] = $this->user->name . ' ' . $this->user->surname . ' (' . ($this->user->student_id ?? '-') . ')';
+        }
+
+        foreach ($attendees['attendee'] as $user) {
+            $name = $user['user_name'] ?? 'Unknown';
+            if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
+                $dbUser = User::where('student_id', $user['user_identify'])
+                    ->orWhere('id', $user['user_identify'])
+                    ->first();
+                if ($dbUser) {
+                    $name = $dbUser->name . ' ' . $dbUser->surname;
+                }
+            }
+            $identify = $user['user_identify'] ?? '-';
+            $attendeeList[] = $name . ' (' . $identify . ')';
+        }
+        return $attendeeList;
+    }
+
+    public static function parseAttendeeforName($attendee)
+    {
+        if (is_string($attendee)) {
+            $attendee = json_decode($attendee, true);
+        }
+
+        if (empty($attendee) || !is_array($attendee) || !isset($attendee['attendee'])) {
+            return [];
+        }
+
+        $attendeeList = [];
+        foreach ($attendee['attendee'] as $user) {
+            $name = $user['user_name'] ?? 'Unknown';
+            if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
+                $dbUser = User::where('student_id', $user['user_identify'])
+                    ->orWhere('id', $user['user_identify'])
+                    ->first();
+                if ($dbUser) {
+                    $name = $dbUser->name . ' ' . $dbUser->surname;
+                }
+            }
+            $attendeeList[] = $name;
+        }
+        return $attendeeList;
+    }
+    public function isAttendee(User $user): bool
+    {
+        $attendees = $this->attendees;
+        if (is_string($attendees)) {
+            $attendees = json_decode($attendees, true);
+        }
+
+        if (empty($attendees) || !is_array($attendees)) {
+            return false;
+        }
+
+        // Try to handle both structure layouts if needed, but primarily the one in history
+        /*
+         { "attendee": [ ... ] }
+        */
+        $list = $attendees['attendee'] ?? $attendees;
+        if (!is_array($list)) return false;
+
+        foreach ($list as $p) {
+            // Check student_id or id
+            if (isset($p['user_from']) && $p['user_from'] === 'id') {
+                if (isset($p['user_identify'])) {
+                    if ($p['user_identify'] == $user->student_id || $p['user_identify'] == $user->id) {
+                        return true;
+                    }
+                }
+            }
+            // Check email
+            if (isset($p['user_from']) && $p['user_from'] === 'mail') {
+                if (isset($p['user_identify']) && $p['user_identify'] == $user->email) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function fetchInternalAttendeeID($attendee) {
+        if (is_string($attendee)) {
+            $attendees = json_decode($attendee, true);
+            $IntAttendID = [];
+            if (empty($attendees) || !is_array($attendees) || !isset($attendees['attendee'])) {
+                return $IntAttendID;
+            } else {
+                foreach ($attendees['attendee'] as $user) {
+                    if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
+                        $dbUser = User::where('student_id', $user['user_identify'])
+                            ->orWhere('id', $user['user_identify'])
+                            ->first();
+                        if ($dbUser) {
+                            $IntAttendID[] = $dbUser->id;
+                        }
+                    }
+                }
+                return $IntAttendID;
+            }
+        }
+    }
+
+    public function fetchGuestMailList($attendee) {
+        // Return array of guest emails from attendees
+        if (is_string($this->attendee)) {
+            $attendees = json_decode($attendee, true);
+            $GuestEmailList = [];
+            if (empty($attendees) || !is_array($attendees) || !isset($attendees['attendee'])) {
+                return $GuestEmailList;
+            } else {
+                foreach ($attendees['attendee'] as $user) {
+                    if (isset($user['user_from']) && $user['user_from'] === 'mail' && isset($user['user_identify'])) {
+                        $GuestEmailList[] = $user['user_identify'];
+                    }
+                }
+                return $GuestEmailList;
+            }
+        }
+    }
+
+    /**
+     * Fetch internal attendees as User collection.
+     * @param Booking $booking
+     * @return \Illuminate\Support\Collection<User>
+     */
+    public static function fetchInternalAttendeeList(Booking $booking): \Illuminate\Support\Collection
+    {
+        $attendees = $booking->attendees;
+        if (is_string($attendees)) {
+            $attendees = json_decode($attendees, true);
+        }
+
+        $userIds = [];
+        if (!empty($attendees) && is_array($attendees) && isset($attendees['attendee'])) {
+            foreach ($attendees['attendee'] as $user) {
+                if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
+                    $dbUser = User::where('student_id', $user['user_identify'])
+                        ->orWhere('id', $user['user_identify'])
+                        ->first();
+                    if ($dbUser) {
+                        $userIds[] = $dbUser->id;
+                    }
+                }
+            }
+        }
+
+        return User::whereIn('id', $userIds)->get();
+    }
+
+    /**
+     * Fetch guest attendees with email and name.
+     * @param Booking $booking
+     * @return array<array{email: string, name: string}>
+     */
+    public static function fetchGuestAttendeeList(Booking $booking): array
+    {
+        $attendees = $booking->attendees;
+        if (is_string($attendees)) {
+            $attendees = json_decode($attendees, true);
+        }
+
+        $guestList = [];
+        if (!empty($attendees) && is_array($attendees) && isset($attendees['attendee'])) {
+            foreach ($attendees['attendee'] as $user) {
+                if (isset($user['user_from']) && $user['user_from'] === 'mail' && isset($user['user_identify'])) {
+                    $guestList[] = [
+                        'email' => $user['user_identify'],
+                        'name' => $user['user_name'] ?? 'Guest',
+                    ];
+                }
+            }
+        }
+
+        return $guestList;
+    }
+
+    public function isOwnerOrAttendee(User $user): bool
+    {
+        return $this->user_id == $user->id || $this->isAttendee($user);
     }
 }

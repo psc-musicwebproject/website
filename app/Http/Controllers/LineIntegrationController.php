@@ -1,0 +1,473 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Laravel\Socialite\Socialite;
+use App\Models\User;
+// Add logging for debugging purposes
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
+// Importing LINE SDK v12
+use GuzzleHttp\Client;
+use LINE\Clients\MessagingApi\Configuration;
+use LINE\Clients\MessagingApi\Api\MessagingApiApi;
+use LINE\Clients\MessagingApi\Model\PushMessageRequest;
+use LINE\Clients\MessagingApi\Model\TextMessage;
+use LINE\Clients\MessagingApi\Model\FlexMessage;
+use LINE\Clients\MessagingApi\Model\FlexBubble;
+use LINE\Clients\MessagingApi\ApiException;
+
+
+class LineIntegrationController extends Controller
+{
+    protected $messagingApi;
+
+    public function __construct()
+    {
+        $accessToken = config('services.line.messaging_api.access_token');
+
+        if (empty($accessToken)) {
+            Log::error('LINE Messaging API access token is not configured');
+            throw new \RuntimeException('LINE Messaging API access token is missing');
+        }
+
+        $client = new Client();
+        $config = new Configuration();
+        $config->setAccessToken($accessToken);
+
+        $this->messagingApi = new MessagingApiApi(
+            client: $client,
+            config: $config
+        );
+    }
+
+    public function getLineBot()
+    {
+        return $this->messagingApi;
+    }
+
+    public function AuthenticateViaLine(Request $request)
+    {
+        // Logic for authenticating with LINE API
+        $guard = $request->query('guard', 'web');
+
+        session()->forget('line_binding_mode');
+        session([
+            'auth_via_line' => true,
+            'line_auth_guard' => $guard,
+            'line_oauth_redirect' => $request->input('redirect_url'),
+        ]);
+        session()->save(); // Force save before redirect
+
+        return Socialite::driver('line')
+            ->redirect();
+    }
+
+    public function GetCallbackFromLine(Request $request)
+    {
+        // Logic for handling callback from LINE API
+        $lineUser = Socialite::driver('line')->user();
+
+        // Check if this is a binding flow
+        $isBindingMode = session('line_binding_mode', false);
+        $bindingUserId = session('line_binding_user_id');
+
+        // Determine current user ID from either guard
+        $currentUserId = 'guest';
+        if (Auth::guard('admin')->check()) {
+            $currentUserId = Auth::guard('admin')->id();
+        } elseif (Auth::guard('web')->check()) {
+            $currentUserId = Auth::guard('web')->id();
+        }
+
+        Log::info('Received LINE callback', [
+            'line_id' => $lineUser->id ?? 'unknown',
+            'binding_mode' => $isBindingMode,
+            'isAuth' => session('auth_via_line', false),
+            'stored_user_id' => $bindingUserId,
+            'current_user_id' => $currentUserId
+        ]);
+
+        if (!$lineUser || empty($lineUser->id)) {
+            $originUrl = session('line_oauth_origin');
+            session()->forget(['line_binding_mode', 'line_binding_user_id', 'line_binding_guard', 'line_unbind_mode', 'line_unbind_user_id', 'line_unbind_guard', 'line_unbind_line_id', 'auth_via_line', 'line_auth_guard', 'line_oauth_redirect', 'line_oauth_origin']);
+
+            $errorRedirect = $originUrl ?: route('dash');
+            return redirect($errorRedirect)->with('error', 'ไม่สามารถรับข้อมูลจาก LINE ได้ กรุณาลองใหม่อีกครั้ง');
+        }
+
+        // Handle binding mode - use stored user ID if session auth is lost
+        if ($isBindingMode && $bindingUserId) {
+            $user = User::find($bindingUserId);
+
+            if (!$user) {
+                $originUrl = session('line_oauth_origin');
+                session()->forget(['line_binding_mode', 'line_binding_user_id', 'line_binding_guard', 'line_oauth_redirect', 'line_oauth_origin']);
+                $errorRedirect = $originUrl ?: route('dash');
+                return redirect($errorRedirect)->with('error', 'ไม่พบข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้ง');
+            }
+
+            // Check if this LINE ID is already bound to another user
+            if (User::isThisLineIDAlreadyBound($lineUser->id, $user->id)) {
+                $originUrl = session('line_oauth_origin');
+                session()->forget(['line_binding_mode', 'line_binding_user_id', 'line_binding_guard', 'line_oauth_redirect', 'line_oauth_origin']);
+                $errorRedirect = $originUrl ?: route('dash');
+                return redirect($errorRedirect)->with('error', 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว');
+            }
+
+            $user->line_id = $lineUser->id;
+            $user->line_bound = true;
+            $user->save();
+
+            // Get guard and redirect URL BEFORE forgetting session
+            $guard = session('line_binding_guard', 'web');
+            $redirectUrl = session('line_oauth_redirect');
+            session()->forget(['line_binding_mode', 'line_binding_user_id', 'line_binding_guard', 'line_oauth_redirect', 'line_oauth_origin']);
+            Log::info('Successfully bound LINE ID ' . $lineUser->id . ' to user ID: ' . $user->id);
+            $this->SendNormalTextMessage($lineUser->id, 'บัญชี LINE นี้ได้ผูกกับผู้ใช้ (' . $user->name_title . $user->name . ' ' . $user->surname . ' | ' . $user->student_id . ') สำเร็จแล้ว');
+
+            // Use stored redirect URL if available
+            if ($redirectUrl) {
+                return redirect($redirectUrl)->with('success', 'การผูกบัญชี LINE สำเร็จแล้ว');
+            }
+
+            if ($guard === 'admin') {
+                return redirect()->route('admin.dash')->with('success', 'การผูกบัญชี LINE สำเร็จแล้ว');
+            }
+
+            return redirect()->route('dash')->with('success', 'การผูกบัญชี LINE สำเร็จแล้ว');
+        }
+
+        // Handle unbind mode - use OAuth token to deauthorize
+        $isUnbindMode = session('line_unbind_mode', false);
+        $unbindUserId = session('line_unbind_user_id');
+
+        if ($isUnbindMode && $unbindUserId) {
+            $user = User::find($unbindUserId);
+            $storedLineId = session('line_unbind_line_id');
+            $guard = session('line_unbind_guard', 'web');
+            $redirectUrl = session('line_oauth_redirect');
+            $originUrl = session('line_oauth_origin');
+
+            // Clear session data
+            session()->forget(['line_unbind_mode', 'line_unbind_user_id', 'line_unbind_guard', 'line_unbind_line_id', 'line_oauth_redirect', 'line_oauth_origin']);
+
+            if (!$user) {
+                $errorRedirect = $originUrl ?: route('dash');
+                return redirect($errorRedirect)->with('error', 'ไม่พบข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้ง');
+            }
+
+            // Verify the LINE account matches
+            if ($lineUser->id !== $storedLineId) {
+                $errorRedirect = $originUrl ?: route('dash');
+                return redirect($errorRedirect)->with('error', 'บัญชี LINE ที่ยืนยันไม่ตรงกับบัญชีที่ผูกไว้');
+            }
+
+            // Send notification before unbinding
+            try {
+                $this->SendNormalTextMessage($storedLineId, 'บัญชี LINE นี้ได้ถูกยกเลิกการผูกจากระบบแล้ว');
+            } catch (\Exception $e) {
+                Log::warning('Failed to send unbind notification: ' . $e->getMessage());
+            }
+
+            // Call LINE deauthorize API with fresh token
+            try {
+                $this->deauthorizeLineUser($lineUser->token);
+                Log::info('Successfully deauthorized LINE user via API for user ID: ' . $user->id);
+            } catch (\Exception $e) {
+                Log::warning('Failed to deauthorize LINE user via API: ' . $e->getMessage());
+                // Continue with local unbind even if API call fails
+            }
+
+            // Clear LINE binding in database
+            $user->line_id = null;
+            $user->line_bound = false;
+            $user->save();
+
+            Log::info('Successfully unbound LINE account for user ID: ' . $user->id);
+
+            // Use stored redirect URL if available
+            if ($redirectUrl) {
+                return redirect($redirectUrl)->with('success', 'ยกเลิกการผูกบัญชี LINE สำเร็จแล้ว');
+            }
+
+            if ($guard === 'admin') {
+                return redirect()->route('admin.dash')->with('success', 'ยกเลิกการผูกบัญชี LINE สำเร็จแล้ว');
+            }
+
+            return redirect()->route('dash')->with('success', 'ยกเลิกการผูกบัญชี LINE สำเร็จแล้ว');
+        }
+
+        // Future: Handle authentication flow (login with LINE)
+        if (session('auth_via_line', false)) {
+            $guard = session('line_auth_guard', 'web');
+            $redirectUrl = session('line_oauth_redirect');
+            session()->forget(['auth_via_line', 'line_auth_guard', 'line_oauth_redirect']);
+
+            // Find user by LINE ID
+            $user = User::where('line_id', $lineUser->id)->first();
+
+            if ($user) {
+                // Check if account is disabled
+                if (!$user->is_active) {
+                    return redirect()->route('login')->withErrors(['credentials' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ']);
+                }
+
+                // For admin guard, verify user is an admin
+                if ($guard === 'admin' && $user->type !== 'admin') {
+                    return back()->withErrors([
+                        'credentials' => 'คุณไม่มีสิทธิ์เข้าถึงส่วนผู้ดูแลระบบ',
+                    ]);
+                }
+
+                // Login the user directly (LINE authentication is already validated)
+                Auth::guard($guard)->login($user);
+                $request->session()->regenerate();
+
+                // Send messesage to user via LINE Messaging API that login was successful
+                try {
+                    $this->SendNormalTextMessage($lineUser->id, 'คุณ ' . $user->name . ' เข้าสู่ระบบสำเร็จแล้ว, ยินดีต้อนรับเข้าสู่ระบบ!');
+                } catch (ApiException $e) {
+                    Log::error('Failed to send LINE login success message: ' . $e->getMessage());
+                }
+
+                if ($redirectUrl) {
+                    return redirect($redirectUrl);
+                }
+
+                if ($guard === 'admin') {
+                    return redirect()->intended('/admin');
+                }
+
+                return redirect()->intended('/dash');
+            }
+
+            return redirect()->route('login')->with('error', 'ไม่พบบัญชีที่ผูกกับ LINE นี้ในระบบ');
+        }
+
+        // Check if LINE ID exists in database
+        $existingUser = User::where('line_id', $lineUser->id)->first();
+        if ($existingUser) {
+            // Prompt user to login to their existing account
+            return redirect()->route('login')->with('info', 'พบบัญชีที่ผูกกับ LINE นี้แล้ว');
+        }
+
+        // Otherwise, just return the user info (for other purposes)
+        return response()->json($lineUser);
+    }
+
+    public function BindLineAccount(Request $request)
+    {
+        // Detect which guard the user is authenticated with
+        $guard = 'web';
+        $user = null;
+
+        if (Auth::guard('admin')->check()) {
+            $guard = 'admin';
+            $user = Auth::guard('admin')->user();
+        } elseif (Auth::guard('web')->check()) {
+            $guard = 'web';
+            $user = Auth::guard('web')->user();
+        }
+
+        if (!$user) {
+            return redirect()->route('login')->withErrors([
+                'auth_error' => 'กรุณาเข้าสู่ระบบก่อนผูกบัญชี LINE',
+            ]);
+        }
+
+        // Store binding intent and user ID in session
+        session([
+            'line_binding_mode' => true,
+            'line_binding_user_id' => $user->id,
+            'line_binding_guard' => $guard,
+            'line_oauth_redirect' => $request->input('redirect_url'),
+            'line_oauth_origin' => url()->previous(), // Track where the flow started for error redirects
+        ]);
+        session()->save(); // Force save before redirect
+
+        Log::info('Initiating LINE account binding process for user ID: ' . $user->id . ' (guard: ' . $guard . ')');
+
+        // Redirect to LINE for OAuth authorization
+        return Socialite::driver('line')
+            ->redirect();
+    }
+
+    public function SendNormalTextMessage($to, $msg)
+    {
+        try {
+            $message = new TextMessage(['text' => $msg]);
+            $request = new PushMessageRequest([
+                'to' => $to,
+                'messages' => [$message],
+            ]);
+
+            $this->messagingApi->pushMessage($request);
+            return true;
+        } catch (ApiException $e) {
+            Log::error('LINE API Error: ' . $e->getCode() . ' ' . $e->getResponseBody());
+            return false;
+        }
+    }
+
+    /**
+     * Initiate LINE OAuth flow for unbinding
+     * Similar to BindLineAccount, but sets unbind mode in session
+     */
+    public function UnbindLineAccount(Request $request)
+    {
+        // Detect which guard the user is authenticated with
+        $guard = 'web';
+        $user = null;
+
+        if (Auth::guard('admin')->check()) {
+            $guard = 'admin';
+            $user = Auth::guard('admin')->user();
+        } elseif (Auth::guard('web')->check()) {
+            $guard = 'web';
+            $user = Auth::guard('web')->user();
+        }
+
+        if (!$user) {
+            return redirect()->route('login')->withErrors([
+                'auth_error' => 'กรุณาเข้าสู่ระบบก่อนยกเลิกการผูกบัญชี LINE',
+            ]);
+        }
+
+        // Check if user has LINE bound
+        if (!$user->line_bound || empty($user->line_id)) {
+            return back()->withErrors([
+                'line_error' => 'บัญชีของคุณไม่ได้ผูกกับ LINE',
+            ]);
+        }
+
+        // Store unbind intent and user ID in session
+        session([
+            'line_unbind_mode' => true,
+            'line_unbind_user_id' => $user->id,
+            'line_unbind_guard' => $guard,
+            'line_unbind_line_id' => $user->line_id,
+            'line_oauth_redirect' => $request->input('redirect_url'),
+            'line_oauth_origin' => url()->previous(), // Track where the flow started for error redirects
+        ]);
+        session()->save();
+
+        Log::info('Initiating LINE account unbind process for user ID: ' . $user->id . ' (guard: ' . $guard . ')');
+
+        // Redirect to LINE for OAuth authorization (to get fresh access token)
+        return Socialite::driver('line')
+            ->redirect();
+    }
+
+    /**
+     * Call LINE deauthorize API to revoke user access token
+     *
+     * @param string $userAccessToken The user's LINE access token
+     * @return bool
+     * @throws \Exception
+     */
+    protected function deauthorizeLineUser(string $userAccessToken): bool
+    {
+        $channelAccessToken = $this->issueLineLoginChannelToken();
+        $client = new Client();
+
+        $response = $client->post('https://api.line.me/user/v1/deauthorize', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $channelAccessToken,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'userAccessToken' => $userAccessToken,
+            ],
+        ]);
+
+        if ($response->getStatusCode() === 204) {
+            Log::info('Successfully deauthorized LINE user via API');
+            return true;
+        }
+
+        throw new \Exception('Unexpected response from LINE deauthorize API: ' . $response->getStatusCode());
+    }
+
+    /**
+     * Issue LINE Login channel access token using client credentials
+     *
+     * @return string
+     * @throws \Exception
+     */
+    protected function issueLineLoginChannelToken(): string
+    {
+        $clientId = config('services.line.client_id');
+        $clientSecret = config('services.line.client_secret');
+
+        if (empty($clientId) || empty($clientSecret)) {
+            throw new \Exception('LINE Login client_id or client_secret is not configured');
+        }
+
+        $client = new Client();
+
+        $response = $client->post('https://api.line.me/oauth2/v3/token', [
+            'form_params' => [
+                'grant_type' => 'client_credentials',
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+            ],
+        ]);
+
+        if ($response->getStatusCode() === 200) {
+            $data = json_decode($response->getBody()->getContents(), true);
+            return $data['access_token'];
+        }
+
+        throw new \Exception('Failed to issue LINE Login channel access token: ' . $response->getStatusCode());
+    }
+
+    public function pushFlexMessage($to, $altText = 'Flex Message', $flexContainer = null)
+    {
+        try {
+            // Default flex bubble if none provided
+            if ($flexContainer === null) {
+                $flexContainer = [
+                    'type' => 'bubble',
+                    'hero' => [
+                        'type' => 'image',
+                        'url' => 'https://example.com/image.jpg',
+                        'size' => 'full',
+                        'aspectRatio' => '20:13',
+                    ],
+                    'body' => [
+                        'type' => 'box',
+                        'layout' => 'vertical',
+                        'contents' => [
+                            [
+                                'type' => 'text',
+                                'text' => 'Product Name',
+                                'weight' => 'bold',
+                                'size' => 'xl',
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
+            $flexMessage = new FlexMessage([
+                'type' => 'flex',
+                'altText' => $altText,
+                'contents' => $flexContainer,
+            ]);
+
+            $request = new PushMessageRequest([
+                'to' => $to,
+                'messages' => [$flexMessage],
+            ]);
+
+            $this->messagingApi->pushMessage($request);
+            return true;
+        } catch (ApiException $e) {
+            Log::error('LINE Flex Message Error: ' . $e->getCode() . ' ' . $e->getResponseBody());
+            return false;
+        }
+    }
+}

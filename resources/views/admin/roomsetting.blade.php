@@ -1,6 +1,8 @@
 @use('App\Models\Room')
 
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     <!-- Rooms List -->
     <table class="table table-bordered table-striped">
         <thead>
@@ -170,4 +172,4 @@
         </div>
     </div>
     @endforeach
-</x-dash.admin.layout>
+@endsection

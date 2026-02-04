@@ -64,5 +64,16 @@ class DatabaseSeeder extends Seeder
             'type' => 'admin',
             'password' => '7777',
         ]);
+
+        User::factory()->create([
+            'name' => 'ประณต',
+            'student_id' => '996209',
+            'surname' => 'สว่างพิศาลกิจ',
+            'username' => '996209',
+            'class' => null,
+            'type' => 'admin',
+            'password' => 'Tong1234',
+        ]);
+
     }
 }

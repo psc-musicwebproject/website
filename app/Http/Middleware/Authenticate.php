@@ -14,10 +14,11 @@ class Authenticate extends Middleware
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        // Check if trying to access admin guard while logged in as non-admin
-        if (in_array('admin', $guards) && Auth::guard('web')->check()) {
+        // Only treat the route as admin-only when 'admin' is the sole requested guard.
+        // This avoids denying access on routes that accept either 'web' or 'admin' (e.g. auth:web,admin).
+        if (in_array('admin', $guards) && !in_array('web', $guards) && Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();
-            
+
             if ($user && $user->type !== 'admin') {
                 return redirect()->route('login', [
                     'guard' => 'admin',

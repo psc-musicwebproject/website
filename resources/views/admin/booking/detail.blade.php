@@ -1,4 +1,6 @@
-<x-dash.admin.layout>
+@extends('layouts.admin')
+
+@section('content')
     <table class="table table-bordered table-striped">
         <tbody>
             @foreach($booking as $detail)
@@ -13,7 +15,7 @@
             <tr>
                 <th scope="col">เวลาการจอง</th>
                 <td>
-                    {{ \Carbon\Carbon::parse($detail->booked_from)->format('d/m/Y H:i') }} - 
+                    {{ \Carbon\Carbon::parse($detail->booked_from)->format('d/m/Y H:i') }} -
                     {{ \Carbon\Carbon::parse($detail->booked_to)->format('d/m/Y H:i') }}
                 </td>
             </tr>
@@ -21,6 +23,15 @@
                 <th scope="col">ห้องที่จอง</th>
                 <td>{{ App\Models\Room::getRoomNameByID($detail->room_id) }}</td>
             </tr>
+            @php $displayAttendees = $detail->parseAttendeeforDisplay(); @endphp
+            @if (!empty($displayAttendees))
+                <tr>
+                    <th scope="col">ผู้เข้าร่วม</th>
+                    <td>
+                        {{ implode(', ', $displayAttendees) }}
+                    </td>
+                </tr>
+            @endif
             @endforeach
         </tbody>
     </table>
@@ -57,4 +68,4 @@
             </div>
     </form>
     @endif
-</x-dash.admin.layout>
+@endsection

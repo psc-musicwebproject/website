@@ -6,6 +6,7 @@
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AppSettingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -27,7 +28,8 @@ Route::post('/auth/web/login', LoginController::class)
 
 // Logout (POST)
 Route::post('/auth/web/logout', function () {
-    Auth::guard('web')->logout();
+    $guard = request()->query('guard', 'web');
+    Auth::guard($guard)->logout();
 
     Session::invalidate();
     Session::regenerateToken();
@@ -35,27 +37,71 @@ Route::post('/auth/web/logout', function () {
     return redirect('/auth/login');
 })->name('auth.web.logout');
 
+// Line Authentication Routes (public - for initial login)
+Route::get('/auth/line/callback', [App\Http\Controllers\LineIntegrationController::class, 'GetCallbackFromLine'])->name('auth.line.callback');
+
+// LINE Binding Routes (for both web and admin users)
+Route::middleware(['auth:web,admin'])->group(function () {
+    Route::get('/auth/line/bindingPage', function () {
+        // Prefer explicit guard query parameter when provided (preserved during redirects)
+        $requestedGuard = request()->query('guard');
+
+        if ($requestedGuard === 'admin') {
+            $defaultRedirect = route('admin.dash');
+        } else {
+            // Fallback to checking the current authenticated guard
+            $defaultRedirect = Auth::guard('admin')->check() ? route('admin.dash') : route('dash');
+        }
+
+        // Use the preserved intended URL from session, or fall back to default
+        $skipUrl = session('line_intended_url', $defaultRedirect);
+        $title = 'ผูกบัญชี LINE';
+        return view('auth.bindline', compact('title', 'skipUrl'));
+    })->name('auth.line.bind');
+
+    Route::post('auth/bind/line', [App\Http\Controllers\LineIntegrationController::class, 'BindLineAccount'])
+        ->name('auth.bind.line');
+
+    Route::post('auth/unbind/line', [App\Http\Controllers\LineIntegrationController::class, 'UnbindLineAccount'])
+        ->name('auth.unbind.line');
+
+    // Forced Password Reset Routes
+    Route::get('/auth/new-password', [App\Http\Controllers\NewPasswordController::class, 'create'])
+        ->name('auth.web.newpass.form');
+
+    Route::post('/auth/new-password', [App\Http\Controllers\NewPasswordController::class, 'store'])
+        ->name('auth.web.newpass');
+
+    Route::get('/auth/user/setting', function () {
+        return view('auth.usersetting', [
+            'title' => 'ตั้งค่าผู้ใช้',
+        ]);
+    })->name('auth.user.setting');
+});
+
 // Group: authenticated user dashboard routes
 Route::middleware('auth')->group(function () {
     Route::view('/dash', 'dash.main', ['title' => 'Dashboard'])->name('dash');
 
-    Route::get('/dash/booking', function() {
+    Route::get('/dash/booking', function () {
         $rooms = App\Models\Room::getAvailableRooms();
-        
+
         return view('dash.booking.main', [
             'title' => 'จองห้อง',
             'rooms' => $rooms
         ]);
     })->name('dash.booking');
     Route::post('/dash/booking/submit', [BookingController::class, 'saveBooking'])->defaults('redirectRoute', 'dash.booking')->name('dash.booking.submit');
-    Route::get('/dash/booking/history', function() {
-        $Bookings = App\Models\Booking::getCurrentUserBookings(Auth::id());
+    Route::post('/dash/booking/find-user', [BookingController::class, 'findUser'])->name('dash.booking.find_user');
+    Route::get('/dash/booking/history', function () {
+        // Use auth() helper to get the current guard's user
+        $Bookings = App\Models\Booking::getCurrentUserBookings(auth()->id());
         return view('dash.booking.summary', [
             'title' => 'ประวัติการจอง',
             'bookings' => $Bookings
         ]);
     })->name('dash.booking.history');
-    Route::get('/dash/booking/history/{id}', function($id) {
+    Route::get('/dash/booking/history/{id}', function ($id) {
         $bookingDetails = App\Models\Booking::getBookingByID($id);
         return view('dash.booking.details', [
             'title' => 'รายละเอียดการจอง',
@@ -64,10 +110,11 @@ Route::middleware('auth')->group(function () {
     })->name('dash.booking.history.detail');
 
     Route::get('/dash/club/register', function () {
-        $user = Auth::user();
+        // Use auth() helper to get the current guard's user
+        $user = auth()->user();
         $clubMembership = $user->clubMembership;
 
-        return view('dash.clubregis', [
+        return view('dash.club.register', [
             'title' => 'สมัครสมาชิก',
             'clubMembership' => $clubMembership
         ]);
@@ -75,24 +122,51 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/dash/club/register', App\Http\Controllers\ClubRegisterController::class)
         ->name('dash.club.register.submit');
+
+    Route::get('/dash/calendar/events', [\App\Http\Controllers\Api\CalendarController::class, 'events'])->name('dash.calendar.events');
 });
+
+// Shared route for photo access (User + Admin)
+Route::get('/dash/club/photo/{member_id}', [\App\Http\Controllers\ClubPhotoController::class, 'show'])
+    ->middleware('auth:web,admin')
+    ->name('dash.club.photo');
 
 // Admin-only routes
 Route::middleware('auth:admin')->group(function () {
     Route::view('/admin', 'admin.main', ['title' => 'Dashboard'])->name('admin.dash');
+
     Route::get('/admin/manage/app', function () {
         return view('admin.appsetting', [
             'title' => 'ตั้งค่าระบบ',
         ]);
     })->name('admin.appsetting');
     Route::post('/admin/manage/app/update', AppSettingController::class)->name('admin.appsetting.update');
-    Route::get('/admin/club/approve', function() {
+
+    Route::get('/admin/manage/user', function () {
+        $users = \App\Models\User::where('type', '!=', 'guest')->get();
+        $userTypes = \App\Models\UserTypeMapping::where('db_type', '!=', 'guest')->get();
+        return view('admin.usersetting', [
+            'title' => 'ตั้งค่าผู้ใช้',
+            'users' => $users,
+            'userTypes' => $userTypes
+        ]);
+    })->name('admin.usersetting');
+
+    Route::post('/admin/manage/user/store', [\App\Http\Controllers\UserManagerController::class, 'store'])->name('admin.user.store');
+    Route::post('/admin/manage/user/import', [\App\Http\Controllers\UserManagerController::class, 'import'])->name('admin.user.import');
+    Route::get('/admin/manage/user/template', [\App\Http\Controllers\UserManagerController::class, 'downloadTemplate'])->name('admin.user.template');
+    Route::get('/admin/manage/user/download-credits/{id}', [\App\Http\Controllers\UserManagerController::class, 'downloadGeneratedCredentials'])->name('admin.user.download_credits');
+    Route::post('/admin/manage/user/update/{id}', [UserController::class, 'update'])->name('admin.user.update');
+    Route::post('/admin/manage/user/delete/{id}', [UserController::class, 'destroy'])->name('admin.user.delete');
+    Route::post('/admin/manage/user/unbind-line/{id}', [UserController::class, 'unbindLine'])->name('admin.user.unbind_line');
+
+    Route::get('/admin/club/approve', function () {
         return view('admin.club.approve.main', [
             'title' => 'อนุมัติสมาชิกชมรม',
             'clubApprovals' => App\Models\ClubMember::getPendingApprovals()
         ]);
     })->name('admin.club.approve');
-    Route::get('/admin/club/approve/{id}', function($id) {
+    Route::get('/admin/club/approve/{id}', function ($id) {
         return view('admin.club.approve.detail', [
             'title' => 'อนุมัติสมาชิกชมรม',
             'clubMember' => App\Models\ClubMember::getApplicationByID($id)
@@ -101,7 +175,7 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::post('/admin/club/approve/{id}', [App\Http\Controllers\ClubApprovalController::class, 'update'])->name('admin.club.approve.update');
 
-    Route::get('/admin/manage/room', function() {
+    Route::get('/admin/manage/room', function () {
         return view('admin.roomsetting', [
             'title' => 'ตั้งค่าห้อง',
         ]);
@@ -112,7 +186,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/manage/room/disable/{room_id}', [App\Http\Controllers\RoomController::class, 'disableRoom'])->name('admin.room.disable');
     Route::post('/admin/manage/room/enable/{room_id}', [App\Http\Controllers\RoomController::class, 'enableRoom'])->name('admin.room.enable');
 
-    Route::get('/admin/booking' , function() {
+    Route::get('/admin/booking', function () {
         return view('admin.booking.main', [
             'title' => 'การจองห้องทั้งหมด',
             'bookings' => App\Models\Booking::getAllBookings(),
@@ -120,7 +194,7 @@ Route::middleware('auth:admin')->group(function () {
         ]);
     })->name('admin.booking');
     Route::post('/admin/booking/submit', [BookingController::class, 'saveBooking'])->defaults('isAdmin', true)->defaults('redirectRoute', 'admin.booking')->name('admin.booking.submit');
-    Route::get('/admin/booking/{id}', function($id) {
+    Route::get('/admin/booking/{id}', function ($id) {
         return view('admin.booking.detail', [
             'title' => 'รายละเอียดการจอง',
             'booking' => App\Models\Booking::getBookingByID($id)
@@ -128,4 +202,7 @@ Route::middleware('auth:admin')->group(function () {
     })->name('admin.booking.detail');
     Route::post('/admin/booking/approve/{id}', [App\Http\Controllers\BookingController::class, 'approveBooking'])->name('admin.booking.approve');
     Route::post('/admin/booking/delete/{id}', [App\Http\Controllers\BookingController::class, 'deleteBooking'])->name('admin.booking.delete');
+    Route::post('/admin/booking/find-user', [BookingController::class, 'findUser'])->name('admin.booking.find_user');
+
+    Route::get('/admin/calendar/events', [\App\Http\Controllers\Api\CalendarController::class, 'events'])->name('admin.calendar.events');
 });

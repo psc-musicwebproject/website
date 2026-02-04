@@ -1,0 +1,132 @@
+{
+  "type": "bubble",
+  "hero": {
+    "type": "image",
+    "url": "https://static.wikitide.net/bluearchivewiki/0/09/Event_Photo_CollectionCG_836_02_Full.png",
+    "size": "full",
+    "aspectRatio": "20:13",
+    "aspectMode": "cover"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "การจองของคุณถูกปฏิเสธ",
+        "weight": "bold",
+        "size": "xl"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "การจองของคุณถูกปฏิเสธโดย นางสาวยาโยอิ อาคิคาวะ ด้วยเหตุผล: กูนม้า, หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ",
+            "margin": "sm",
+            "size": "sm",
+            "wrap": true
+          }
+        ]
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "margin": "lg",
+        "spacing": "sm",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "ห้อง",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "Flex Tower, 7-7-4 Midori-ku, Tokyo",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "วันที่",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "01 เมษายน 2566",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เวลา",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "10:00 - 23:00",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+              {
+                "type": "text",
+                "text": "ผู้เข้าร่วม",
+                "flex": 1,
+                "size": "sm",
+                "color": "#aaaaaa",
+                "wrap": true
+              },
+              {
+                "type": "text",
+                "text": "Berno Light, Oguri Cap, Tamamo Cross",
+                "flex": 5,
+                "size": "sm",
+                "color": "#666666",
+                "wrap": true
+              }
+            ],
+            "spacing": "sm"
+          }
+        ]
+      }
+    ]
+  }
+}

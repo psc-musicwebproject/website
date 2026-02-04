@@ -1,0 +1,132 @@
+{
+  "type": "bubble",
+  "hero": {
+    "type": "image",
+    "url": "https://file.smilekrub.net/file/sk-blob/web/user/pic/1z0n9l468h7j0tzxxpsq1f9neg1kz4n5",
+    "size": "full",
+    "aspectRatio": "20:13",
+    "aspectMode": "cover"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "การจองของคุณได้รับการอนุมัติแล้ว",
+        "weight": "bold",
+        "size": "xl"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "การจองของคุณได้รับการอนุมัติโดยนางสาวยาโยอิ อาคิคาวะ ด้วยเหตุผล: อยากฟังฟิโนมิโน่ร้องเพลงสติล, หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ",
+            "margin": "sm",
+            "size": "sm",
+            "wrap": true
+          }
+        ]
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "margin": "lg",
+        "spacing": "sm",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "ห้อง",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "Flex Tower, 7-7-4 Midori-ku, Tokyo",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "วันที่",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "01 เมษายน 2566",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เวลา",
+                "color": "#aaaaaa",
+                "size": "sm",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "text": "10:00 - 23:00",
+                "wrap": true,
+                "color": "#666666",
+                "size": "sm",
+                "flex": 5
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+              {
+                "type": "text",
+                "text": "ผู้เข้าร่วม",
+                "flex": 1,
+                "size": "sm",
+                "color": "#aaaaaa",
+                "wrap": true
+              },
+              {
+                "type": "text",
+                "text": "Berno Light, Oguri Cap, Tamamo Cross",
+                "flex": 5,
+                "size": "sm",
+                "color": "#666666",
+                "wrap": true
+              }
+            ],
+            "spacing": "sm"
+          }
+        ]
+      }
+    ]
+  }
+}

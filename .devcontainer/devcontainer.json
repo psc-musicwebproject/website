@@ -1,0 +1,39 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/php-mariadb
+{
+	"name": "PHP & MariaDB",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers-extra/features/bun:1": {}
+	},
+
+	// For use with PHP or Apache (e.g.php -S localhost:8080 or apache2ctl start)
+	"forwardPorts": [
+		8080,
+		8000,
+		3306,
+		9000,
+		9003
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"onecentlin.laravel5-snippets",
+				"oven.bun-vscode",
+				"hossaini.bootstrap-intellisense",
+				"onecentlin.laravel-extension-pack",
+				"Wscats.html-snippets"
+			]
+		}
+	},
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "composer install && bun install"
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

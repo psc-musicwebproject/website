@@ -1,4 +1,6 @@
-<x-dash.layout>
+@extends('layouts.dash')
+
+@section('content')
     @foreach($booking as $detail)
         <table class="table table-bordered table-striped">
             <tr>
@@ -12,7 +14,7 @@
             <tr>
                 <th scope="col">เวลาการจอง</th>
                 <td>
-                    {{ \Carbon\Carbon::parse($detail->booked_from)->format('d/m/Y H:i') }} - 
+                    {{ \Carbon\Carbon::parse($detail->booked_from)->format('d/m/Y H:i') }} -
                     {{ \Carbon\Carbon::parse($detail->booked_to)->format('d/m/Y H:i') }}
                 </td>
             </tr>
@@ -20,6 +22,15 @@
                 <th scope="col">ห้องที่จอง</th>
                 <td>{{ App\Models\Room::getRoomNameByID($detail->room_id) }}</td>
             </tr>
+            @php $displayAttendees = $detail->parseAttendeeforDisplay(); @endphp
+            @if (!empty($displayAttendees))
+                <tr>
+                    <th scope="col">ผู้เข้าร่วม</th>
+                    <td>
+                        {{ implode(', ', $displayAttendees) }}
+                    </td>
+                </tr>
+            @endif
             <tr>
                 <th scope="col">สถานะ</th>
                 <td>{{ App\Models\Booking::bookingStatusToText($detail->approval_status) }}</td>
@@ -40,4 +51,4 @@
             @endif
         </table>
     @endforeach
-</x-dash.layout>
+@endsection
