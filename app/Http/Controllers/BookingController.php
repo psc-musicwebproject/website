@@ -77,6 +77,18 @@ class BookingController extends Controller
 
             if ($booking->user) {
                 $booking->user->notify(new NewBooking($booking, Auth::user()));
+                if ($isAdmin && $booking->attendees) {
+                    $InternalList = Booking::fetchInternalAttendeeList($booking);
+                    foreach ($InternalList as $user) {
+                        $user->notify(new UserInvitedNotify($booking, Auth::user()));
+                    }
+                    $GuestList = Booking::fetchGuestAttendeeList($booking);
+                    foreach ($GuestList as $guest) {
+                        // Send invitation email to guest with their name
+                        Notification::route('mail', $guest['email'])
+                            ->notify(new UserInvitedNotify($booking, Auth::user(), $guest['name']));
+                    }
+                }
             }
 
             if ($booking->user && ($booking->user->type != "admin" || Auth::user()->type != 'admin') ) {
