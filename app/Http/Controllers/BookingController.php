@@ -113,16 +113,22 @@ class BookingController extends Controller
             Booking::approveBooking($request, $bookingId);
             $booking = Booking::where('booking_id', $bookingId)->first();
 
-            if ($wasWaiting && $booking && $booking->attendees) {
-                $InternalList = Booking::fetchInternalAttendeeList($booking);
-                foreach ($InternalList as $user) {
-                    $user->notify(new UserInvitedNotify($booking));
-                }
-                $GuestList = Booking::fetchGuestAttendeeList($booking);
-                foreach ($GuestList as $guest) {
-                    // Send invitation email to guest with their name
-                    Notification::route('mail', $guest['email'])
-                        ->notify(new UserInvitedNotify($booking, $guest['name']));
+            if ($booking->booking_status === 'denied') {
+                $booking->user->notify(new \App\Notifications\User\Booking\DeniedUserNotify($booking));
+            } elseif ($booking->booking_status === 'approved') {
+                $booking->user->notify(new \App\Notifications\User\Booking\ApprovedUserNotify($booking));
+
+                if ($wasWaiting && $booking && $booking->attendees) {
+                    $InternalList = Booking::fetchInternalAttendeeList($booking);
+                    foreach ($InternalList as $user) {
+                        $user->notify(new UserInvitedNotify($booking));
+                    }
+                    $GuestList = Booking::fetchGuestAttendeeList($booking);
+                    foreach ($GuestList as $guest) {
+                        // Send invitation email to guest with their name
+                        Notification::route('mail', $guest['email'])
+                            ->notify(new UserInvitedNotify($booking, $guest['name']));
+                    }
                 }
             }
             return redirect()->route('admin.booking')->with('success', 'อัปเดตสถานะการจองเรียบร้อยแล้ว');

@@ -117,9 +117,7 @@ class UserInvitedNotify extends Notification
     {
         return [
             'booking_id' => $this->booking->booking_id,
-            'booking_name' => $this->booking->booking_name,
-            'inviter_id' => $this->inviter->id,
-            'inviter_name' => $this->inviter->name . ' ' . $this->inviter->surname,
+            'booking_name' => $this->booking->booking_name
         ];
     }
 }
