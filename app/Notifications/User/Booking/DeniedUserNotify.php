@@ -79,9 +79,9 @@ class DeniedUserNotify extends Notification
 
         // Replace placeholders with real data
         if ($this->booking->approval_comment) {
-            $fTem['body']['contents'][1]['contents']['text'] = 'การจองของคุณปฎิเสธโดย ' . $this->booking->approvalPerson->name_title . $this->booking->approvalPerson->name . ' ' . $this->booking->approvalPerson->surname . ' ด้วยเหตุผล: ' . $this->booking->approval_comment . ', หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ';
+            $fTem['body']['contents'][1]['contents'][0]['text'] = 'การจองของคุณปฎิเสธโดย ' . $this->booking->approvalPerson->name_title . $this->booking->approvalPerson->name . ' ' . $this->booking->approvalPerson->surname . ' ด้วยเหตุผล: ' . $this->booking->approval_comment . ', หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ';
         } else {
-            $fTem['body']['contents'][1]['contents']['text'] = 'การจองของคุณปฎิเสธโดย ' . $this->booking->approvalPerson->name_title . $this->booking->approvalPerson->name . ' ' . $this->booking->approvalPerson->surname . ', หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ';
+            $fTem['body']['contents'][1]['contents'][0]['text'] = 'การจองของคุณปฎิเสธโดย ' . $this->booking->approvalPerson->name_title . $this->booking->approvalPerson->name . ' ' . $this->booking->approvalPerson->surname . ', หากต้องการข้อมูลเพิ่มเติมหรือโต้แย้งการอนุมัตินี้ กรุณาติดต่อผู้ดูแลระบบ';
         }
 
         // Replace placeholders with actual booking data

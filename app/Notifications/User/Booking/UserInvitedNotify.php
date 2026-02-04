@@ -16,20 +16,17 @@ class UserInvitedNotify extends Notification
     use Queueable;
 
     protected Booking $booking;
-    protected User $inviter;
     protected ?string $guestName;
 
     /**
      * Create a new notification instance.
      *
      * @param Booking $booking The booking the user is invited to
-     * @param User $inviter The user who sent the invitation
      * @param string|null $guestName Optional name for guest (non-registered) users
      */
-    public function __construct(Booking $booking, User $inviter, ?string $guestName = null)
+    public function __construct(Booking $booking, ?string $guestName = null)
     {
         $this->booking = $booking;
-        $this->inviter = $inviter;
         $this->guestName = $guestName;
     }
 
@@ -62,13 +59,11 @@ class UserInvitedNotify extends Notification
         $roomName = $this->booking->room?->room_name ?? 'N/A';
         $bookedDate = $this->booking->booked_from?->format('d/m/Y') ?? 'N/A';
         $bookedTime = ($this->booking->booked_from?->format('H:i') ?? '') . ' - ' . ($this->booking->booked_to?->format('H:i') ?? '');
-        $inviterName = $this->inviter->name . ' ' . $this->inviter->surname;
 
         return (new MailMessage)
             ->subject('คุณได้รับเชิญเข้าร่วมการจองห้อง - ' . $this->booking->booking_name . ' - ' . (\App\Models\AppSetting::getSetting('name') ?? config('app.name', 'PSC-MusicWeb Project')))
             ->greeting('เรียน คุณ' . $recipientName)
-            ->line('คุณได้รับเชิญให้เข้าร่วมการจองห้องจาก ' . $inviterName)
-            ->line('**รายละเอียดการจอง:**')
+            ->line('คุณได้รับเชิญให้เข้าร่วมการจองห้องจาก ' . $this->booking->user->name_title . $this->booking->user->name . ' ' . $this->booking->user->surname . ' โดยมีรายละเอียดดังนี้:')
             ->line('ชื่อการจอง: ' . $this->booking->booking_name)
             ->line('ห้อง: ' . $roomName)
             ->line('วันที่: ' . $bookedDate)
@@ -84,11 +79,11 @@ class UserInvitedNotify extends Notification
         }
 
         // Importing Line Flex Message Template from JSON file
-        $jStr = file_get_contents(app_path('line/flex_messages/booking/user_denied.json'));
+        $jStr = file_get_contents(app_path('line/flex_messages/booking/user_invited.json'));
         $fTem = json_decode($jStr, true);
 
         // Replace placeholders with real data
-        $fTem['body']['contents'][1]['contents']['text'] = $this->booking->user->name_title . $this->booking->user->name . ' ' . $this->booking->user->surname . ' ได้เชิญคุณให้เข้าร่วมการใช้ห้อง "' . $this->booking->room->room_name . '" กรุณาตรวจสอบรายละเอียดการจองด้านล่าง';
+        $fTem['body']['contents'][1]['contents'][0]['text'] = $this->booking->user->name_title . $this->booking->user->name . ' ' . $this->booking->user->surname . ' ได้เชิญคุณให้เข้าร่วมการใช้ห้อง "' . $this->booking->room->room_name . '" กรุณาตรวจสอบรายละเอียดการจองด้านล่าง';
 
         // Replace placeholders with actual booking data
         // Room name
