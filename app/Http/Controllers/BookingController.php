@@ -107,9 +107,13 @@ class BookingController extends Controller
     public function approveBooking(Request $request, $bookingId)
     {
         try {
+            $booking = Booking::where('booking_id', $bookingId)->first();
+            $wasWaiting = $booking && $booking->booking_status === 'waiting';
+
             Booking::approveBooking($request, $bookingId);
-            $booking = Booking::find($bookingId);
-            if ($booking->attendees) {
+            $booking = Booking::where('booking_id', $bookingId)->first();
+
+            if ($wasWaiting && $booking && $booking->attendees) {
                 $InternalList = Booking::fetchInternalAttendeeList($booking);
                 foreach ($InternalList as $user) {
                     $user->notify(new UserInvitedNotify($booking, Auth::user()));
