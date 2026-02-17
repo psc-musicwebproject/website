@@ -4,6 +4,6 @@
     </span>
     <div class="info-box-content">
         <span class="info-box-text">การจองที่รออนุมัติ</span>
-        <span class="info-box-number">{{ App\Models\Booking::countAllBookings('waiting') }}</span>
+        <span class="info-box-number">{{ App\Models\Booking::countAllBookings('waiting', 5) }}</span>
     </div>
 </div>
