@@ -12,7 +12,7 @@ class ClubApprovalController extends Controller
     public function update(Request $request, $id)
     {
         $clubMember = \App\Models\ClubMember::where('member_id', $id)->firstOrFail();
-        $isInitialDecision = $clubMember->approval_status === 'waiting';
+        $isInitialDecision = $clubMember->status === 'waiting';
         $action = $request->input('action');
         $reason = $request->input('approve_reason');
         $adminId = \Illuminate\Support\Facades\Auth::id();
