@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        @if ($AppSetting::getNotice() && (request()->query('guard') != 'admin' || request()->routeIs('login')))
+        @if ($AppSetting::getNotice() && (request()->routeIs('login') && request()->query('guard') != 'admin'))
             <div class="card card-outline card-warning mt-2 mb-0">
                 <div class="card-header">
                     <strong>ประกาศ</strong>
