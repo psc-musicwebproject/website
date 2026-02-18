@@ -108,8 +108,7 @@ class BookingController extends Controller
     {
         try {
             $booking = Booking::where('booking_id', $bookingId)->first();
-            $wasWaiting = $booking && $booking->booking_status === 'waiting';
-
+            $wasWaiting = $booking && $booking->booking_status === 'waiting_approval';
             Booking::approveBooking($request, $bookingId);
             $booking = Booking::where('booking_id', $bookingId)->first();
 
