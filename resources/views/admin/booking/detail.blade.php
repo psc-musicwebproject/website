@@ -41,7 +41,7 @@
             @csrf
             <div class="card">
                 <div class="card-header">
-                    @if ($detail->approval_status == 'pending')
+                    @if ($detail->approval_status == 'waiting')
                         <span>อนุมัติ / ไม่อนุมัติการจอง</span>
                     @else
                         <span>อัปเดตสถานะการจอง</span>
