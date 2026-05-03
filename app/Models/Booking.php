@@ -32,23 +32,22 @@ class Booking extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'booking_id',
+        'booking_uuid',
         'booking_name',
-        'room_id',
+        'room_uuid',
         'booking_time',
-        'user_id',
+        'user_uuid',
         'booked_from',
         'booked_to',
         'attendees',
-        'approval_status',
-        'approval_person_id',
+        'approval_person_uuid',
         'approval_time',
         'approval_comment',
         'checking_status',
-        'checking_person_id',
+        'checking_person_uuid',
         'checking_time',
         'checkout_time',
-        'checkout_person_id',
+        'checkout_person_uuid',
         'booking_status',
     ];
 
@@ -73,8 +72,8 @@ class Booking extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->booking_id)) {
-                $model->booking_id = (string) Str::uuid();
+            if (empty($model->booking_uuid)) {
+                $model->booking_uuid = (string) Str::uuid();
             }
         });
     }
@@ -84,7 +83,7 @@ class Booking extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_uuid');
     }
 
     /**
@@ -92,7 +91,7 @@ class Booking extends Model
      */
     public function approvalPerson(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'approval_person_id');
+        return $this->belongsTo(User::class, 'approval_person_uuid');
     }
 
     /**
@@ -100,12 +99,12 @@ class Booking extends Model
      */
     public function room(): BelongsTo
     {
-        return $this->belongsTo(Room::class, 'room_id', 'room_id');
+        return $this->belongsTo(Room::class, 'room_uuid', 'room_uuid');
     }
 
-    public static function getCurrentUserBookings($userId, $status = null)
+    public static function getCurrentUserBookings($userUUID, $status = null)
     {
-        return self::where('user_id', $userId)
+        return self::where('user_uuid', $userUUID)
             ->orderBy('booking_time', 'desc')
             ->when($status, function ($query, $status) {
                 return $query->where('approval_status', $status);
@@ -113,25 +112,25 @@ class Booking extends Model
             ->get();
     }
 
-    public static function countCurrentUserBookings($userId, $status = null)
+    public static function countCurrentUserBookings($userUUID, $status = null)
     {
-        return self::where('user_id', $userId)
+        return self::where('user_uuid', $userUUID)
             ->when($status, function ($query, $status) {
-                return $query->where('approval_status', $status);
+                return $query->where('booking_status', $status);
             })
             ->count();
     }
 
-    public static function getBookingByID($bookingId)
+    public static function getBookingByUUID($bookingUUID)
     {
-        return self::where('booking_id', $bookingId)->get();
+        return self::where('booking_uuid', $bookingUUID)->get();
     }
 
     public static function getAllBookings($status = null, $quantity = null)
     {
         return self::orderBy('booking_time', 'desc')
             ->when($status, function ($query, $status) {
-                return $query->where('approval_status', $status);
+                return $query->where('booking_status', $status);
             })
             ->when($quantity, function ($query, $quantity) {
                 return $query->limit($quantity);
@@ -142,7 +141,7 @@ class Booking extends Model
     public static function countAllBookings($status = null, $quantity = null)
     {
         return self::when($status, function ($query, $status) {
-            return $query->where('approval_status', $status);
+            return $query->where('booking_status', $status);
         })
             ->when($quantity, function ($query, $quantity) {
                 return $query->limit($quantity);
@@ -160,27 +159,25 @@ class Booking extends Model
         };
     }
 
-    public static function approveBooking(Request $request, $bookingId)
+    public static function approveBooking(Request $request, $bookingUUID)
     {
-        $booking = self::where('booking_id', $bookingId)->first();
+        $booking = self::where('booking_uuid', $bookingUUID)->first();
         if ($request->input('action') === 'approve') {
-            $booking->approval_status = 'approved';
             $booking->booking_status = 'approved';
         } elseif ($request->input('action') === 'reject') {
-            $booking->approval_status = 'rejected';
             $booking->booking_status = 'rejected';
         } else {
             throw new \InvalidArgumentException('Invalid action for booking approval.');
         }
-        $booking->approval_person_id = Auth::id();
+        $booking->approval_person_uuid = Auth::uuid();
         $booking->approval_time = now();
         $booking->approval_comment = $request->input('approval_comment', null);
         $booking->save();
     }
 
-    public static function delBooking($bookingId)
+    public static function delBooking($bookingUUID)
     {
-        $booking = self::where('booking_id', $bookingId)->first();
+        $booking = self::where('booking_uuid', $bookingUUID)->first();
         if ($booking) {
             $booking->delete();
             return true;
@@ -207,7 +204,7 @@ class Booking extends Model
         foreach ($attendees['attendee'] as $user) {
             $name = $user['user_name'] ?? 'Unknown';
             if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
-                $dbUser = User::where('student_id', $user['user_identify'])
+                $dbUser = User::where('user_id', $user['user_identify'])
                     ->orWhere('id', $user['user_identify'])
                     ->first();
                 if ($dbUser) {
@@ -234,7 +231,7 @@ class Booking extends Model
         foreach ($attendee['attendee'] as $user) {
             $name = $user['user_name'] ?? 'Unknown';
             if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
-                $dbUser = User::where('student_id', $user['user_identify'])
+                $dbUser = User::where('user_id', $user['user_identify'])
                     ->orWhere('id', $user['user_identify'])
                     ->first();
                 if ($dbUser) {
@@ -292,7 +289,7 @@ class Booking extends Model
             } else {
                 foreach ($attendees['attendee'] as $user) {
                     if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
-                        $dbUser = User::where('student_id', $user['user_identify'])
+                        $dbUser = User::where('user_id', $user['user_identify'])
                             ->orWhere('id', $user['user_identify'])
                             ->first();
                         if ($dbUser) {
@@ -339,7 +336,7 @@ class Booking extends Model
         if (!empty($attendees) && is_array($attendees) && isset($attendees['attendee'])) {
             foreach ($attendees['attendee'] as $user) {
                 if (isset($user['user_from']) && $user['user_from'] === 'id' && isset($user['user_identify'])) {
-                    $dbUser = User::where('student_id', $user['user_identify'])
+                    $dbUser = User::where('user_id', $user['user_identify'])
                         ->orWhere('id', $user['user_identify'])
                         ->first();
                     if ($dbUser) {
