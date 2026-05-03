@@ -12,16 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('booking', function (Blueprint $table) {
-            $table->id();
             $table->uuid('booking_id')->unique();
             $table->string('booking_name');
-            $table->uuid('room_id');
+            $table->uuid('room_uuid');
             $table->timestamp('booking_time');
-            $table->string('user_id');
+            $table->uuid('user_uuid');
             $table->dateTime('booked_from')->nullable();
             $table->dateTime('booked_to')->nullable();
             $table->json('attendees')->nullable();
-            $table->string('approval_status')->default('waiting');
             $table->string('approval_person_id')->nullable();
             $table->dateTime('approval_time')->nullable();
             $table->string('approval_comment')->nullable();

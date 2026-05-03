@@ -14,12 +14,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('uuid')->primary();
             $table->string('name');
             $table->string('surname');
             $table->string('email')->unique()->nullable();
             $table->string('username')->unique();
-            $table->string('student_id')->unique();
+            $table->string('user_id')->unique();
             $table->string('type');
             $table->string('class')->nullable();
             $table->string('password');
@@ -29,7 +29,7 @@ return new class extends Migration
         });
 
         Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->uuid('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
@@ -38,11 +38,12 @@ return new class extends Migration
         });
 
         DB::table('users')->insert([
+            'id' => \Illuminate\Support\Str::uuid(),
             'name' => 'Default',
             'surname' => 'Admin',
             'email' => 'admin@example.com',
             'username' => 'admin',
-            'student_id' => '012345',
+            'user_id' => '012345',
             'type' => 'admin',
             'password' => \Illuminate\Support\Facades\Hash::make('admin'),
             'reset_password_on_next_login' => true,
