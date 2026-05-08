@@ -30,7 +30,7 @@ class User extends Authenticatable
         'surname',
         'nickname',
         'username',
-        'student_id',
+        'user_id',
         'major',
         'phone_number',
         'email',
@@ -72,7 +72,7 @@ class User extends Authenticatable
      */
     public function clubMembership()
     {
-        return $this->hasOne(ClubMember::class, 'user_id');
+        return $this->hasOne(ClubMember::class, 'user_uuid');
     }
 
     /**
@@ -80,7 +80,7 @@ class User extends Authenticatable
      */
     public function approvedClubMemberships()
     {
-        return $this->hasMany(ClubMember::class, 'approval_person_id');
+        return $this->hasMany(ClubMember::class, 'approval_person_uuid');
     }
 
     /**
