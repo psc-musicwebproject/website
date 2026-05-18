@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Sakura',
-            'student_id' => '032997',
+            'user_id' => '032997',
             'surname' => 'Chiyono O',
             'username' => 'u6832997',
             'type' => 'student',
@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Tazuna',
-            'student_id' => '992789',
+            'user_id' => '992789',
             'surname' => 'Hayakawa',
             'username' => '992789',
             'class' => null,
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Yayoi',
-            'student_id' => '992999',
+            'user_id' => '992999',
             'surname' => 'Akikawa',
             'username' => '992999',
             'class' => null,
