@@ -20,6 +20,20 @@ class User extends Authenticatable
     public $timestamps = false;
 
     /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * The "type" of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -68,11 +82,25 @@ class User extends Authenticatable
     }
 
     /**
+     * Boot the model and generate UUID for id.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
+    /**
      * Get the club membership for this user.
      */
     public function clubMembership()
     {
-        return $this->hasOne(ClubMember::class, 'user_uuid');
+        return $this->hasOne(ClubMember::class, 'user_id');
     }
 
     /**

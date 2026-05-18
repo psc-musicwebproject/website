@@ -9,6 +9,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('app_settings', function (Blueprint $table) {
+            $table->id();
             $table->string('web_name');
             $table->string('web_header');
             $table->string('notice')->nullable();

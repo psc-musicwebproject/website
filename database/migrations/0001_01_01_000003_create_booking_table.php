@@ -12,28 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('booking', function (Blueprint $table) {
-            $table->uuid('booking_uuid')->unique();
+            $table->uuid('booking_uuid')->primary();
             $table->string('booking_name');
-            $table->uuid('room_uuid');
+            $table->uuid('room_id');
             $table->timestamp('booking_time');
-            $table->uuid('user_uuid');
+            $table->uuid('user_id');
             $table->dateTime('booked_from')->nullable();
             $table->dateTime('booked_to')->nullable();
             $table->json('attendees')->nullable();
-            $table->string('approval_person_uuid')->nullable();
+            $table->uuid('approval_person_id')->nullable();
             $table->dateTime('approval_time')->nullable();
             $table->string('approval_comment')->nullable();
             $table->string(('checking_status'))->default('not_checked');
-            $table->string('checking_person_uuid')->nullable();
+            $table->uuid('checking_person_id')->nullable();
             $table->dateTime('checking_time')->nullable();
             $table->dateTime('checkout_time')->nullable();
-            $table->string('checkout_person_uuid')->nullable();
+            $table->uuid('checkout_person_id')->nullable();
             $table->string('booking_status')->default('waiting_approval');
         });
 
         Schema::create('rooms', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('room_id')->unique();
+            $table->uuid('room_uuid')->primary();
             $table->string('room_name');
             $table->string('room_status')->default('available');
         });

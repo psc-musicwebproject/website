@@ -27,6 +27,27 @@ class Booking extends Model
     public $timestamps = false;
 
     /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'booking_uuid';
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * The "type" of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -34,20 +55,20 @@ class Booking extends Model
     protected $fillable = [
         'booking_uuid',
         'booking_name',
-        'room_uuid',
+        'room_id',
         'booking_time',
-        'user_uuid',
+        'user_id',
         'booked_from',
         'booked_to',
         'attendees',
-        'approval_person_uuid',
+        'approval_person_id',
         'approval_time',
         'approval_comment',
         'checking_status',
-        'checking_person_uuid',
+        'checking_person_id',
         'checking_time',
         'checkout_time',
-        'checkout_person_uuid',
+        'checkout_person_id',
         'booking_status',
     ];
 
@@ -83,7 +104,7 @@ class Booking extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_uuid');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -91,7 +112,7 @@ class Booking extends Model
      */
     public function approvalPerson(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'approval_person_uuid');
+        return $this->belongsTo(User::class, 'approval_person_id');
     }
 
     /**
@@ -99,22 +120,22 @@ class Booking extends Model
      */
     public function room(): BelongsTo
     {
-        return $this->belongsTo(Room::class, 'room_uuid', 'room_uuid');
+        return $this->belongsTo(Room::class, 'room_id', 'room_id');
     }
 
     public static function getCurrentUserBookings($userUUID, $status = null)
     {
-        return self::where('user_uuid', $userUUID)
+        return self::where('user_id', $userUUID)
             ->orderBy('booking_time', 'desc')
             ->when($status, function ($query, $status) {
-                return $query->where('approval_status', $status);
+                return $query->where('booking_status', $status);
             })
             ->get();
     }
 
     public static function countCurrentUserBookings($userUUID, $status = null)
     {
-        return self::where('user_uuid', $userUUID)
+        return self::where('user_id', $userUUID)
             ->when($status, function ($query, $status) {
                 return $query->where('booking_status', $status);
             })
@@ -169,7 +190,7 @@ class Booking extends Model
         } else {
             throw new \InvalidArgumentException('Invalid action for booking approval.');
         }
-        $booking->approval_person_uuid = Auth::uuid();
+        $booking->approval_person_id = Auth::id();
         $booking->approval_time = now();
         $booking->approval_comment = $request->input('approval_comment', null);
         $booking->save();
@@ -198,7 +219,7 @@ class Booking extends Model
 
         $attendeeList = [];
         if ($this->user) {
-            $attendeeList[] = $this->user->name . ' ' . $this->user->surname . ' (' . ($this->user->student_id ?? '-') . ')';
+            $attendeeList[] = $this->user->name . ' ' . $this->user->surname . ' (' . ($this->user->user_id ?? '-') . ')';
         }
 
         foreach ($attendees['attendee'] as $user) {
@@ -261,10 +282,10 @@ class Booking extends Model
         if (!is_array($list)) return false;
 
         foreach ($list as $p) {
-            // Check student_id or id
+            // Check user_id or id
             if (isset($p['user_from']) && $p['user_from'] === 'id') {
                 if (isset($p['user_identify'])) {
-                    if ($p['user_identify'] == $user->student_id || $p['user_identify'] == $user->id) {
+                    if ($p['user_identify'] == $user->user_id || $p['user_identify'] == $user->id) {
                         return true;
                     }
                 }
