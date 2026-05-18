@@ -45,9 +45,9 @@
         </div>
     @endif
     <div class="mb-3">
-        <label for="student_id" class="form-label">รหัสนักเรียน / นักศึกษา / พนักงาน</label>
-        <input type="text" class="form-control" id="student_id" name="student_id"
-            value="{{ Auth::user()->student_id }}" readonly>
+        <label for="user_id" class="form-label">รหัสนักเรียน / นักศึกษา / พนักงาน</label>
+        <input type="text" class="form-control" id="user_id" name="user_id"
+            value="{{ Auth::user()->user_id }}" readonly>
     </div>
     <div class="mb-3">
         <label for="email" class="form-label">อีเมล</label>

@@ -18,7 +18,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:255',
-            'student_id' => 'required|string|max:255|unique:users,student_id,' . $id,
+            'user_id' => 'required|string|max:255|unique:users,user_id,' . $id,
             'phone_number' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255|unique:users,email,' . $id,
             'major' => 'nullable|string|max:255',

@@ -30,14 +30,13 @@ class BookingController extends Controller
             $booking->booking_name = $request->input('name');
             $booking->room_id = $request->input('room_id');
             $booking->booking_time = now();
-            $booking->user_id = Auth::id();
+            $booking->user_id = Auth::user()->id;
 
             if ($isAdmin) {
                 if (Auth::user()->type != 'admin') {
                     throw new \Exception('สิทธิ์ไม่เพียงพอในการดำเนินการนี้');
                 } else {
-                    $booking->approval_status = 'approved';
-                    $booking->approval_person_id = Auth::id();
+                    $booking->approval_person_id = Auth::user()->id;
                     $booking->approval_time = now();
                     $booking->approval_comment = 'จองโดยผู้ดูแลระบบ, ไม่จำเป็นต้องรออนุมัติ';
                     $booking->booking_status = 'approved';
@@ -67,10 +66,10 @@ class BookingController extends Controller
                  if (\App\Models\User::where('id', $ownerId)->exists()) {
                      $booking->user_id = $ownerId;
                  } else {
-                     $booking->user_id = Auth::id(); // Fallback
+                     $booking->user_id = Auth::user()->id; // Fallback
                  }
             } else {
-                $booking->user_id = Auth::id();
+                $booking->user_id = Auth::user()->id;
             }
 
             $booking->save();
@@ -107,10 +106,10 @@ class BookingController extends Controller
     public function approveBooking(Request $request, $bookingId)
     {
         try {
-            $booking = Booking::where('booking_id', $bookingId)->first();
+            $booking = Booking::where('booking_uuid', $bookingId)->first();
             $wasWaiting = $booking && $booking->booking_status === 'waiting_approval';
             Booking::approveBooking($request, $bookingId);
-            $booking = Booking::where('booking_id', $bookingId)->first();
+            $booking = Booking::where('booking_uuid', $bookingId)->first();
 
             if ($booking->booking_status === 'rejected') {
                 $booking->user->notify(new \App\Notifications\User\Booking\DeniedUserNotify($booking));
@@ -161,7 +160,7 @@ class BookingController extends Controller
         $searchQuery = $query;
         $user = \App\Models\User::where('is_active', true)
             ->where(function ($q) use ($searchQuery) {
-                $q->where('student_id', $searchQuery)
+                $q->where('user_id', $searchQuery)
                   ->orWhere('email', $searchQuery);
             })
             ->first();
@@ -173,7 +172,7 @@ class BookingController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'surname' => $user->surname,
-                    'student_id' => $user->student_id,
+                    'user_id' => $user->user_id,
                     'email' => $user->email,
                     'type' => $user->type,
                     'role_label' => $user->role_label

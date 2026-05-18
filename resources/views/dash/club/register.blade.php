@@ -75,7 +75,7 @@
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label">รหัสประจำตัว</label>
-                            <input type="text" class="form-control" readonly value="{{ Auth::user()->student_id }}">
+                            <input type="text" class="form-control" readonly value="{{ Auth::user()->user_id }}">
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label">ระดับชั้น</label>

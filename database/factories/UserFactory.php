@@ -24,9 +24,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'id' => Str::uuid(),
             'name' => $this->faker->firstName(),
             'surname' => $this->faker->lastName(),
-            'student_id' => $this->faker->unique(),
+            'user_id' => $this->faker->unique()->numerify('######'),
             'username' => $this->faker->unique(),
             'type' => $this->faker->randomElement(['student', 'teacher', 'admin']),
             'class' => $this->faker->randomElement(['ปวส.1/5','ปวส.1/6','ปวส.1/7 (ม.)']),

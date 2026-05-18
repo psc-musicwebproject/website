@@ -126,7 +126,7 @@ class LineIntegrationController extends Controller
             $redirectUrl = session('line_oauth_redirect');
             session()->forget(['line_binding_mode', 'line_binding_user_id', 'line_binding_guard', 'line_oauth_redirect', 'line_oauth_origin']);
             Log::info('Successfully bound LINE ID ' . $lineUser->id . ' to user ID: ' . $user->id);
-            $this->SendNormalTextMessage($lineUser->id, 'บัญชี LINE นี้ได้ผูกกับผู้ใช้ (' . $user->name_title . $user->name . ' ' . $user->surname . ' | ' . $user->student_id . ') สำเร็จแล้ว');
+            $this->SendNormalTextMessage($lineUser->id, 'บัญชี LINE นี้ได้ผูกกับผู้ใช้ (' . $user->name_title . $user->name . ' ' . $user->surname . ' | ' . $user->user_id . ') สำเร็จแล้ว');
 
             // Use stored redirect URL if available
             if ($redirectUrl) {

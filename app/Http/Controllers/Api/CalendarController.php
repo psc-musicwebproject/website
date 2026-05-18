@@ -12,7 +12,7 @@ class CalendarController extends Controller
     public function events(Request $request)
     {
         $bookings = Booking::with(['room', 'user'])
-            ->where('approval_status', 'approved')
+            ->where('booking_status', 'approved')
             ->get();
 
         $events = $bookings->map(function ($booking) {
@@ -35,7 +35,7 @@ class CalendarController extends Controller
             }
 
             return [
-                'id' => $booking->booking_id, // User requested booking_id
+                'id' => $booking->booking_uuid, // Using booking_uuid
                 'title' => \App\Models\Room::getRoomNameByID($booking->room_id) . ' - ' . $booking->booking_name,
                 'start' => $booking->booked_from,
                 'end' => $booking->booked_to,
@@ -48,8 +48,8 @@ class CalendarController extends Controller
                     'end_formatted' => \Carbon\Carbon::parse($booking->booked_to)->format('d/m/Y H:i'),
                     // Dynamic Detail URL
                     'detail_url' => $isAdmin
-                        ? route('admin.booking.detail', ['id' => $booking->booking_id])
-                        : route('dash.booking.history.detail', ['id' => $booking->booking_id]),
+                        ? route('admin.booking.detail', ['id' => $booking->booking_uuid])
+                        : route('dash.booking.history.detail', ['id' => $booking->booking_uuid]),
                     // Only send attendees if authorized? User said "attendee list won't show"
                     'attendees' => $canViewDetails ? $booking->parseAttendeeforDisplay() : [],
                 ]

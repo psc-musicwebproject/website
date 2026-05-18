@@ -20,8 +20,8 @@
 
         <div class="input-group mb-2">
             <div class="form-floating">
-                <input name="student_id" type="text" class="form-control" value="{{ old('student_id') }}" placeholder="" data-bs-toggle="tooltip" data-bs-placement="right" title="กรุณากรอกรหัสประจำตัวเป็นตัวเลขเท่านั้น"/>
-                <label for="student_id">รหัสประจำตัว</label>
+                <input name="user_id" type="text" class="form-control" value="{{ old('user_id') }}" placeholder="" data-bs-toggle="tooltip" data-bs-placement="right" title="กรุณากรอกรหัสประจำตัวเป็นตัวเลขเท่านั้น"/>
+                <label for="user_id">รหัสประจำตัว</label>
             </div>
         </div>
         <div class="input-group mb-2">

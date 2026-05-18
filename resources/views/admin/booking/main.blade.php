@@ -17,18 +17,18 @@
         <tbody>
             @foreach ($bookings as $booking)
                 <tr>
-                    <td>{{ $booking->booking_id }}</td>
+                    <td>{{ $booking->booking_uuid }}</td>
                     <td>{{ $booking->booking_name }}</td>
                     <td>
                         {{ \Carbon\Carbon::parse($booking->booked_from)->format('d/m/Y H:i') }} -
                         {{ \Carbon\Carbon::parse($booking->booked_to)->format('d/m/Y H:i') }}
                     </td>
-                    <td>{{ App\Models\Booking::bookingStatusToText($booking->approval_status) }}</td>
+                    <td>{{ App\Models\Booking::bookingStatusToText($booking->booking_status) }}</td>
                     <td>
-                        <a href="{{ route('admin.booking.detail', ['id' => $booking->booking_id]) }}"
+                        <a href="{{ route('admin.booking.detail', ['id' => $booking->booking_uuid]) }}"
                             class="btn btn-primary btn-sm">ดูรายละเอียด</a>
                         <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#deleteBooking-{{ $booking->booking_id }}">ลบ</button>
+                            data-bs-target="#deleteBooking-{{ $booking->booking_uuid }}">ลบ</button>
                     </td>
                 </tr>
             @endforeach
@@ -52,7 +52,7 @@
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control" id="booker_input"
                                         placeholder="ค้นหาผู้จอง (รหัสนักศึกษา / อีเมล)"
-                                        value="{{ Auth::user()->student_id }}">
+                                        value="{{ Auth::user()->user_id }}">
                                     <button class="btn btn-outline-secondary" type="button"
                                         id="button-search-booker"><i class="bi bi-search"></i></button>
                                 </div>
@@ -321,7 +321,7 @@
 
             // Current Booker State (Defaults to Admin)
             let currentBooker = {
-                id: '{{ Auth::user()->student_id }}', // Assuming admin has student_id or use fallback
+                id: '{{ Auth::user()->user_id }}', // Assuming admin has user_id or use fallback
                 email: '{{ Auth::user()->email }}',
                 db_id: '{{ Auth::id() }}'
             };
@@ -352,7 +352,7 @@
                         const user = result.user;
                         // Update Booker State
                         currentBooker = {
-                            id: user.student_id,
+                            id: user.user_id,
                             email: user.email,
                             db_id: user.id
                         };
@@ -465,13 +465,13 @@
                         }
 
                         // Cache user name for display
-                        cachedUserNames[user.student_id] = `${user.name} ${user.surname}`;
+                        cachedUserNames[user.user_id] = `${user.name} ${user.surname}`;
 
                         // User found
                         attendees.push({
                             user_from: 'id',
                             user_status: user.role_label,
-                            user_identify: user.student_id,
+                            user_identify: user.user_id,
                         });
 
                         renderTable();
@@ -520,7 +520,7 @@
     </script>
 
     @foreach ($bookings as $booking)
-        <div class="modal fade" id="deleteBooking-{{ $booking->booking_id }}" data-bs-backdrop="static"
+        <div class="modal fade" id="deleteBooking-{{ $booking->booking_uuid }}" data-bs-backdrop="static"
             data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -536,7 +536,7 @@
                             <p>คุณแน่ใจหรือไม่ว่าต้องการลบการจองห้องนี้?</p>
                             <p>ชื่อการจอง: {{ $booking->booking_name }}</p>
                             <p>โดย: {{ $booking->user->name }} {{ $booking->user->surname }}
-                                ({{ $booking->user->student_id }})
+                                ({{ $booking->user->user_id }})
                             </p>
                         </div>
                         <div class="modal-footer">
