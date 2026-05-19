@@ -181,10 +181,10 @@ Route::middleware('auth:admin')->group(function () {
         ]);
     })->name('admin.roomsetting');
     Route::post('/admin/manage/room/add', [App\Http\Controllers\RoomController::class, 'addRoom'])->name('admin.room.add');
-    Route::post('/admin/manage/room/edit/{room_id}', [App\Http\Controllers\RoomController::class, 'editRoom'])->name('admin.room.edit');
-    Route::post('/admin/manage/room/delete/{room_id}', [App\Http\Controllers\RoomController::class, 'deleteRoom'])->name('admin.room.delete');
-    Route::post('/admin/manage/room/disable/{room_id}', [App\Http\Controllers\RoomController::class, 'disableRoom'])->name('admin.room.disable');
-    Route::post('/admin/manage/room/enable/{room_id}', [App\Http\Controllers\RoomController::class, 'enableRoom'])->name('admin.room.enable');
+    Route::post('/admin/manage/room/edit/{room_uuid}', [App\Http\Controllers\RoomController::class, 'editRoom'])->name('admin.room.edit');
+    Route::post('/admin/manage/room/delete/{room_uuid}', [App\Http\Controllers\RoomController::class, 'deleteRoom'])->name('admin.room.delete');
+    Route::post('/admin/manage/room/disable/{room_uuid}', [App\Http\Controllers\RoomController::class, 'disableRoom'])->name('admin.room.disable');
+    Route::post('/admin/manage/room/enable/{room_uuid}', [App\Http\Controllers\RoomController::class, 'enableRoom'])->name('admin.room.enable');
 
     Route::get('/admin/booking', function () {
         return view('admin.booking.main', [
