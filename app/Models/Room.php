@@ -17,6 +17,28 @@ class Room extends Model
      * @var string
      */
     protected $table = 'rooms';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'room_uuid';
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * The "type" of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
     /**
      * Disable timestamps for this model.
      * @var bool
@@ -42,15 +64,15 @@ class Room extends Model
     ];
 
     /**
-     * Boot the model and generate UUID for room_id.
+     * Boot the model and generate UUID for room_uuid.
      */
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->room_id)) {
-                $model->room_id = (string) Str::uuid();
+            if (empty($model->room_uuid)) {
+                $model->room_uuid = (string) Str::uuid();
             }
         });
     }
@@ -60,7 +82,7 @@ class Room extends Model
      */
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class, 'room_id', 'room_id');
+        return $this->hasMany(Booking::class, 'room_uuid', 'room_uuid');
     }
 
     public static function add(string $name)
@@ -70,9 +92,9 @@ class Room extends Model
         $newRoom->save();
     }
 
-    public static function edit(string $room_id, $config_type , $value)
+    public static function edit(string $room_uuid, $config_type , $value)
     {
-        $room = self::where('room_id', $room_id)->first();
+        $room = self::where('room_uuid', $room_uuid)->first();
         if ($room) {
             $query = 'room_'.$config_type;
             $room->$query = $value;
@@ -85,26 +107,26 @@ class Room extends Model
         return self::all();
     }
 
-    public static function del(string $room_id)
+    public static function del(string $room_uuid)
     {
-        $room = self::where('room_id', $room_id)->first();
+        $room = self::where('room_uuid', $room_uuid)->first();
         if ($room) {
             $room->delete();
         }
     }
 
-    public static function disable(string $room_id)
+    public static function disable(string $room_uuid)
     {
-        $room = self::where('room_id', $room_id)->first();
+        $room = self::where('room_uuid', $room_uuid)->first();
         if ($room) {
             $room->room_status = 'disabled';
             $room->save();
         }
     }
 
-    public static function enable(string $room_id)
+    public static function enable(string $room_uuid)
     {
-        $room = self::where('room_id', $room_id)->first();
+        $room = self::where('room_uuid', $room_uuid)->first();
         if ($room) {
             $room->room_status = 'available';
             $room->save();
@@ -120,12 +142,12 @@ class Room extends Model
 
     public static function getRoomByID($roomId)
     {
-        return self::where('room_id', $roomId)->first();
+        return self::where('room_uuid', $roomId)->first();
     }
 
     public static function getRoomNameByID($roomId)
     {
-        $room = self::where('room_id', $roomId)->first();
+        $room = self::where('room_uuid', $roomId)->first();
         return $room ? $room->room_name : null;
     }
 }
