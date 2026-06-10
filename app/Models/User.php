@@ -127,7 +127,7 @@ class User extends Authenticatable
         return $this->clubMembership()->where('status', 'waiting')->exists();
     }
 
-    public static function isThisLineIDAlreadyBound(string $lineID, ?int $excludeUserId = null): bool
+    public static function isThisLineIDAlreadyBound(string $lineID, ?string $excludeUserId = null): bool
     {
         $query = self::where('line_id', $lineID);
 
