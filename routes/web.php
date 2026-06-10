@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
         $bookingDetails = App\Models\Booking::where('booking_uuid', $id)->first();
         return view('dash.booking.details', [
             'title' => 'รายละเอียดการจอง',
-            'booking' => $bookingDetails
+            'booking' => $bookingDetails ? collect([$bookingDetails]) : collect([])
         ]);
     })->name('dash.booking.history.detail');
 
@@ -195,9 +195,10 @@ Route::middleware('auth:admin')->group(function () {
     })->name('admin.booking');
     Route::post('/admin/booking/submit', [BookingController::class, 'saveBooking'])->defaults('isAdmin', true)->defaults('redirectRoute', 'admin.booking')->name('admin.booking.submit');
     Route::get('/admin/booking/{id}', function ($id) {
+        $bookingDetails = App\Models\Booking::where('booking_uuid', $id)->first();
         return view('admin.booking.detail', [
             'title' => 'รายละเอียดการจอง',
-            'booking' => App\Models\Booking::where('booking_uuid', $id)->first()
+            'booking' => $bookingDetails ? collect([$bookingDetails]) : collect([])
         ]);
     })->name('admin.booking.detail');
     Route::post('/admin/booking/approve/{id}', [App\Http\Controllers\BookingController::class, 'approveBooking'])->name('admin.booking.approve');
