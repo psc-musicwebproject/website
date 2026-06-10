@@ -72,7 +72,7 @@
                                     <select class="form-select" id="room_id" name="room_id" required
                                         @if (count($rooms) == 0) disabled @endif>
                                         @foreach ($rooms as $room)
-                                            <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
+                                            <option value="{{ $room->room_uuid }}">{{ $room->room_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -530,7 +530,7 @@
                             aria-label="Close"></button>
                     </div>
                     <form method="POST"
-                        action="{{ route('admin.booking.delete', ['id' => $booking->booking_id]) }}">
+                        action="{{ route('admin.booking.delete', ['id' => $booking->booking_uuid]) }}">
                         @csrf
                         <div class="modal-body">
                             <p>คุณแน่ใจหรือไม่ว่าต้องการลบการจองห้องนี้?</p>
