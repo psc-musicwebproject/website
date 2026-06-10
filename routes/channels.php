@@ -15,15 +15,27 @@ use Illuminate\Support\Facades\Log;
 */
 
 Broadcast::channel('admin.{id}', function ($user, $id) {
-    $authorized = (int) $user->id === (int) $id && $user->type === 'admin';
+    // Support UUID primary key (`id`) and legacy `user_id` fields.
+    $userId = (string) $user->id;
+    $legacyUserId = isset($user->user_id) ? (string) $user->user_id : null;
+
+    $idParam = (string) $id;
+
+    $matchesId = $userId === $idParam;
+    $matchesLegacy = $legacyUserId !== null && $legacyUserId === $idParam;
+    $isAdmin = $user->type === 'admin';
+
+    $authorized = ($isAdmin && ($matchesId || $matchesLegacy));
 
     if (!$authorized) {
         Log::debug('Admin channel auth failed', [
-            'user_id' => $user->id,
-            'channel_id' => $id,
+            'user_id' => $userId,
+            'legacy_user_id' => $legacyUserId,
+            'channel_id' => $idParam,
             'user_type' => $user->type,
-            'id_match' => (int) $user->id === (int) $id,
-            'type_match' => $user->type === 'admin',
+            'matches_id' => $matchesId,
+            'matches_legacy' => $matchesLegacy,
+            'is_admin' => $isAdmin,
         ]);
     }
 
@@ -31,15 +43,27 @@ Broadcast::channel('admin.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('user.{id}', function ($user, $id) {
-    $authorized = (int) $user->id === (int) $id && $user->type !== 'admin';
+    // Support UUID primary key (`id`) and legacy `user_id` fields.
+    $userId = (string) $user->id;
+    $legacyUserId = isset($user->user_id) ? (string) $user->user_id : null;
+
+    $idParam = (string) $id;
+
+    $matchesId = $userId === $idParam;
+    $matchesLegacy = $legacyUserId !== null && $legacyUserId === $idParam;
+    $isNotAdmin = $user->type !== 'admin';
+
+    $authorized = ($isNotAdmin && ($matchesId || $matchesLegacy));
 
     if (!$authorized) {
         Log::debug('User channel auth failed', [
-            'user_id' => $user->id,
-            'channel_id' => $id,
+            'user_id' => $userId,
+            'legacy_user_id' => $legacyUserId,
+            'channel_id' => $idParam,
             'user_type' => $user->type,
-            'id_match' => (int) $user->id === (int) $id,
-            'type_match' => $user->type !== 'admin',
+            'matches_id' => $matchesId,
+            'matches_legacy' => $matchesLegacy,
+            'is_not_admin' => $isNotAdmin,
         ]);
     }
 
