@@ -120,7 +120,7 @@ class Booking extends Model
      */
     public function room(): BelongsTo
     {
-        return $this->belongsTo(Room::class, 'room_id', 'room_id');
+        return $this->belongsTo(Room::class, 'room_id', 'room_uuid');
     }
 
     public static function getCurrentUserBookings($userUUID, $status = null)
