@@ -19,24 +19,25 @@
                 return collect($contactInfo)->contains('type', $type);
             };
             $getSocial = function ($type) use ($contactInfo) {
-                return collect($contactInfo)->firstWhere('type', $type)['data'] ?? '';
+                return data_get(collect($contactInfo)->firstWhere('type', $type), 'data', '');
             };
 
             $hasInst = function ($type) use ($instruments) {
                 return collect($instruments)->contains('type', $type);
             };
             $getInst = function ($type) use ($instruments) {
-                return collect($instruments)->firstWhere('type', $type)['data'] ?? '';
+                return data_get(collect($instruments)->firstWhere('type', $type), 'data', '');
             };
 
-            $expType = collect($experience)->first()['type'] ?? '';
-            $expData = collect($experience)->first()['data'] ?? '';
+            $expFirst = collect($experience)->first();
+            $expType = data_get($expFirst, 'type', '');
+            $expData = data_get($expFirst, 'data', '');
 
             $hasDuty = function ($type) use ($duties) {
                 return collect($duties)->contains('type', $type);
             };
             $getDuty = function ($type) use ($duties) {
-                return collect($duties)->firstWhere('type', $type)['data'] ?? '';
+                return data_get(collect($duties)->firstWhere('type', $type), 'data', '');
             };
         @endphp
 
