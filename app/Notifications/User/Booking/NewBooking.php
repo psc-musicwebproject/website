@@ -39,7 +39,13 @@ class NewBooking extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', LineChannel::class, 'broadcast'];
+        $channels = ['mail', LineChannel::class];
+
+        if (!$this->isAdminBooking || $this->booking->user_id !== $this->bookedBy->id) {
+            $channels[] = 'broadcast';
+        }
+
+        return $channels;
     }
 
     /**
@@ -168,7 +174,7 @@ class NewBooking extends Notification
             ? route('admin.booking.detail', ['id' => $this->booking->booking_uuid])
             : route('dash.booking.history.detail', ['id' => $this->booking->booking_uuid]);
 
-        if (!$this->isAdminBooking) {
+        if (!$this->isAdminBooking || $this->booking->user_id !== $this->bookedBy->id) {
             return new BroadcastMessage([
                 'title' => 'การจองห้องเสร็จสิ้น',
                 'message' => $broad_msg,

@@ -75,25 +75,35 @@ class BookingController extends Controller
             $booking->save();
 
             if ($booking->user) {
-                $booking->user->notify(new NewBooking($booking, Auth::user()));
-                if ($isAdmin && $booking->attendees) {
-                    $InternalList = Booking::fetchInternalAttendeeList($booking);
-                    foreach ($InternalList as $user) {
-                        $user->notify(new UserInvitedNotify($booking));
+                try {
+                    $booking->user->notify(new NewBooking($booking, Auth::user()));
+
+                    if ($isAdmin && $booking->attendees) {
+                        $InternalList = Booking::fetchInternalAttendeeList($booking);
+                        foreach ($InternalList as $user) {
+                            $user->notify(new UserInvitedNotify($booking));
+                        }
+
+                        $GuestList = Booking::fetchGuestAttendeeList($booking);
+                        foreach ($GuestList as $guest) {
+                            // Send invitation email to guest with their name
+                            Notification::route('mail', $guest['email'])
+                                ->notify(new UserInvitedNotify($booking, $guest['name']));
+                        }
                     }
-                    $GuestList = Booking::fetchGuestAttendeeList($booking);
-                    foreach ($GuestList as $guest) {
-                        // Send invitation email to guest with their name
-                        Notification::route('mail', $guest['email'])
-                            ->notify(new UserInvitedNotify($booking, $guest['name']));
-                    }
+                } catch (\Throwable $e) {
+                    report($e);
                 }
             }
 
-            if ($booking->user && ($booking->user->type != "admin" || Auth::user()->type != 'admin') ) {
+            if (!$isAdmin && $booking->user && $booking->user->type != 'admin') {
                 $admin = \App\Models\User::where('type', 'admin')->get();
                 if ($admin->isNotEmpty()) {
-                    Notification::send($admin, new NewBookingNotice($booking));
+                    try {
+                        Notification::send($admin, new NewBookingNotice($booking));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
                 }
             }
 
@@ -107,9 +117,17 @@ class BookingController extends Controller
     {
         try {
             $booking = Booking::where('booking_uuid', $bookingId)->first();
+            if (!$booking) {
+                return redirect()->route('admin.booking')->with('error', 'ไม่พบการจองที่ต้องการอัปเดต');
+            }
+
             $wasWaiting = $booking && $booking->booking_status === 'waiting_approval';
             Booking::approveBooking($request, $bookingId);
             $booking = Booking::where('booking_uuid', $bookingId)->first();
+
+            if (!$booking) {
+                return redirect()->route('admin.booking')->with('error', 'ไม่พบการจองที่ต้องการอัปเดต');
+            }
 
             if ($booking->booking_status === 'rejected') {
                 $booking->user->notify(new \App\Notifications\User\Booking\DeniedUserNotify($booking));

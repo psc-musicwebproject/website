@@ -69,9 +69,10 @@ class ClubRegisterSentNoti extends Notification
         $jStr = file_get_contents(app_path('line/flex_messages/club_register/sent_alert.json'));
         $fTem = json_decode($jStr, true);
 
-        // Replace Placeholder data to real data
-        $fTem['body']['contents'][2]['contents'][0]['contents'][1]['text'] = $this->clubMember->user->name_title . $this->clubMember->user->name . ' ' . $this->clubMember->user->surname;
-        $fTem['body']['contents'][2]['contents'][1]['contents'][1]['text'] = $this->clubMember->user->major;
+        // Replace Placeholder data to real data (concise merge, keep original format)
+        $fullName = trim(sprintf('%s%s %s', $this->clubMember->user->name_title ?? '', $this->clubMember->user->name ?? '', $this->clubMember->user->surname ?? ''));
+        $fTem['body']['contents'][2]['contents'][0]['contents'][1]['text'] = $fullName !== '' ? $fullName : '-';
+        $fTem['body']['contents'][2]['contents'][1]['contents'][1]['text'] = trim((string) ($this->clubMember->user->major ?? '')) ?: '-';
 
         $fTem['footer']['contents'][0]['action']['uri'] = route('dash.club.register');
 
