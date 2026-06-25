@@ -25,6 +25,13 @@ class UserTypeMapping extends Model
     protected $primaryKey = 'id';
 
     /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
      * The "type" of the auto-incrementing ID.
      *
      * @var string
@@ -44,4 +51,18 @@ class UserTypeMapping extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * Boot the model and generate UUID for id.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 }
