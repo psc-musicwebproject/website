@@ -108,7 +108,7 @@ class User extends Authenticatable
      */
     public function approvedClubMemberships()
     {
-        return $this->hasMany(ClubMember::class, 'approval_person_uuid');
+        return $this->hasMany(ClubMember::class, 'approval_person_id');
     }
 
     /**
