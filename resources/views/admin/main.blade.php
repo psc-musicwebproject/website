@@ -34,15 +34,15 @@
                                     <tr>
                                         <td>{{ $booking->booking_name }}</td>
                                         <td class="text-nowrap">{{ $booking->booking_time }}</td>
-                                        <td class="text-nowrap">{{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->student_id }})</td>
+                                        <td class="text-nowrap">{{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->user_id }})</td>
                                         <td class="text-nowrap">
-                                            <a href="{{ route('admin.booking.detail', ['id' => $booking->booking_id]) }}" class="btn btn-info btn-sm">
+                                            <a href="{{ route('admin.booking.detail', ['id' => $booking->booking_uuid]) }}" class="btn btn-info btn-sm">
                                                 ดูรายละเอียด
                                             </a>
-                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveBooking-{{ $booking->booking_id }}">
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveBooking-{{ $booking->booking_uuid }}">
                                                 อนุมัติ
                                             </button>
-                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectBooking-{{ $booking->booking_id }}">
+                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectBooking-{{ $booking->booking_uuid }}">
                                                 ปฏิเสธ
                                             </button>
                                         </td>
@@ -66,19 +66,19 @@
 
     <!-- Modal for approval -->
     @foreach (App\Models\Booking::getAllBookings('waiting', 5) as $booking)
-    <div class="modal fade" id="approveBooking-{{ $booking->booking_id }}" tabindex="-1" aria-labelledby="approveBookingModalLabel{{ $booking->booking_id }}" aria-hidden="true">
+    <div class="modal fade" id="approveBooking-{{ $booking->booking_uuid }}" tabindex="-1" aria-labelledby="approveBookingModalLabel{{ $booking->booking_uuid }}" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="approveBookingModalLabel{{ $booking->booking_id }}">อนุมัติการจอง: {{ $booking->booking_name }} [{{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->student_id }})]</h5>
+                    <h5 class="modal-title" id="approveBookingModalLabel{{ $booking->booking_uuid }}">อนุมัติการจอง: {{ $booking->booking_name }} [{{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->user_id }})]</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('admin.booking.approve', ['id' => $booking->booking_id]) }}">
+                <form method="POST" action="{{ route('admin.booking.approve', ['id' => $booking->booking_uuid]) }}">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="approval_comment{{ $booking->booking_id }}" class="form-label">เหตุผล (ถ้ามี)</label>
-                            <textarea class="form-control" id="approval_comment{{ $booking->booking_id }}" name="approval_comment" rows="3"></textarea>
+                            <label for="approval_comment{{ $booking->booking_uuid }}" class="form-label">เหตุผล (ถ้ามี)</label>
+                            <textarea class="form-control" id="approval_comment{{ $booking->booking_uuid }}" name="approval_comment" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -90,19 +90,19 @@
         </div>
     </div>
 
-    <div class="modal fade" id="rejectBooking-{{ $booking->booking_id }}" tabindex="-1" aria-labelledby="rejectBookingModalLabel{{ $booking->booking_id }}" aria-hidden="true">
+    <div class="modal fade" id="rejectBooking-{{ $booking->booking_uuid }}" tabindex="-1" aria-labelledby="rejectBookingModalLabel{{ $booking->booking_uuid }}" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="rejectBookingModalLabel{{ $booking->booking_id }}">ปฏิเสธการจอง: {{ $booking->booking_name }} [{{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->student_id }})]</h5>
+                    <h5 class="modal-title" id="rejectBookingModalLabel{{ $booking->booking_uuid }}">ปฏิเสธการจอง: {{ $booking->booking_name }} [{{ $booking->user->name }} {{ $booking->user->surname }} ({{ $booking->user->user_id }})]</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('admin.booking.delete', ['id' => $booking->booking_id]) }}">
+                <form method="POST" action="{{ route('admin.booking.delete', ['id' => $booking->booking_uuid]) }}">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="rejection_comment{{ $booking->booking_id }}" class="form-label">เหตุผล (ถ้ามี)</label>
-                            <textarea class="form-control" id="rejection_comment{{ $booking->booking_id }}" name="approval_comment" rows="3"></textarea>
+                            <label for="rejection_comment{{ $booking->booking_uuid }}" class="form-label">เหตุผล (ถ้ามี)</label>
+                            <textarea class="form-control" id="rejection_comment{{ $booking->booking_uuid }}" name="approval_comment" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

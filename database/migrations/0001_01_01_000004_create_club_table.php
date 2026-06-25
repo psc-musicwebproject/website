@@ -12,12 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('club_members', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('member_id')->unique();
-            $table->string('user_id');
+            $table->uuid('member_id')->primary();
+            $table->uuid('user_id');
             $table->string('status')->default('waiting');
-            # $table->string('ability');
-            $table->string('approval_person_id')->nullable();
+            $table->uuid('approval_person_id')->nullable();
             $table->dateTime('approval_time')->nullable();
             $table->string('approval_comment')->nullable();
             $table->timestamps();

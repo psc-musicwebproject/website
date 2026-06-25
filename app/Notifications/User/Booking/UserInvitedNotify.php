@@ -110,7 +110,7 @@ class UserInvitedNotify extends Notification
         $fTem['body']['contents'][2]['contents'][3]['contents'][1]['text'] =
             !empty($attendeeList) ? implode(', ', $attendeeList) : 'ไม่ระบุผู้เข้าร่วม';
 
-        $fTem['footer']['contents'][0]['action']['uri'] = route('booking.detail', ['booking_id' => $this->booking->booking_id]);
+        $fTem['footer']['contents'][0]['action']['uri'] = route('dash.booking.history.detail', ['id' => $this->booking->booking_uuid]);
 
         $lineCon = new LineIntegrationController();
         return $lineCon->pushFlexMessage($notifiable->line_id, "คำเชิญเข้าห้อง" . $this->booking->room->room_name . " - " . $this->booking->booking_name, $fTem);
@@ -124,7 +124,7 @@ class UserInvitedNotify extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'booking_id' => $this->booking->booking_id,
+            'booking_id' => $this->booking->booking_uuid,
             'booking_name' => $this->booking->booking_name
         ];
     }

@@ -32,7 +32,7 @@ class LoginController extends Controller
 
         // 3. Handle Credentials Login
         $credentials = $request->validate([
-            'student_id' => ['required', 'numeric'],
+            'user_id' => ['required', 'numeric'],
             'password'   => ['required'],
         ]);
 
@@ -49,7 +49,7 @@ class LoginController extends Controller
                 $request->session()->regenerateToken();
                 return back()
                     ->withErrors(['credentials' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ'])
-                    ->onlyInput('student_id');
+                    ->onlyInput('user_id');
             }
 
             $request->session()->regenerate();
@@ -99,12 +99,12 @@ class LoginController extends Controller
             if (Auth::guard('web')->once($credentials)) {
                 return back()
                     ->withErrors(['access' => 'Unauthorized access. Admin privileges required.'])
-                    ->onlyInput('student_id');
+                    ->onlyInput('user_id');
             }
         }
 
         return back()
             ->withErrors(['credentials' => 'The provided credentials do not match our records.'])
-            ->onlyInput('student_id');
+            ->onlyInput('user_id');
     }
 }

@@ -33,12 +33,12 @@
                 </td>
                 <td>
                     <div class="d-grid gap-2 d-md-flex">
-                        <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#editroom-{{ $room->room_id }}">แก้ไข</button>
-                        <button class="btn btn-danger text-nowrap" data-bs-toggle="modal" data-bs-target="#deleteroom-{{ $room->room_id }}">ลบ</button>
+                        <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#editroom-{{ $room->room_uuid }}">แก้ไข</button>
+                        <button class="btn btn-danger text-nowrap" data-bs-toggle="modal" data-bs-target="#deleteroom-{{ $room->room_uuid }}">ลบ</button>
                         @if ($room->room_status != 'disabled' && $room->room_status != 'in_use')
-                        <button class="btn btn-secondary text-nowrap" data-bs-toggle="modal" data-bs-target="#disableroom-{{ $room->room_id }}">ปิดใช้งาน</button>
+                        <button class="btn btn-secondary text-nowrap" data-bs-toggle="modal" data-bs-target="#disableroom-{{ $room->room_uuid }}">ปิดใช้งาน</button>
                         @elseif ($room->room_status == 'disabled')
-                        <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#enableroom-{{ $room->room_id }}">เปิดใช้งาน</button>
+                        <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#enableroom-{{ $room->room_uuid }}">เปิดใช้งาน</button>
                         @endif
                     </div>
                 </td>
@@ -74,14 +74,14 @@
 
     <!-- Edit Room Modal -->
     @foreach (Room::all() as $room)
-    <div class="modal fade" id="editroom-{{ $room->room_id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="editroom-{{ $room->room_uuid }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">แก้ไขห้อง</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('admin.room.edit', ['room_id' => $room->room_id]) }} ">
+                <form method="POST" action="{{ route('admin.room.edit', ['room_uuid' => $room->room_uuid]) }} ">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
@@ -101,14 +101,14 @@
 
     <!-- Delete Room Modal -->
     @foreach (Room::all() as $room)
-    <div class="modal fade" id="deleteroom-{{ $room->room_id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteroom-{{ $room->room_uuid }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">ลบห้อง</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action=" {{ route('admin.room.delete', ['room_id' => $room->room_id]) }} ">
+                <form method="POST" action=" {{ route('admin.room.delete', ['room_uuid' => $room->room_uuid]) }} ">
                     @csrf
                     <div class="modal-body">
                         <p>คุณแน่ใจหรือไม่ว่าต้องการลบ{{ $room->room_name }} ?</p>
@@ -125,7 +125,7 @@
 
     <!-- Disable Confirmation Modal -->
     @foreach (Room::all() as $room)
-    <div class="modal fade" id="disableroom-{{ $room->room_id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade" id="disableroom-{{ $room->room_uuid }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -133,7 +133,7 @@
                     <h5 class="modal-title" id="staticBackdropLabel">ปิดใช้งานห้อง</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action=" {{ route('admin.room.disable', ['room_id' => $room->room_id]) }} ">
+                <form method="POST" action=" {{ route('admin.room.disable', ['room_uuid' => $room->room_uuid]) }} ">
                     @csrf
                     <div class="modal-body">
                         <p>คุณแน่ใจหรือไม่ว่าต้องการปิดใช้งาน{{ $room->room_name }} ?</p>
@@ -150,7 +150,7 @@
 
     <!-- Enable Confirmation Modal -->
     @foreach (Room::all() as $room)
-    <div class="modal fade" id="enableroom-{{ $room->room_id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade" id="enableroom-{{ $room->room_uuid }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -158,7 +158,7 @@
                     <h5 class="modal-title" id="staticBackdropLabel">เปิดใช้งานห้อง</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action=" {{ route('admin.room.enable', ['room_id' => $room->room_id]) }} ">
+                <form method="POST" action=" {{ route('admin.room.enable', ['room_uuid' => $room->room_uuid]) }} ">
                     @csrf
                     <div class="modal-body">
                         <p>คุณแน่ใจหรือไม่ว่าต้องการเปิดใช้งาน{{ $room->room_name }} ?</p>

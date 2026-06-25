@@ -6,7 +6,7 @@
             @foreach($booking as $detail)
             <tr>
                 <th scope="col">รหัสการจอง</th>
-                <td>{{ $detail->booking_id }}</td>
+                <td>{{ $detail->booking_uuid }}</td>
             </tr>
             <tr>
                 <th scope="col">ชื่อการจอง</th>
@@ -37,11 +37,11 @@
     </table>
 
     @if($detail->user->type != 'admin')
-    <form action="{{ route('admin.booking.approve', $detail->booking_id) }}" method="POST">
+    <form action="{{ route('admin.booking.approve', $detail->booking_uuid) }}" method="POST">
             @csrf
             <div class="card">
                 <div class="card-header">
-                    @if ($detail->approval_status == 'waiting')
+                    @if ($detail->booking_status == 'waiting_approval')
                         <span>อนุมัติ / ไม่อนุมัติการจอง</span>
                     @else
                         <span>อัปเดตสถานะการจอง</span>

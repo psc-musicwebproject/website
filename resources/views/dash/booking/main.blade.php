@@ -22,7 +22,7 @@
                             <select class="form-select" id="room_id" name="room_id" required
                                 @if (count($rooms) == 0) disabled @endif>
                                 @foreach ($rooms as $room)
-                                    <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
+                                    <option value="{{ $room->room_uuid }}">{{ $room->room_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -258,7 +258,7 @@
 
             // Current User Info
             const currentUser = {
-                id: "{{ auth()->user()->student_id }}",
+                id: "{{ auth()->user()->user_id }}",
                 email: "{{ auth()->user()->email }}"
             };
 
@@ -371,7 +371,7 @@
                         const user = result.user;
 
                         // Double check if found user is self (in case searched by alternate ID)
-                        if (user.student_id === currentUser.id || user.email === currentUser.email) {
+                        if (user.user_id === currentUser.id || user.email === currentUser.email) {
                             attendeeInput.classList.add('is-invalid');
                             feedbackDiv.textContent =
                                 'คุณไม่สามารถเพิ่มตัวเองเป็นผู้เข้าร่วมได้ (คุณเป็นผู้จองอยู่แล้ว)';
@@ -379,7 +379,7 @@
                             return;
                         }
 
-                        let existing = attendees.find(a => a.user_identify === user.student_id || a
+                        let existing = attendees.find(a => a.user_identify === user.user_id || a
                             .user_identify === user.email);
                         if (existing) {
                             alert('ผู้ใช้นี้ถูกเพิ่มไปแล้ว');
@@ -388,12 +388,12 @@
                         }
 
                         // Cache the name for display purposes
-                        cachedUserNames[user.student_id] = `${user.name} ${user.surname || ''}`.trim();
+                        cachedUserNames[user.user_id] = `${user.name} ${user.surname || ''}`.trim();
 
                         attendees.push({
                             user_from: 'id',
                             user_status: user.role_label,
-                            user_identify: user.student_id,
+                            user_identify: user.user_id,
                         });
 
                         attendeeInput.value = '';

@@ -14,7 +14,7 @@ class UserManagerController extends Controller
      * This is the single source of truth for CSV format.
      */
     public const CSV_COLUMNS = [
-        'student_id', 'username', 'title', 'name', 'surname', 'type',
+        'user_id', 'username', 'title', 'name', 'surname', 'type',
         'major', 'class', 'phone', 'nickname', 'password', 'force_reset',
         'email', 'is_active'
     ];
@@ -25,7 +25,7 @@ class UserManagerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'student_id' => 'required|string|unique:users,student_id',
+            'user_id' => 'required|string|unique:users,user_id',
             'username' => 'required|string|unique:users,username',
             'password' => 'nullable|string|min:8',
             'name_title' => 'nullable|string',
@@ -92,11 +92,11 @@ class UserManagerController extends Controller
             if (empty($row) || count($row) < 5) continue;
 
             // Mapping based on index (matches CSV_COLUMNS order)
-            // 0:student_id, 1:username, 2:title, 3:name, 4:surname, 5:type,
+            // 0:user_id, 1:username, 2:title, 3:name, 4:surname, 5:type,
             // 6:major, 7:class, 8:phone, 9:nickname, 10:password, 11:force_reset,
             // 12:email, 13:is_active
             $userData = [
-                'student_id' => $row[0] ?? null,
+                'user_id' => $row[0] ?? null,
                 'username'   => $row[1] ?? null,
                 'name_title' => $row[2] ?? null,
                 'name'       => $row[3] ?? null,
@@ -114,7 +114,7 @@ class UserManagerController extends Controller
             $csvForceReset = isset($row[10]) ? ($row[10] /* password */) : null; // Wait, row[10] is password. We need row[11].
 
             // Re-map:
-            // 0: student_id
+            // 0: user_id
             // ...
             // 10: password
             // 11: force_reset (optional)
@@ -154,16 +154,16 @@ class UserManagerController extends Controller
             if (!empty($missing)) {
                 $skippedRows[] = [
                     'line' => $lineNum,
-                    'sid' => $userData['student_id'] ?? '-',
+                    'sid' => $userData['user_id'] ?? '-',
                     'name' => $userData['name'] ?? '-',
-                    'raw_data' => implode(', ', array_filter([$userData['student_id'], $userData['name'], $userData['username']])),
+                    'raw_data' => implode(', ', array_filter([$userData['user_id'], $userData['name'], $userData['username']])),
                     'missing' => implode(', ', $missing)
                 ];
                 continue;
             }
 
             // Check for existing fields to prevent error (including email if provided)
-            $existsQuery = User::where('student_id', '=', $userData['student_id'])
+            $existsQuery = User::where('user_id', '=', $userData['user_id'])
                 ->orWhere('username', '=', $userData['username']);
             if (!empty($userData['email'])) {
                 $existsQuery->orWhere('email', '=', $userData['email']);
@@ -171,7 +171,7 @@ class UserManagerController extends Controller
             if ($existsQuery->exists()) {
                 $skippedRows[] = [
                     'line' => $lineNum,
-                    'sid' => $userData['student_id'] ?? '-',
+                    'sid' => $userData['user_id'] ?? '-',
                     'name' => $userData['name'] ?? '-',
                     'raw_data' => 'Duplicate ID/Username/Email',
                     'missing' => 'Already exists'
@@ -183,7 +183,7 @@ class UserManagerController extends Controller
             if (!empty($userData['email']) && !filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
                 $skippedRows[] = [
                     'line' => $lineNum,
-                    'sid' => $userData['student_id'] ?? '-',
+                    'sid' => $userData['user_id'] ?? '-',
                     'name' => $userData['name'] ?? '-',
                     'raw_data' => 'Invalid email: ' . $userData['email'],
                     'missing' => 'Valid email format'
@@ -202,7 +202,7 @@ class UserManagerController extends Controller
 
                 // Add to list for export (ONLY if not duplicate)
                 $generatedCredentials[] = [
-                    'student_id' => $userData['student_id'],
+                    'user_id' => $userData['user_id'],
                     'username' => $userData['username'],
                     'name' => $userData['name_title'] . $userData['name'] . ' ' . $userData['surname'],
                     'password' => $rawPassword

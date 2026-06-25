@@ -20,6 +20,20 @@ class User extends Authenticatable
     public $timestamps = false;
 
     /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * The "type" of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -30,7 +44,7 @@ class User extends Authenticatable
         'surname',
         'nickname',
         'username',
-        'student_id',
+        'user_id',
         'major',
         'phone_number',
         'email',
@@ -68,6 +82,20 @@ class User extends Authenticatable
     }
 
     /**
+     * Boot the model and generate UUID for id.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
+    /**
      * Get the club membership for this user.
      */
     public function clubMembership()
@@ -99,7 +127,7 @@ class User extends Authenticatable
         return $this->clubMembership()->where('status', 'waiting')->exists();
     }
 
-    public static function isThisLineIDAlreadyBound(string $lineID, ?int $excludeUserId = null): bool
+    public static function isThisLineIDAlreadyBound(string $lineID, ?string $excludeUserId = null): bool
     {
         $query = self::where('line_id', $lineID);
 

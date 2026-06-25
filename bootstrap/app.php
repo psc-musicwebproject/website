@@ -12,57 +12,34 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__ . '/../routes/web.php',
         api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
-        // Don't auto-register channels to avoid default Broadcast::routes()
-        // channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         then: function () {
-            // Manually load channel definitions without registering routes
+            // Manually load channel definitions to avoid Laravel auto-registering
+            // the default Broadcast::routes() which overrides our custom auth route.
             require __DIR__ . '/../routes/channels.php';
 
-            // Custom broadcasting routes that check both guards
+            // Custom broadcasting auth route that supports both 'admin' and 'web' guards.
+            // Laravel's default Broadcast::routes() only checks the default guard,
+            // so we register our own route that tries both guards before delegating
+            // to Laravel's built-in channel authorization (channels.php).
             Route::middleware(['web'])->group(function () {
                 Route::match(['get', 'post'], '/broadcasting/auth', function (Illuminate\Http\Request $request) {
-                    // Try to authenticate with either admin or web guard
+                    // Try admin guard first, then fall back to web guard
                     $user = Auth::guard('admin')->user() ?? Auth::guard('web')->user();
 
                     if (!$user) {
-                        return response()->json(['error' => 'Unauthenticated'], 403);
+                        abort(403, 'Unauthenticated.');
                     }
 
-                    $channelName = $request->input('channel_name');
-                    $socketId = $request->input('socket_id');
+                    // Set the resolved user on the request so that
+                    // Laravel's Broadcast::auth() can find them via $request->user()
+                    $request->setUserResolver(function () use ($user) {
+                        return $user;
+                    });
 
-                    // Remove 'private-' prefix for matching
-                    $channelWithoutPrefix = preg_replace('/^private-/', '', $channelName);
-
-                    // Direct channel authorization
-                    $authorized = false;
-
-                    // Match admin.{id} pattern
-                    if (preg_match('/^admin\.(\d+)$/', $channelWithoutPrefix, $matches)) {
-                        $channelId = (int) $matches[1];
-                        $authorized = (int) $user->id === $channelId && $user->type === 'admin';
-                    }
-                    // Match user.{id} pattern
-                    elseif (preg_match('/^user\.(\d+)$/', $channelWithoutPrefix, $matches)) {
-                        $channelId = (int) $matches[1];
-                        $authorized = (int) $user->id === $channelId && $user->type !== 'admin';
-                    }
-
-                    if (!$authorized) {
-                        return response()->json(['error' => 'Forbidden', 'message' => 'Channel authorization failed'], 403);
-                    }
-
-                    // Return Pusher/Reverb compatible auth response
-                    $pusher = new \Pusher\Pusher(
-                        config('broadcasting.connections.reverb.key'),
-                        config('broadcasting.connections.reverb.secret'),
-                        config('broadcasting.connections.reverb.app_id')
-                    );
-
-                    $auth = $pusher->authorizeChannel($channelName, $socketId);
-
-                    return response()->json(json_decode($auth, true));
+                    // Delegate to Laravel's built-in broadcast authorization,
+                    // which will match against the channel callbacks in channels.php
+                    return Broadcast::auth($request);
                 })->name('broadcasting.auth');
             });
         },

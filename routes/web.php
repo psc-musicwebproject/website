@@ -102,10 +102,10 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('dash.booking.history');
     Route::get('/dash/booking/history/{id}', function ($id) {
-        $bookingDetails = App\Models\Booking::getBookingByID($id);
+        $bookingDetails = App\Models\Booking::where('booking_uuid', $id)->first();
         return view('dash.booking.details', [
             'title' => 'รายละเอียดการจอง',
-            'booking' => $bookingDetails
+            'booking' => $bookingDetails ? collect([$bookingDetails]) : collect([])
         ]);
     })->name('dash.booking.history.detail');
 
@@ -181,10 +181,10 @@ Route::middleware('auth:admin')->group(function () {
         ]);
     })->name('admin.roomsetting');
     Route::post('/admin/manage/room/add', [App\Http\Controllers\RoomController::class, 'addRoom'])->name('admin.room.add');
-    Route::post('/admin/manage/room/edit/{room_id}', [App\Http\Controllers\RoomController::class, 'editRoom'])->name('admin.room.edit');
-    Route::post('/admin/manage/room/delete/{room_id}', [App\Http\Controllers\RoomController::class, 'deleteRoom'])->name('admin.room.delete');
-    Route::post('/admin/manage/room/disable/{room_id}', [App\Http\Controllers\RoomController::class, 'disableRoom'])->name('admin.room.disable');
-    Route::post('/admin/manage/room/enable/{room_id}', [App\Http\Controllers\RoomController::class, 'enableRoom'])->name('admin.room.enable');
+    Route::post('/admin/manage/room/edit/{room_uuid}', [App\Http\Controllers\RoomController::class, 'editRoom'])->name('admin.room.edit');
+    Route::post('/admin/manage/room/delete/{room_uuid}', [App\Http\Controllers\RoomController::class, 'deleteRoom'])->name('admin.room.delete');
+    Route::post('/admin/manage/room/disable/{room_uuid}', [App\Http\Controllers\RoomController::class, 'disableRoom'])->name('admin.room.disable');
+    Route::post('/admin/manage/room/enable/{room_uuid}', [App\Http\Controllers\RoomController::class, 'enableRoom'])->name('admin.room.enable');
 
     Route::get('/admin/booking', function () {
         return view('admin.booking.main', [
@@ -195,9 +195,10 @@ Route::middleware('auth:admin')->group(function () {
     })->name('admin.booking');
     Route::post('/admin/booking/submit', [BookingController::class, 'saveBooking'])->defaults('isAdmin', true)->defaults('redirectRoute', 'admin.booking')->name('admin.booking.submit');
     Route::get('/admin/booking/{id}', function ($id) {
+        $bookingDetails = App\Models\Booking::where('booking_uuid', $id)->first();
         return view('admin.booking.detail', [
             'title' => 'รายละเอียดการจอง',
-            'booking' => App\Models\Booking::getBookingByID($id)
+            'booking' => $bookingDetails ? collect([$bookingDetails]) : collect([])
         ]);
     })->name('admin.booking.detail');
     Route::post('/admin/booking/approve/{id}', [App\Http\Controllers\BookingController::class, 'approveBooking'])->name('admin.booking.approve');

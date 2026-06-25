@@ -98,7 +98,7 @@
                 <tbody>
                     @foreach ($users as $user)
                         <tr>
-                            <td>{{ $user->student_id }}</td>
+                            <td>{{ $user->user_id }}</td>
                             <td>
                                 {{ $user->name_title }} {{ $user->name }} {{ $user->surname }}
                                 <div class="text-muted text-sm">{{ $user->username }}</div>
@@ -163,8 +163,8 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="edit_student_id" class="form-label">รหัสผู้ใช้</label>
-                                <input type="text" class="form-control" id="edit_student_id" name="student_id" required>
+                                <label for="edit_user_id" class="form-label">รหัสผู้ใช้</label>
+                                <input type="text" class="form-control" id="edit_user_id" name="user_id" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="edit_username" class="form-label">ชื่อผู้ใช้</label>
@@ -277,7 +277,7 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">รหัสนักเรียน/ผู้ใช้ *</label>
-                                        <input type="text" class="form-control" name="student_id" required>
+                                        <input type="text" class="form-control" name="user_id" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">ชื่อผู้ใช้ (Username) *</label>
@@ -470,7 +470,7 @@
                     var userData = JSON.parse(this.dataset.user);
                     var updateUrl = this.dataset.updateUrl;
 
-                    document.getElementById('edit_student_id').value = userData.student_id;
+                    document.getElementById('edit_user_id').value = userData.user_id;
                     document.getElementById('edit_username').value = userData.username;
                     document.getElementById('edit_name').value = userData.name;
                     document.getElementById('edit_surname').value = userData.surname;

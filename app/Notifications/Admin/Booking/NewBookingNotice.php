@@ -43,7 +43,7 @@ class NewBookingNotice extends Notification
             ->line('- ผู้เข้าร่วม: ' . (!empty($this->booking->parseAttendeeforDisplay()) ? implode(', ', $this->booking->parseAttendeeforDisplay()) : 'ไม่ระบุผู้เข้าร่วม'))
             ->line('')
             ->line('คุณสามารถตรวจสอบและอนุมัติการจองได้ที่ลิงก์ด้านล่างนี้')
-            ->action('ตรวจสอบและอนุมัติการจอง', route('admin.booking.detail', ['id' => $this->booking->booking_id]))
+            ->action('ตรวจสอบและอนุมัติการจอง', route('admin.booking.detail', ['id' => $this->booking->booking_uuid]))
             ->line('ขอบคุณครับ/ค่ะ');
     }
 
@@ -64,7 +64,7 @@ class NewBookingNotice extends Notification
         return new BroadcastMessage([
             'message' => 'มีการจองห้องดนตรีใหม่โดย ' . $this->booking->user->name . ' ' . $this->booking->user->surname,
             'type' => 'new_booking',
-            'booking_id' => $this->booking->id,
+            'booking_id' => $this->booking->booking_uuid,
         ]);
     }
 
@@ -82,7 +82,7 @@ class NewBookingNotice extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'booking_id' => $this->booking->id,
+            'booking_id' => $this->booking->booking_uuid,
         ];
     }
 
@@ -116,7 +116,7 @@ class NewBookingNotice extends Notification
             !empty($attendeeList) ? implode(', ', $attendeeList) : 'ไม่ระบุผู้เข้าร่วม';
 
         // Booking Approval Link
-        $fTem['footer']['contents'][0]['action']['uri'] = route('admin.booking.approve', ['id' => $this->booking->booking_id]);
+        $fTem['footer']['contents'][0]['action']['uri'] = route('admin.booking.approve', ['id' => $this->booking->booking_uuid]);
 
         $lineCon = new LineIntegrationController();
         return $lineCon->pushFlexMessage($notifiable->line_id, "แจ้งเตือนการจองห้องเสร็จสิ้น", $fTem);

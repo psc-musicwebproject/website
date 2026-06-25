@@ -39,7 +39,13 @@ class NewBooking extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', LineChannel::class, 'broadcast'];
+        $channels = ['mail', LineChannel::class];
+
+        if (!$this->isAdminBooking || $this->booking->user_id !== $this->bookedBy->id) {
+            $channels[] = 'broadcast';
+        }
+
+        return $channels;
     }
 
     /**
@@ -90,8 +96,8 @@ class NewBooking extends Notification
 
         // Action button
         $detailRoute = $this->isAdminBooking
-            ? route('admin.booking.detail', ['id' => $this->booking->booking_id])
-            : route('dash.booking.history.detail', ['id' => $this->booking->booking_id]);
+            ? route('admin.booking.detail', ['id' => $this->booking->booking_uuid])
+            : route('dash.booking.history.detail', ['id' => $this->booking->booking_uuid]);
 
         $mail->line('ถ้าคุณต้องการดูรายละเอียดการจองเพิ่มเติม กรุณาคลิกที่ปุ่มด้านล่างนี้')
             ->action('ดูรายละเอียดการจอง', $detailRoute)
@@ -137,9 +143,9 @@ class NewBooking extends Notification
 
         // Update action URL (optional - link to booking details)
         if ($this->booking->user->type == 'admin') {
-            $bookingUrl = route('admin.booking.detail', ['id' => $this->booking->booking_id]);
+            $bookingUrl = route('admin.booking.detail', ['id' => $this->booking->booking_uuid]);
         } else {
-            $bookingUrl = route('dash.booking.history.detail', ['id' => $this->booking->booking_id]);
+            $bookingUrl = route('dash.booking.history.detail', ['id' => $this->booking->booking_uuid]);
         }
         $flexMessage['footer']['contents'][0]['action']['uri'] = $bookingUrl;
 
@@ -165,10 +171,10 @@ class NewBooking extends Notification
             ? 'การจองห้องของคุณได้ถูกบันทึกเรียบร้อยแล้วโดยผู้ดูแลระบบ'
             : 'การจองห้องของคุณได้ถูกบันทึกเรียบร้อยแล้ว โปรดรอการอนุมัติจากผู้ดูแลระบบ';
         $redirectURI = $this->isAdminBooking
-            ? route('admin.booking.detail', ['id' => $this->booking->booking_id])
-            : route('dash.booking.history.detail', ['id' => $this->booking->booking_id]);
+            ? route('admin.booking.detail', ['id' => $this->booking->booking_uuid])
+            : route('dash.booking.history.detail', ['id' => $this->booking->booking_uuid]);
 
-        if (!$this->isAdminBooking) {
+        if (!$this->isAdminBooking || $this->booking->user_id !== $this->bookedBy->id) {
             return new BroadcastMessage([
                 'title' => 'การจองห้องเสร็จสิ้น',
                 'message' => $broad_msg,

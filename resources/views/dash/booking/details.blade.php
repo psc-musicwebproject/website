@@ -5,7 +5,7 @@
         <table class="table table-bordered table-striped">
             <tr>
                 <th scope="col">รหัสการจอง</th>
-                <td>{{ $detail->booking_id }}</td>
+                <td>{{ $detail->booking_uuid }}</td>
             </tr>
             <tr>
                 <th scope="col">ชื่อการจอง</th>
@@ -33,9 +33,9 @@
             @endif
             <tr>
                 <th scope="col">สถานะ</th>
-                <td>{{ App\Models\Booking::bookingStatusToText($detail->approval_status) }}</td>
+                <td>{{ App\Models\Booking::bookingStatusToText($detail->booking_status) }}</td>
             </tr>
-            @if($detail->approval_status == 'approved' || $detail->approval_status == 'rejected')
+            @if($detail->booking_status == 'approved' || $detail->booking_status == 'rejected')
             <tr>
                 <th scope="col">ผู้อนุมัติ</th>
                 <td>{{ $detail->approvalPerson->name }}  {{ $detail->approvalPerson->surname }}</td>
