@@ -66,7 +66,7 @@ class NewClubRegisterNotice extends Notification
         return new BroadcastMessage([
             'message' => 'มีการสมัครสมาชิกใหม่โดย ' . $this->clubMember->user->name . ' ' . $this->clubMember->user->surname,
             'type' => 'new_club_member',
-            'club_member_id' => $this->clubMember->id,
+            'club_member_id' => $this->clubMember->member_id,
         ]);
     }
 
