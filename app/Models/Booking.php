@@ -173,7 +173,7 @@ class Booking extends Model
     public static function bookingStatusToText($status)
     {
         return match ($status) {
-            'waiting' => 'รอการอนุมัติ',
+            'waiting_approval' => 'รอการอนุมัติ',
             'approved' => 'อนุมัติแล้ว',
             'rejected' => 'ถูกปฏิเสธ',
             default => 'ไม่ทราบ',
@@ -325,7 +325,7 @@ class Booking extends Model
 
     public function fetchGuestMailList($attendee) {
         // Return array of guest emails from attendees
-        if (is_string($this->attendee)) {
+        if (is_string($attendee)) {
             $attendees = json_decode($attendee, true);
             $GuestEmailList = [];
             if (empty($attendees) || !is_array($attendees) || !isset($attendees['attendee'])) {
