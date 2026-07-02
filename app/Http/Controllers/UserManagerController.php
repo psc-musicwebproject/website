@@ -27,7 +27,7 @@ class UserManagerController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|string|unique:users,user_id',
             'username' => 'required|string|unique:users,username',
-            'password' => 'nullable|string|min:8',
+            'password' => 'nullable|string|min:4',
             'name_title' => 'nullable|string',
             'name' => 'required|string',
             'surname' => 'required|string',
