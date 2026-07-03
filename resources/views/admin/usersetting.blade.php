@@ -91,7 +91,9 @@
                         <th>คณะ/สาขา</th>
                         <th>สถานะ (Type)</th>
                         <th>สถานะบัญชี</th>
-                        <th>สถานะไลน์</th>
+                        @if (config('app.line_enabled'))
+                            <th>สถานะไลน์</th>
+                        @endif
                         <th>จัดการ</th>
                     </tr>
                 </thead>
@@ -114,6 +116,7 @@
                                     <span class="badge bg-danger">ปิดใช้งาน</span>
                                 @endif
                             </td>
+                            @if (config('app.line_enabled'))
                             <td>
                                 @if($user->line_bound)
                                     <span class="badge bg-success">Linked</span>
@@ -124,6 +127,7 @@
                                     <span class="badge bg-secondary">Unlinked</span>
                                 @endif
                             </td>
+                            @endif
                             <td>
                                 <button class="btn btn-primary edit-user-btn" data-user="{{ json_encode($user) }}"
                                     data-update-url="{{ route('admin.user.update', ['id' => $user->id]) }}">
@@ -134,7 +138,7 @@
                                     data-delete-url="{{ route('admin.user.delete', ['id' => $user->id]) }}">
                                     <i class="bi bi-trash"></i> ลบ
                                 </button>
-                                @if($user->line_bound)
+                                @if (config('app.line_enabled') && $user->line_bound)
                                     <button class="btn btn-warning unbind-line-btn"
                                         data-username="{{ $user->name_title }}{{ $user->name }} {{ $user->surname }}"
                                         data-linename="{{ \App\Services\LineService::getProfileName($user->line_id) }}"
@@ -428,6 +432,7 @@
     </div>
 
     <!-- Unbind LINE Modal -->
+    @if (config('app.line_enabled', true))
     <div class="modal fade" id="unbindLineModal" tabindex="-1" aria-labelledby="unbindLineModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -454,6 +459,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Script to handle modals -->
     <script type="module">

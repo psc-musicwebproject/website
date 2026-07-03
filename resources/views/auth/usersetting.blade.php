@@ -55,6 +55,7 @@
             value="{{ Auth::user()->email ?? 'ไม่ระบุ' }}" readonly>
     </div>
     {{-- Make input to fetch their line username from LineServices using their id, and show status if user already bind it or not --}}
+    @if (config('app.line_enabled', true))
     <div class="mb-3">
         <div class="row align-items-center">
             <div class="col">
@@ -87,6 +88,7 @@
             </form>
         @endif
     </div>
+    @endif
     <hr>
     <div class="d-flex justify-content-between align-items-center">
         <a href="{{ Auth::user()->type == 'admin' ? route('admin.dash') : route('dash') }}"

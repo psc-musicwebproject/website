@@ -33,14 +33,18 @@
         <div class="d-grid gap-2">
             <button type="submit" name="action" value="cred_login" class="btn btn-primary">Sign In</button>
         </div>
+        @if (config('app.line_enabled', true))
         <div class="text-center mt-3">
             <span>หรือเข้าสู่ระบบด้วย</span>
         </div>
-        <div class="d-grid gap-2 mt-2">
-            <button type="submit" name="action" value="line_login" class="btn btn-success">
-                <i class="bi bi-line"></i> Sign In with LINE
-            </button>
-        </div>
+        @endif
+        @if (config('app.line_enabled', true))
+            <div class="d-grid gap-2 mt-2">
+                <button type="submit" name="action" value="line_login" class="btn btn-success">
+                    <i class="bi bi-line"></i> Sign In with LINE
+                </button>
+            </div>
+        @endif
     </form>
     <p class="mt-3 mb-0">
         <a href="{{ env('RESETPASSURI', "https://youtu.be/DAaHYO7PpzQ") }}">ลืมรหัสผ่าน / เพิ่งเข้าระบบครั้งแรกใช่ไหม?</a>
