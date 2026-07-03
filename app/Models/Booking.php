@@ -125,21 +125,43 @@ class Booking extends Model
 
     public static function getCurrentUserBookings($userUUID, $status = null)
     {
-        return self::where('user_id', $userUUID)
-            ->orderBy('booking_time', 'desc')
-            ->when($status, function ($query, $status) {
-                return $query->where('booking_status', $status);
-            })
-            ->get();
+        $user = User::where('id', $userUUID)->orWhere('user_id', $userUUID)->first();
+
+        return self::where(function ($query) use ($userUUID, $user) {
+            $query->where('user_id', $userUUID);
+            if ($user) {
+                $query->orWhere('attendees', 'like', "%\"user_identify\":\"{$user->id}\"%")
+                      ->orWhere('attendees', 'like', "%\"user_identify\":\"{$user->user_id}\"%")
+                      ->orWhere('attendees', 'like', "%\"user_identify\":\"{$user->email}\"%");
+            } else {
+                $query->orWhere('attendees', 'like', "%\"user_identify\":\"{$userUUID}\"%");
+            }
+        })
+        ->orderBy('booking_time', 'desc')
+        ->when($status, function ($query, $status) {
+            return $query->where('booking_status', $status);
+        })
+        ->get();
     }
 
     public static function countCurrentUserBookings($userUUID, $status = null)
     {
-        return self::where('user_id', $userUUID)
-            ->when($status, function ($query, $status) {
-                return $query->where('booking_status', $status);
-            })
-            ->count();
+        $user = User::where('id', $userUUID)->orWhere('user_id', $userUUID)->first();
+
+        return self::where(function ($query) use ($userUUID, $user) {
+            $query->where('user_id', $userUUID);
+            if ($user) {
+                $query->orWhere('attendees', 'like', "%\"user_identify\":\"{$user->id}\"%")
+                      ->orWhere('attendees', 'like', "%\"user_identify\":\"{$user->user_id}\"%")
+                      ->orWhere('attendees', 'like', "%\"user_identify\":\"{$user->email}\"%");
+            } else {
+                $query->orWhere('attendees', 'like', "%\"user_identify\":\"{$userUUID}\"%");
+            }
+        })
+        ->when($status, function ($query, $status) {
+            return $query->where('booking_status', $status);
+        })
+        ->count();
     }
 
     public static function getBookingByUUID($bookingUUID)
